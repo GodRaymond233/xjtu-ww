@@ -1,13 +1,15 @@
 """Install release dependencies, allowing fresh PyPI releases to propagate."""
 
+import argparse
 import subprocess
 import sys
 import time
 
 
 def pip_install(arguments, attempts=10, retry_delay=30):
-    command = [sys.executable, '-m', 'pip', 'install', '--no-cache-dir', *arguments]
     for attempt in range(1, attempts + 1):
+        cache_args = ['--no-cache-dir'] if attempt > 1 else []
+        command = [sys.executable, '-m', 'pip', 'install', *cache_args, *arguments]
         result = subprocess.run(command)
         if result.returncode == 0:
             return 0
@@ -18,11 +20,12 @@ def pip_install(arguments, attempts=10, retry_delay=30):
         time.sleep(retry_delay)
 
 
-def main():
-    result = pip_install(['-r', 'requirements.txt'])
-    if result:
-        return result
-    return pip_install(['.[dev]'])
+def main(argv=None):
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--bundle', action='store_true', help='Include portable build tools')
+    args = parser.parse_args(argv)
+    extras = 'dev,bundle' if args.bundle else 'dev'
+    return pip_install(['-r', 'requirements.txt', f'.[{extras}]'])
 
 
 if __name__ == '__main__':

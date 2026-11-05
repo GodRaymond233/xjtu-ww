@@ -32,8 +32,8 @@ This project only supports Python 3.12. Prefer using the repository-local virtua
 # 安装或更新依赖 / Install or update dependencies
 .\.venv\Scripts\python.exe -m pip install -r requirements.txt --upgrade
 
-# 如需开发测试依赖 / For development test dependencies
-.\.venv\Scripts\python.exe -m pip install ".[dev]" --upgrade
+# 安装固定的运行依赖与测试依赖 / Install pinned runtime and test dependencies
+.\.venv\Scripts\python.exe .github/scripts/install_dependencies.py
 
 # 仅进行 Web 测试时需要 / Only for web testing
 .\.venv\Scripts\python.exe -m pip install ".[dev,web-test]" --upgrade
@@ -51,11 +51,43 @@ If `.venv` does not exist, use `python` instead of the interpreter path above.
 
 ## 构建 Windows 便携包 / Build the Windows portable app
 
+默认使用 GitHub Actions 的 Windows 云端机器构建。本机只做日常开发、针对性测试和界面检查。
+完整本地打包用于明确要求的离线构建或打包问题复现。
+
+| 入口 | 云端执行内容 | 产物 |
+| --- | --- | --- |
+| 推送 `workshop-preserved` 或提交 PR | 安装依赖、完整测试 | 测试结果 |
+| 手动运行 `Windows Portable` | 完整测试、PyInstaller 打包、独立启动与 OCR 检查 | 测试 ZIP + SHA-256，保留 7 天 |
+| 推送 `vX.Y.Z` 或 `vX.Y.Z-beta.N` 等版本标签 | 同上，全部通过后发布 | GitHub Release 的 ZIP + SHA-256 |
+
+手动测试包：
+
 ```powershell
-.\.venv\Scripts\python.exe -m pip install -r requirements.txt
-.\.venv\Scripts\python.exe -m pip install ".[bundle]"
+gh workflow run build.yml --repo GodRaymond233/xjtu-ww --ref workshop-preserved
+gh run list --repo GodRaymond233/xjtu-ww --workflow build.yml --limit 5
+```
+
+从对应运行页面的 Artifacts 下载 `windows-portable`。测试包版本包含提交短哈希；
+包内 `build-info.json` 记录完整提交、构建运行地址和依赖清单哈希。
+手动运行（包括选中标签的手动运行）仅上传产物。正式发布需明确创建并推送版本标签；
+稳定版使用 `vX.Y.Z`，预发布使用 `vX.Y.Z-alpha.N`、`vX.Y.Z-beta.N` 或 `vX.Y.Z-rc.N`。
+
+CI 和打包共用依赖安装与测试脚本，同时解析 `requirements.txt` 和项目 extras，
+保持运行依赖版本固定。首次安装使用 pip 缓存，失败重试时绕过缓存。
+ZIP 上传不再二次压缩；打包失败时上传可用的启动日志和 PyInstaller 警告。
+
+Full builds run on GitHub-hosted Windows runners by default. Branch pushes and PRs run
+tests; manual builds produce preview artifacts; version-tag pushes publish releases only
+after tests and portable startup/OCR checks pass. Each cloud package records its source
+commit and workflow run in `build-info.json`.
+
+需要本地复现打包问题时：
+
+```powershell
+.\.venv\Scripts\python.exe .github/scripts/install_dependencies.py --bundle
 $env:APP_VERSION = "dev"
 .\.venv\Scripts\python.exe -m PyInstaller --noconfirm xjtu-ww.spec
+.\.github\scripts\test_portable.ps1
 ```
 
 构建结果位于 `dist/xjtu-ww`，运行其中的 `xjtu-ww.exe` 直接进入主界面。
@@ -67,9 +99,6 @@ The result is `dist/xjtu-ww`; run `xjtu-ww.exe` to open the app. Distribute the 
 directory, which includes Python, dependencies, OCR models, and character sources for
 the workshop. Run as administrator when game interaction requires elevation. To update,
 extract into a new directory and copy `configs`, `ok_tasks`, and `ok_import`, if present.
-
-The Windows Portable workflow builds the ZIP and SHA-256 checksum on version tags.
-Manual workflow runs produce artifacts without publishing a release.
 
 ## 测试 / Testing
 

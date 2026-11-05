@@ -22,7 +22,8 @@ env:
 jobs:
   build:
     name: Test and build portable app
-    runs-on: windows-latest
+    runs-on: windows-2025
+    timeout-minutes: 35
     outputs:
       prerelease: ${{ steps.version.outputs.prerelease }}
 
@@ -43,13 +44,15 @@ jobs:
             pyproject.toml
 
       - name: Install dependencies
-        run: |
-          python .github/scripts/install_dependencies.py
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          python -m pip install ".[bundle]"
+        run: python .github/scripts/install_dependencies.py --bundle
 
       - name: Run tests
         timeout-minutes: 20
+        env:
+          GITHUB_TOKEN: ''
+          GH_TOKEN: ''
+          ACTIONS_RUNTIME_TOKEN: ''
+          ACTIONS_ID_TOKEN_REQUEST_TOKEN: ''
         run: ./run_tests.ps1
 
       - name: Set package version
@@ -57,6 +60,9 @@ jobs:
         shell: pwsh
         run: |
           $version = if ($env:GITHUB_REF_TYPE -eq 'tag') {
+            if ($env:GITHUB_REF_NAME -notmatch '^v\d+\.\d+\.\d+(-(alpha|beta|rc)\.\d+)?$') {
+              throw "Unsupported release tag: $env:GITHUB_REF_NAME"
+            }
             $env:GITHUB_REF_NAME
           } else {
             "dev-$($env:GITHUB_SHA.Substring(0, 7))"
@@ -74,11 +80,25 @@ jobs:
       - name: Package portable app
         shell: pwsh
         run: |
+          $metadata = [ordered]@{
+            version = $env:APP_VERSION
+            commit = $env:GITHUB_SHA
+            run_url = "$env:GITHUB_SERVER_URL/$env:GITHUB_REPOSITORY/actions/runs/$env:GITHUB_RUN_ID"
+            python = (python --version)
+            requirements_sha256 = (Get-FileHash requirements.txt -Algorithm SHA256).Hash.ToLowerInvariant()
+          }
+          $metadata | ConvertTo-Json | Set-Content 'dist/xjtu-ww/build-info.json' -Encoding utf8
           $archive = "dist/xjtu-ww-$env:APP_VERSION-windows-x64.zip"
           python -m zipfile -c $archive dist/xjtu-ww
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           $hash = (Get-FileHash -LiteralPath $archive -Algorithm SHA256).Hash.ToLowerInvariant()
           "$hash  $([System.IO.Path]::GetFileName($archive))" | Set-Content "$archive.sha256" -Encoding ascii
+          @(
+            "Version: $env:APP_VERSION",
+            "Commit: $env:GITHUB_SHA",
+            "Package: $([System.IO.Path]::GetFileName($archive))",
+            "SHA-256: $hash"
+          ) -join "`n`n" | Add-Content $env:GITHUB_STEP_SUMMARY
 
       - name: Upload portable app
         uses: actions/upload-artifact@v4
@@ -89,10 +109,22 @@ jobs:
             dist/*.sha256
           if-no-files-found: error
           retention-days: 7
+          compression-level: 0
+
+      - name: Upload failure diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: portable-diagnostics
+          path: |
+            build/portable-smoke.*.log
+            build/xjtu-ww/warn-xjtu-ww.txt
+          if-no-files-found: ignore
+          retention-days: 7
 
   publish:
     name: Publish portable app
-    if: startsWith(github.ref, 'refs/tags/')
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
     needs: build
     runs-on: ubuntu-latest
     permissions:
