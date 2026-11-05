@@ -14,6 +14,16 @@ class Globals:
         self.mini_map_arrow = None
         self.logged_in = False
 
+    def on_show_main_window(self, window):
+        from ok.ui.qt.about.AboutTab import ProjectCard
+
+        about = window.about_tab
+        for section in list(about.sections):
+            if section.findChildren(ProjectCard):
+                about.vBoxLayout.removeWidget(section)
+                about.sections.remove(section)
+                section.deleteLater()
+
     @property
     def yolo_model(self):
         if self._yolo_model is None:

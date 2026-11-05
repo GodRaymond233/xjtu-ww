@@ -14,8 +14,8 @@ from PySide6.QtGui import (
     QColor, QDesktopServices, QFontMetricsF, QPainter, QPixmap, QTextCursor, QTextFormat, QTextLayout,
 )
 from PySide6.QtWidgets import (
-    QApplication, QFileDialog, QAbstractItemView, QHBoxLayout, QHeaderView, QLabel,
-    QLineEdit, QListWidget, QListWidgetItem, QPlainTextEdit, QSplitter, QStyle,
+    QApplication, QFileDialog, QAbstractItemView, QGridLayout, QHBoxLayout, QHeaderView, QLabel,
+    QLineEdit, QListWidget, QListWidgetItem, QPlainTextEdit, QSizePolicy, QSplitter, QStyle,
     QStyledItemDelegate, QStyleOptionViewItem, QTableWidget, QTableWidgetItem, QTextEdit,
     QVBoxLayout, QWidget,
 )
@@ -912,38 +912,38 @@ class CharacterCodeTab(CustomTab):
             translate_ui("Switch every team between imported and built in code"))
         self.switch_all_button.clicked.connect(self._switch_all_code_mode)
         left_layout.addWidget(self.switch_all_button)
-        team_buttons = QVBoxLayout()
-        first_team_button_row = QHBoxLayout()
+        team_buttons = QGridLayout()
+        team_buttons.setColumnStretch(0, 1)
+        team_buttons.setColumnStretch(1, 1)
         self.create_team_button = Button(self.tr("Create Team"), icon="plus", variant="primary")
         self.create_team_button.clicked.connect(self._create_team)
         self.delete_team_button = Button(self.tr("Delete Team"), icon="trash")
         self.delete_team_button.clicked.connect(self._delete_team)
         self.workshop_button = Button(self.tr("Workshop"), icon="layers")
         self.workshop_button.clicked.connect(self._open_workshop)
-        first_team_button_row.addWidget(self.create_team_button)
-        first_team_button_row.addWidget(self.delete_team_button)
-        second_team_button_row = QHBoxLayout()
         self.import_team_button = Button(self.tr("Import Team"), icon="download")
         self.import_team_button.clicked.connect(self._import_team)
         self.export_team_button = Button(self.tr("Export Selected"), icon="export")
         self.export_team_button.clicked.connect(self._export_team)
-        second_team_button_row.addWidget(self.workshop_button)
-        second_team_button_row.addWidget(self.import_team_button)
-        third_team_button_row = QHBoxLayout()
         self.upload_team_button = Button(self.tr("Upload Team"), icon="github")
         self.upload_team_button.clicked.connect(self._open_upload_team)
-        third_team_button_row.addWidget(self.export_team_button)
-        third_team_button_row.addWidget(self.upload_team_button)
         self.export_current_button = None
         if (getattr(og, "app", None) and getattr(og.app, "config", {}).get("debug", False)
                 and (Path.cwd() / ".git").is_dir()):
             self.export_current_button = Button(self.tr("Export Current"), icon="export")
             self.export_current_button.clicked.connect(self._export_current_team)
-            team_buttons.addWidget(self.export_current_button)
-        team_buttons.addLayout(first_team_button_row)
-        team_buttons.addLayout(second_team_button_row)
-        team_buttons.addLayout(third_team_button_row)
+            left_layout.addWidget(self.export_current_button)
         left_layout.addLayout(team_buttons)
+        button_width = 0
+        for index, button in enumerate((self.create_team_button, self.delete_team_button,
+                                        self.workshop_button, self.import_team_button,
+                                        self.export_team_button, self.upload_team_button)):
+            button.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+            team_buttons.addWidget(button, index // 2, index % 2)
+            button.ensurePolished()
+            button_width = max(button_width, button.sizeHint().width())
+        team_buttons.setColumnMinimumWidth(0, button_width)
+        team_buttons.setColumnMinimumWidth(1, button_width)
 
         right = QWidget(splitter)
         right_layout = QVBoxLayout(right)

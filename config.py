@@ -266,9 +266,12 @@ config = {
     <p style="color:red;">
         <strong>使用本软件可能会导致账号被封。</strong> 请在了解风险后再使用。
     </p>
+    <p style="color:red;">
+        <strong>本版本仅供内部使用。</strong>
+    </p>
 """,
     'screenshots_folder': "screenshots",
-    'gui_title': 'OK-WW',  # Optional
+    'gui_title': 'XJTU-WW',  # Optional
     'game_name': 'Wuthering Waves',
     # 'coco_feature_folder': get_path(__file__, 'assets/coco_feature'),  # required if using feature detection
     'log_file': 'logs/ok-ww.log',  # Optional, auto rotating every day
