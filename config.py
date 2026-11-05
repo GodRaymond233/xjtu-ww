@@ -2,11 +2,16 @@ import os
 import re
 from pathlib import Path
 
+import pyappify
+
 from ok import Box, ConfigOption, Icon
 from ok.util.GlobalConfig import create_basic_options
 from src.game_launcher import get_game_launch_arguments
 from src.task.process_feature import process_feature
 from src.task.task_icons import task_icon
+
+# The framework enables its update card when this launcher API is callable.
+pyappify.get_version_list = None
 
 version = "dev"
 
@@ -126,6 +131,7 @@ def blur_area(width, height):
 
 
 basic_config_option = create_basic_options(enable_blur=True)
+basic_config_option.default_config.pop('Kill Launcher After Start', None)
 
 key_config_option = ConfigOption('Game Hotkey', {
     'Echo Key': 'q',
@@ -193,7 +199,6 @@ config = {
     'plugin':True,
     'my_app': ['src.globals', 'Globals'],
     'start_timeout': 120,  # default 60
-    'update_only_game_exit': True,  # if startup skipped the update check, check 10s after the game exits
     'wait_until_settle_time': 0,
     # required if using feature detection
     'template_matching': {
@@ -268,8 +273,6 @@ config = {
     # 'coco_feature_folder': get_path(__file__, 'assets/coco_feature'),  # required if using feature detection
     'log_file': 'logs/ok-ww.log',  # Optional, auto rotating every day
     'error_log_file': 'logs/ok-ww_error.log',
-    'launcher_log_file': 'logs/launcher.log',
-    'launcher_error_log_file': 'logs/launcher_error.log',
     'version': version,
     'onetime_tasks': [  # tasks to execute
         ["src.task.DailyTask", "DailyTask"],
@@ -294,10 +297,4 @@ config = {
         ["src.task.FastTravelTask", "FastTravelTask"],
         ["src.task.MouseResetTask", "MouseResetTask"],
     ], 'scene': ["src.scene.WWScene", "WWScene"],
-    'update_pyappify': {
-        'to_version': '1.2.3',
-        'zip_url': 'https://github.com/ok-oldking/ok-wuthering-waves/releases/download/v3.5.30/ok-ww-win32.zip',
-        'sha256': '447207edbfb6944beb994347048e155df99775eb18c87dcae54dda125071c94a',
-    }
-
 }

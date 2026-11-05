@@ -61,7 +61,7 @@ If you encounter issues, please check the following steps one by one before aski
 3.  **Custom Keybinds**: If you have changed the default in-game keybinds, you must update them accordingly in the `ok-ww` settings. Only the keybinds listed in the settings are supported.
 4.  **Software Version**: Check and ensure you are using the latest version of `ok-ww`.
 5.  **Game Performance**: Make sure the game can run stably at **60 FPS**. If the frame rate is unstable, try lowering the game's graphics quality or resolution.
-6.  **Game Disconnections**: Enable "Close Launcher After Start" in the `ok-ww` settings and make sure the launcher process is not running, or run `ok-ww` from source.
+6.  **Permissions**: Extract the portable archive and run `xjtu-ww.exe`. If game interaction requires elevated permissions, right-click it and select "Run as administrator".
 7.  **OpenVINO Error**: If you encounter error `0x000005` on an Intel CPU with an NPU, update to the latest Intel NPU driver.
 8.  **Getting Help**: If the steps above do not solve your problem, please submit a detailed bug report through our community channels.
 9.  **Disable Auto Sprint**: Turn off Auto Sprint in the game settings.

@@ -74,6 +74,17 @@ class TestCharacterCodeTab(unittest.TestCase):
         finally:
             tab.deleteLater()
 
+    def test_standalone_app_registers_workshop_and_has_no_update_card(self):
+        from config import config
+        from ok.ui.qt.about.AboutTab import AboutTab
+
+        self.assertIn(["src.gui.CharacterCodeTab", "CharacterCodeTab"], config['custom_tabs'])
+        about = AboutTab(config)
+        try:
+            self.assertIsNone(about.update_card)
+        finally:
+            about.deleteLater()
+
     def test_create_team_defaults_to_detected_team(self):
         tab = CharacterCodeTab()
         try:

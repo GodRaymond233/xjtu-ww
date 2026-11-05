@@ -49,6 +49,28 @@ This project only supports Python 3.12. Prefer using the repository-local virtua
 
 If `.venv` does not exist, use `python` instead of the interpreter path above.
 
+## 构建 Windows 便携包 / Build the Windows portable app
+
+```powershell
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+.\.venv\Scripts\python.exe -m pip install ".[bundle]"
+$env:APP_VERSION = "dev"
+.\.venv\Scripts\python.exe -m PyInstaller --noconfirm xjtu-ww.spec
+```
+
+构建结果位于 `dist/xjtu-ww`，运行其中的 `xjtu-ww.exe` 直接进入主界面。
+发布时压缩整个目录；Python、依赖、OCR 模型和工坊所需角色源码均包含在内。
+需要管理员权限进行游戏操作时，请以管理员身份运行。更新时解压到新目录，并复制旧目录的
+`configs`、`ok_tasks` 和 `ok_import`（如有）。
+
+The result is `dist/xjtu-ww`; run `xjtu-ww.exe` to open the app. Distribute the entire
+directory, which includes Python, dependencies, OCR models, and character sources for
+the workshop. Run as administrator when game interaction requires elevation. To update,
+extract into a new directory and copy `configs`, `ok_tasks`, and `ok_import`, if present.
+
+The Windows Portable workflow builds the ZIP and SHA-256 checksum on version tags.
+Manual workflow runs produce artifacts without publishing a release.
+
 ## 测试 / Testing
 
 提交 PR 前，请尽量运行相关测试，并在 PR 描述中说明测试结果。

@@ -9,7 +9,7 @@ permissions:
 
 jobs:
   build:
-    name: Build exe with launcher
+    name: Run Python tests
     runs-on: windows-latest
 
     env:

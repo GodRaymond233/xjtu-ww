@@ -29,7 +29,7 @@ On-demand, and Triggers artwork through `task_category_icons`. The linked
 ok-script UI accepts these overrides for filter tabs and section headings.
 
 These are UI assets, not recognition templates. The `icons` directory is included
-by `deploy.txt` in release updates. The task-list icons have no background tile.
+by `xjtu-ww.spec` in portable builds. The task-list icons have no background tile.
 The UI fits PNGs to their visible alpha bounds at render time so source padding
 does not shrink individual symbols. Task glyphs are 28 px and category glyphs
 20 px, with their aspect ratios and original asset bytes preserved.
