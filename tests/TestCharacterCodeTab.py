@@ -1,5 +1,6 @@
 import os
 import json
+import ssl
 import tempfile
 import unittest
 from concurrent.futures import Future
@@ -7,7 +8,7 @@ from collections import Counter
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import patch
-from urllib.error import HTTPError
+from urllib.error import HTTPError, URLError
 
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
@@ -267,8 +268,45 @@ class TestCharacterCodeTab(unittest.TestCase):
 
     def test_workshop_404_is_an_empty_list(self):
         error = HTTPError("https://example.invalid", 404, "Not Found", {}, None)
-        with patch("src.gui.CharacterCodeTab.urlopen", side_effect=error):
+        with patch("src.gui.CharacterCodeTab.urlopen", side_effect=error) as open_url:
             self.assertEqual(fetch_workshop_codes((Aemeath, Augusta, Baizhi)), [])
+        open_url.assert_called_once()
+
+    def test_workshop_tls_failure_uses_official_source_for_lists_and_archives(self):
+        tab = CharacterCodeTab()
+        payload = json.dumps({"teams": [], "codes": []}).encode()
+        try:
+            for path, fetch in (
+                ("/teams.json", fetch_all_workshop_teams),
+                ("/teams/Aemeath_Augusta_Baizhi.json",
+                 lambda: fetch_workshop_codes((Aemeath, Augusta, Baizhi))),
+                ("/codes/team%20name.zip", lambda: tab._import_workshop_code(
+                    {"downloadUrl": "https://cfokwwchar.ok-script.com/codes/team%20name.zip"}, tab)),
+            ):
+                with (
+                    self.subTest(path=path),
+                    patch("src.gui.CharacterCodeTab.urlopen") as open_url,
+                    patch.object(tab, "_preview_and_import_archive") as preview,
+                ):
+                    response = open_url.return_value
+                    response.__enter__.return_value.read.return_value = payload
+                    open_url.side_effect = [URLError(ssl.SSLEOFError("TLS connection closed")), response]
+                    fetch()
+                    self.assertEqual([call.args[0].full_url for call in open_url.call_args_list], [
+                        "https://cfokwwchar.ok-script.com" + path,
+                        "https://raw.githubusercontent.com/ok-oldking/ok-ww-char-code/main" + path,
+                    ])
+                    if path.endswith('.zip'):
+                        preview.assert_called_once()
+        finally:
+            tab.deleteLater()
+
+    def test_workshop_transport_failure_stops_after_the_official_source(self):
+        error = URLError(ssl.SSLEOFError("TLS connection closed"))
+        with patch("src.gui.CharacterCodeTab.urlopen", side_effect=error) as open_url:
+            with self.assertRaises(URLError):
+                fetch_all_workshop_teams()
+        self.assertEqual(open_url.call_count, 2)
 
     def test_workshop_index_sends_app_user_agent(self):
         payload = {"teams": [{"team": "Test team", "members": ["Aemeath"],

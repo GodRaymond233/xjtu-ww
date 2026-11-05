@@ -1,10 +1,11 @@
 import difflib
 import json
 import re
+import ssl
 import tempfile
 from datetime import datetime
 from pathlib import Path
-from urllib.error import HTTPError
+from urllib.error import HTTPError, URLError
 from urllib.parse import quote, urlparse
 from urllib.request import Request, urlopen
 
@@ -43,6 +44,7 @@ BASE_CHAR_URL = "https://raw.githubusercontent.com/ok-oldking/ok-wuthering-waves
 UPLOAD_TEAM_URL = "https://github.com/ok-oldking/ok-ww-char-code"
 WORKSHOP_TEAMS_ALL_URL = "https://cfokwwchar.ok-script.com/teams.json"
 WORKSHOP_TEAM_URL = "https://cfokwwchar.ok-script.com/teams/{slug}.json"
+WORKSHOP_RAW_BASE_URL = "https://raw.githubusercontent.com/ok-oldking/ok-ww-char-code/main"
 WORKSHOP_ARCHIVE_HOSTS = {"cfokwwchar.ok-script.com", "raw.githubusercontent.com"}
 WORKSHOP_USER_AGENT = "ok-wuthering-waves"
 logger = Logger.get_logger(__name__)
@@ -463,12 +465,28 @@ def workshop_team_url(team):
     return WORKSHOP_TEAM_URL.format(slug=quote(workshop_team_slug(team), safe="_-"))
 
 
+def _read_workshop_url(url, *, timeout, max_bytes):
+    urls = [url]
+    parsed = urlparse(url)
+    if parsed.hostname == urlparse(WORKSHOP_TEAMS_ALL_URL).hostname:
+        urls.append(WORKSHOP_RAW_BASE_URL + parsed.path)
+    for index, source_url in enumerate(urls):
+        try:
+            with urlopen(Request(source_url, headers={"User-Agent": WORKSHOP_USER_AGENT}), timeout=timeout) as response:
+                return response.read(max_bytes + 1)
+        except HTTPError:
+            raise
+        except (URLError, ssl.SSLError, TimeoutError, ConnectionError):
+            if index == len(urls) - 1:
+                raise
+            logger.warning("Workshop connection failed; trying the official GitHub source.")
+
+
 def fetch_all_workshop_teams():
     url = WORKSHOP_TEAMS_ALL_URL
     logger.info(f"char code workshop all teams request: {url}")
     try:
-        with urlopen(Request(url, headers={"User-Agent": WORKSHOP_USER_AGENT}), timeout=15) as response:
-            content = response.read(5_000_001)
+        content = _read_workshop_url(url, timeout=15, max_bytes=5_000_000)
     except HTTPError as error:
         if error.code == 404:
             return []
@@ -507,8 +525,7 @@ def fetch_workshop_codes(team):
     url = workshop_team_url(team)
     logger.info(f"char code workshop request: {url}")
     try:
-        with urlopen(Request(url, headers={"User-Agent": WORKSHOP_USER_AGENT}), timeout=15) as response:
-            content = response.read(2_000_001)
+        content = _read_workshop_url(url, timeout=15, max_bytes=2_000_000)
     except HTTPError as error:
         if error.code == 404:
             return []
@@ -1568,8 +1585,7 @@ class CharacterCodeTab(CustomTab):
             show_info_bar(parent, self.tr("Workshop download URL is invalid."), title=self.tr("Error"), error=True)
             return
         try:
-            with urlopen(Request(url, headers={"User-Agent": WORKSHOP_USER_AGENT}), timeout=30) as response:
-                content = response.read(20_000_001)
+            content = _read_workshop_url(url, timeout=30, max_bytes=20_000_000)
             if len(content) > 20_000_000:
                 raise ValueError(self.tr("Workshop archive is too large."))
             with tempfile.TemporaryDirectory() as temp_dir:
