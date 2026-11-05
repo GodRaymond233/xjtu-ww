@@ -37,7 +37,8 @@ pyz = PYZ(analysis.pure)
 exe = EXE(
     pyz,
     analysis.scripts,
-    [],
+    # Keep Chinese logs readable on Windows installations using other code pages.
+    [('X utf8', None, 'OPTION')],
     exclude_binaries=True,
     name='xjtu-ww',
     console=False,
