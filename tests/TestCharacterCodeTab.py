@@ -272,6 +272,26 @@ class TestCharacterCodeTab(unittest.TestCase):
             self.assertEqual(fetch_workshop_codes((Aemeath, Augusta, Baizhi)), [])
         open_url.assert_called_once()
 
+    def test_unavailable_workshop_index_shows_error_instead_of_an_empty_dialog(self):
+        tab = CharacterCodeTab()
+        missing = HTTPError("https://example.invalid/teams.json", 404, "Not Found", {}, None)
+        try:
+            for errors in ([missing], [URLError(ssl.SSLEOFError("TLS connection closed")), missing]):
+                with (
+                    self.subTest(requests=len(errors)),
+                    patch("src.gui.CharacterCodeTab.urlopen", side_effect=errors) as open_url,
+                    patch("src.gui.CharacterCodeTab.WorkshopDialog") as dialog,
+                    patch("src.gui.CharacterCodeTab.show_info_bar") as notification,
+                ):
+                    tab._open_workshop()
+                    self.assertEqual(open_url.call_count, len(errors))
+                    dialog.assert_not_called()
+                    notification.assert_called_once()
+                    self.assertTrue(notification.call_args.kwargs["error"])
+                    self.assertIn("404", notification.call_args.args[1])
+        finally:
+            tab.deleteLater()
+
     def test_workshop_tls_failure_uses_official_source_for_lists_and_archives(self):
         tab = CharacterCodeTab()
         payload = json.dumps({"teams": [], "codes": []}).encode()
