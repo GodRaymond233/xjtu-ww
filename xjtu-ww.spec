@@ -1,7 +1,11 @@
 from pathlib import Path
 import os
+import re
 
 from PyInstaller.utils.hooks import collect_all, collect_data_files, collect_dynamic_libs, collect_submodules
+from PyInstaller.utils.win32.versioninfo import (
+    FixedFileInfo, StringFileInfo, StringStruct, StringTable, VarFileInfo, VarStruct, VSVersionInfo,
+)
 
 root = Path(SPECPATH)
 datas = [(str(root / name), name) for name in ('assets', 'icons', 'i18n')]
@@ -19,8 +23,26 @@ for package in ('ok', 'onnxocr'):
 
 version_file = root / 'build' / 'version.txt'
 version_file.parent.mkdir(parents=True, exist_ok=True)
-version_file.write_text(os.environ.get('APP_VERSION', 'dev'), encoding='utf-8')
+app_version = os.environ.get('APP_VERSION', 'dev')
+version_file.write_text(app_version, encoding='utf-8')
 datas.append((str(version_file), '.'))
+version_match = re.match(r'^v?(\d+)\.(\d+)\.(\d+)(?:-|$)', app_version)
+file_version = tuple(map(int, version_match.groups())) + (0,) if version_match else (0, 0, 0, 0)
+version_info = VSVersionInfo(
+    ffi=FixedFileInfo(filevers=file_version, prodvers=file_version),
+    kids=[
+        StringFileInfo([StringTable('040904B0', [
+            StringStruct('FileDescription', 'XJTU-WW Workshop'),
+            StringStruct('FileVersion', app_version),
+            StringStruct('InternalName', 'xjtu-ww'),
+            StringStruct('OriginalFilename', 'xjtu-ww.exe'),
+            StringStruct('ProductName', 'XJTU-WW'),
+            StringStruct('ProductVersion', app_version),
+            StringStruct('Comments', 'Internal workshop edition based on ok-wuthering-waves.'),
+        ])]),
+        VarFileInfo([VarStruct('Translation', [0x0409, 1200])]),
+    ],
+)
 
 analysis = Analysis(
     [str(root / 'main.py')],
@@ -43,6 +65,7 @@ exe = EXE(
     name='xjtu-ww',
     console=False,
     icon=str(root / 'icons' / 'icon.png'),
+    version=version_info,
     contents_directory='.',
 )
 coll = COLLECT(

@@ -22,11 +22,20 @@ try {
             throw "Missing portable runtime file: $required"
         }
     }
+    $executable = Join-Path $smokeDirectory 'xjtu-ww.exe'
+    $identity = [Diagnostics.FileVersionInfo]::GetVersionInfo($executable)
+    $version = (Get-Content -LiteralPath (Join-Path $smokeDirectory 'version.txt') -Raw).Trim()
+    if ($identity.ProductName -ne 'XJTU-WW' -or
+        $identity.FileDescription -ne 'XJTU-WW Workshop' -or
+        $identity.OriginalFilename -ne 'xjtu-ww.exe' -or
+        $identity.ProductVersion -ne $version) {
+        throw 'Portable executable metadata does not match the XJTU-WW package.'
+    }
     # Exclude developer-installed DLLs from the portable runtime's search path.
     $env:PATH = "$env:SystemRoot\System32;$env:SystemRoot"
     $env:QT_QPA_PLATFORM = 'offscreen'
     $env:ONEDNN_MAX_CPU_ISA = 'AVX2'
-    $process = Start-Process -FilePath (Join-Path $smokeDirectory 'xjtu-ww.exe') `
+    $process = Start-Process -FilePath $executable `
         -WorkingDirectory $buildRoot -WindowStyle Hidden -PassThru `
         -RedirectStandardOutput $stdout -RedirectStandardError $stderr
     $deadline = (Get-Date).AddSeconds(90)
