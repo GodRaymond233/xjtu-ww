@@ -14,3 +14,7 @@
 - Build a complete package locally only when explicitly requested or when diagnosing a packaging issue that needs local reproduction.
 - Pushes to `workshop-preserved` and pull requests run tests. Dispatch `Windows Portable` for a preview ZIP; manual runs do not publish releases.
 - Create and push a version tag only when the user requests a release. Tag builds must pass tests and the portable startup check before publishing.
+
+## Workshop
+
+- Use `GodRaymond233/ok-ww-char-code` on `main` for the workshop index and archives. Rewrite legacy upstream/CDN archive links to this fork when reading the preserved index.

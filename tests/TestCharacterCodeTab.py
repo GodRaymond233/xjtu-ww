@@ -226,13 +226,13 @@ class TestCharacterCodeTab(unittest.TestCase):
     def test_workshop_url_uses_sorted_team_slug(self):
         self.assertEqual(
             workshop_team_url((Baizhi, Augusta, Aemeath)),
-            "https://cfokwwchar.ok-script.com/teams/Aemeath_Augusta_Baizhi.json",
+            "https://raw.githubusercontent.com/GodRaymond233/ok-ww-char-code/main/teams/Aemeath_Augusta_Baizhi.json",
         )
 
     def test_workshop_url_sanitizes_character_name_punctuation(self):
         self.assertEqual(
             workshop_team_url((YangYangSp, Chisa, Suisui)),
-            "https://cfokwwchar.ok-script.com/teams/Chisa_Suisui_Yangyang_Xuanling.json",
+            "https://raw.githubusercontent.com/GodRaymond233/ok-ww-char-code/main/teams/Chisa_Suisui_Yangyang_Xuanling.json",
         )
 
     def test_workshop_codes_are_sorted_by_timestamp_descending(self):
@@ -263,7 +263,7 @@ class TestCharacterCodeTab(unittest.TestCase):
         self.assertEqual(open_url.call_args.kwargs, {"timeout": 15})
         log_info.assert_called_once_with(
             "char code workshop request: "
-            "https://cfokwwchar.ok-script.com/teams/Aemeath_Augusta_Baizhi.json"
+            "https://raw.githubusercontent.com/GodRaymond233/ok-ww-char-code/main/teams/Aemeath_Augusta_Baizhi.json"
         )
 
     def test_workshop_404_is_an_empty_list(self):
@@ -276,23 +276,21 @@ class TestCharacterCodeTab(unittest.TestCase):
         tab = CharacterCodeTab()
         missing = HTTPError("https://example.invalid/teams.json", 404, "Not Found", {}, None)
         try:
-            for errors in ([missing], [URLError(ssl.SSLEOFError("TLS connection closed")), missing]):
-                with (
-                    self.subTest(requests=len(errors)),
-                    patch("src.gui.CharacterCodeTab.urlopen", side_effect=errors) as open_url,
-                    patch("src.gui.CharacterCodeTab.WorkshopDialog") as dialog,
-                    patch("src.gui.CharacterCodeTab.show_info_bar") as notification,
-                ):
-                    tab._open_workshop()
-                    self.assertEqual(open_url.call_count, len(errors))
-                    dialog.assert_not_called()
-                    notification.assert_called_once()
-                    self.assertTrue(notification.call_args.kwargs["error"])
-                    self.assertIn("404", notification.call_args.args[1])
+            with (
+                patch("src.gui.CharacterCodeTab.urlopen", side_effect=missing) as open_url,
+                patch("src.gui.CharacterCodeTab.WorkshopDialog") as dialog,
+                patch("src.gui.CharacterCodeTab.show_info_bar") as notification,
+            ):
+                tab._open_workshop()
+                open_url.assert_called_once()
+                dialog.assert_not_called()
+                notification.assert_called_once()
+                self.assertTrue(notification.call_args.kwargs["error"])
+                self.assertIn("404", notification.call_args.args[1])
         finally:
             tab.deleteLater()
 
-    def test_workshop_tls_failure_uses_official_source_for_lists_and_archives(self):
+    def test_workshop_lists_and_archives_use_the_preserved_repository(self):
         tab = CharacterCodeTab()
         payload = json.dumps({"teams": [], "codes": []}).encode()
         try:
@@ -308,25 +306,22 @@ class TestCharacterCodeTab(unittest.TestCase):
                     patch("src.gui.CharacterCodeTab.urlopen") as open_url,
                     patch.object(tab, "_preview_and_import_archive") as preview,
                 ):
-                    response = open_url.return_value
-                    response.__enter__.return_value.read.return_value = payload
-                    open_url.side_effect = [URLError(ssl.SSLEOFError("TLS connection closed")), response]
+                    open_url.return_value.__enter__.return_value.read.return_value = payload
                     fetch()
                     self.assertEqual([call.args[0].full_url for call in open_url.call_args_list], [
-                        "https://cfokwwchar.ok-script.com" + path,
-                        "https://raw.githubusercontent.com/ok-oldking/ok-ww-char-code/main" + path,
+                        "https://raw.githubusercontent.com/GodRaymond233/ok-ww-char-code/main" + path,
                     ])
                     if path.endswith('.zip'):
                         preview.assert_called_once()
         finally:
             tab.deleteLater()
 
-    def test_workshop_transport_failure_stops_after_the_official_source(self):
+    def test_workshop_transport_failure_reports_the_preserved_source_error(self):
         error = URLError(ssl.SSLEOFError("TLS connection closed"))
         with patch("src.gui.CharacterCodeTab.urlopen", side_effect=error) as open_url:
             with self.assertRaises(URLError):
                 fetch_all_workshop_teams()
-        self.assertEqual(open_url.call_count, 2)
+        open_url.assert_called_once()
 
     def test_workshop_index_sends_app_user_agent(self):
         payload = {"teams": [{"team": "Test team", "members": ["Aemeath"],
@@ -338,30 +333,33 @@ class TestCharacterCodeTab(unittest.TestCase):
         self.assertEqual(codes[0]["name"], "Test code")
         self.assertEqual(codes[0]["team"], "Test team")
         request = open_url.call_args.args[0]
-        self.assertEqual(request.full_url, "https://cfokwwchar.ok-script.com/teams.json")
+        self.assertEqual(request.full_url, "https://raw.githubusercontent.com/GodRaymond233/ok-ww-char-code/main/teams.json")
         self.assertEqual(request.get_header("User-agent"), "ok-wuthering-waves")
         self.assertEqual(open_url.call_args.kwargs, {"timeout": 15})
 
     def test_workshop_archive_sends_app_user_agent(self):
         tab = CharacterCodeTab()
         try:
-            for field, url, expected_url in (
-                ("downloadUrl", "https://cfokwwchar.ok-script.com/team.zip",
-                 "https://cfokwwchar.ok-script.com/team.zip"),
-                ("rawUrl", "https://raw.githubusercontent.com/example/team.zip",
-                 "https://raw.githubusercontent.com/example/team.zip"),
-                ("downloadUrl", "https://okwwcharcode.ok-script.com/codes/team%20name.zip",
-                 "https://cfokwwchar.ok-script.com/codes/team%20name.zip"),
+            base_url = "https://raw.githubusercontent.com/GodRaymond233/ok-ww-char-code/main"
+            for code, expected_url in (
+                ({"downloadUrl": "https://cfokwwchar.ok-script.com/codes/team.zip"},
+                 base_url + "/codes/team.zip"),
+                ({"rawUrl": base_url + "/codes/team.zip"}, base_url + "/codes/team.zip"),
+                ({"downloadUrl": "https://okwwcharcode.ok-script.com/codes/team%20name.zip"},
+                 base_url + "/codes/team%20name.zip"),
+                ({"rawUrl": "https://raw.githubusercontent.com/ok-oldking/ok-ww-char-code/main/codes/team.zip",
+                  "downloadUrl": "https://okwwcharcode.ok-script.com/codes/other.zip"},
+                 base_url + "/codes/team.zip"),
             ):
                 with (
-                    self.subTest(url=url),
+                    self.subTest(code=code),
                     patch("src.gui.CharacterCodeTab.urlopen") as open_url,
                     patch.object(tab, "_preview_and_import_archive") as preview,
                 ):
                     open_url.return_value.__enter__.return_value.read.return_value = b"archive contents"
                     preview.side_effect = lambda path, **kwargs: self.assertEqual(
                         path.read_bytes(), b"archive contents")
-                    tab._import_workshop_code({field: url}, tab)
+                    tab._import_workshop_code(code, tab)
 
                     request = open_url.call_args.args[0]
                     self.assertEqual(request.full_url, expected_url)

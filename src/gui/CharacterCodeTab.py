@@ -1,11 +1,10 @@
 import difflib
 import json
 import re
-import ssl
 import tempfile
 from datetime import datetime
 from pathlib import Path
-from urllib.error import HTTPError, URLError
+from urllib.error import HTTPError
 from urllib.parse import quote, urlparse
 from urllib.request import Request, urlopen
 
@@ -41,11 +40,10 @@ from src.char.CustomCharLoader import (
 )
 
 BASE_CHAR_URL = "https://raw.githubusercontent.com/ok-oldking/ok-wuthering-waves/refs/heads/master/src/char/BaseChar.py"
-UPLOAD_TEAM_URL = "https://github.com/ok-oldking/ok-ww-char-code"
-WORKSHOP_TEAMS_ALL_URL = "https://cfokwwchar.ok-script.com/teams.json"
-WORKSHOP_TEAM_URL = "https://cfokwwchar.ok-script.com/teams/{slug}.json"
-WORKSHOP_RAW_BASE_URL = "https://raw.githubusercontent.com/ok-oldking/ok-ww-char-code/main"
-WORKSHOP_ARCHIVE_HOSTS = {"cfokwwchar.ok-script.com", "raw.githubusercontent.com"}
+UPLOAD_TEAM_URL = "https://github.com/GodRaymond233/ok-ww-char-code"
+WORKSHOP_RAW_BASE_URL = "https://raw.githubusercontent.com/GodRaymond233/ok-ww-char-code/main"
+WORKSHOP_TEAMS_ALL_URL = WORKSHOP_RAW_BASE_URL + "/teams.json"
+WORKSHOP_TEAM_URL = WORKSHOP_RAW_BASE_URL + "/teams/{slug}.json"
 WORKSHOP_USER_AGENT = "ok-wuthering-waves"
 logger = Logger.get_logger(__name__)
 
@@ -159,7 +157,7 @@ def translate_ui(message):
             "Character:": "角色:",
             "{count} configurations": "{count} 个配置",
             "No shared code matches the search criteria.": "未找到符合搜索条件的配置。",
-            "The official workshop index is unavailable (HTTP {status}). Please try again later or import a local team ZIP.": "官方工坊索引暂时无法访问（HTTP {status}）。请稍后重试，或使用“导入队伍”导入本地 ZIP 文件。",
+            "The workshop index is unavailable (HTTP {status}). Please try again later or import a local team ZIP.": "工坊索引暂时无法访问（HTTP {status}）。请稍后重试，或使用“导入队伍”导入本地 ZIP 文件。",
             "Team Workshop": "队伍创意工坊",
             "{team_name} - Team Workshop": "{team_name} - 队伍工坊",
             "Configuration Details": "配置详情",
@@ -212,7 +210,7 @@ def translate_ui(message):
             "Character:": "角色:",
             "{count} configurations": "{count} 個設定",
             "No shared code matches the search criteria.": "未找到符合搜尋條件的設定。",
-            "The official workshop index is unavailable (HTTP {status}). Please try again later or import a local team ZIP.": "官方工坊索引暫時無法存取（HTTP {status}）。請稍後重試，或使用「匯入隊伍」匯入本機 ZIP 檔案。",
+            "The workshop index is unavailable (HTTP {status}). Please try again later or import a local team ZIP.": "工坊索引暫時無法存取（HTTP {status}）。請稍後重試，或使用「匯入隊伍」匯入本機 ZIP 檔案。",
             "Team Workshop": "隊伍工作坊",
             "{team_name} - Team Workshop": "{team_name} - 隊伍工作坊",
             "Configuration Details": "設定詳情",
@@ -265,7 +263,7 @@ def translate_ui(message):
             "Character:": "キャラクター:",
             "{count} configurations": "{count} 件の構成",
             "No shared code matches the search criteria.": "検索条件に一致する共有コードが見つかりません。",
-            "The official workshop index is unavailable (HTTP {status}). Please try again later or import a local team ZIP.": "公式ワークショップの一覧を取得できません（HTTP {status}）。後でもう一度試すか、ローカルのチーム ZIP をインポートしてください。",
+            "The workshop index is unavailable (HTTP {status}). Please try again later or import a local team ZIP.": "ワークショップの一覧を取得できません（HTTP {status}）。後でもう一度試すか、ローカルのチーム ZIP をインポートしてください。",
             "Team Workshop": "チームワークショップ",
             "{team_name} - Team Workshop": "{team_name} - チームワークショップ",
             "Configuration Details": "構成の詳細",
@@ -318,7 +316,7 @@ def translate_ui(message):
             "Character:": "캐릭터:",
             "{count} configurations": "{count}개 구성",
             "No shared code matches the search criteria.": "검색 조건과 일치하는 공유 코드가 없습니다.",
-            "The official workshop index is unavailable (HTTP {status}). Please try again later or import a local team ZIP.": "공식 창작마당 목록을 불러올 수 없습니다(HTTP {status}). 나중에 다시 시도하거나 로컬 팀 ZIP을 가져오세요.",
+            "The workshop index is unavailable (HTTP {status}). Please try again later or import a local team ZIP.": "창작마당 목록을 불러올 수 없습니다(HTTP {status}). 나중에 다시 시도하거나 로컬 팀 ZIP을 가져오세요.",
             "Team Workshop": "파티 창작마당",
             "{team_name} - Team Workshop": "{team_name} - 파티 창작마당",
             "Configuration Details": "구성 상세 정보",
@@ -371,7 +369,7 @@ def translate_ui(message):
             "Character:": "Personaje:",
             "{count} configurations": "{count} configuraciones",
             "No shared code matches the search criteria.": "No se encontraron códigos compartidos que coincidan.",
-            "The official workshop index is unavailable (HTTP {status}). Please try again later or import a local team ZIP.": "El índice oficial del taller no está disponible (HTTP {status}). Inténtalo más tarde o importa un ZIP de equipo local.",
+            "The workshop index is unavailable (HTTP {status}). Please try again later or import a local team ZIP.": "El índice del taller no está disponible (HTTP {status}). Inténtalo más tarde o importa un ZIP de equipo local.",
             "Team Workshop": "Taller de equipos",
             "{team_name} - Team Workshop": "{team_name} - Taller de equipos",
             "Configuration Details": "Detalles de configuración",
@@ -471,20 +469,8 @@ def workshop_team_url(team):
 
 
 def _read_workshop_url(url, *, timeout, max_bytes):
-    urls = [url]
-    parsed = urlparse(url)
-    if parsed.hostname == urlparse(WORKSHOP_TEAMS_ALL_URL).hostname:
-        urls.append(WORKSHOP_RAW_BASE_URL + parsed.path)
-    for index, source_url in enumerate(urls):
-        try:
-            with urlopen(Request(source_url, headers={"User-Agent": WORKSHOP_USER_AGENT}), timeout=timeout) as response:
-                return response.read(max_bytes + 1)
-        except HTTPError:
-            raise
-        except (URLError, ssl.SSLError, TimeoutError, ConnectionError):
-            if index == len(urls) - 1:
-                raise
-            logger.warning("Workshop connection failed; trying the official GitHub source.")
+    with urlopen(Request(url, headers={"User-Agent": WORKSHOP_USER_AGENT}), timeout=timeout) as response:
+        return response.read(max_bytes + 1)
 
 
 def fetch_all_workshop_teams():
@@ -494,7 +480,7 @@ def fetch_all_workshop_teams():
         content = _read_workshop_url(url, timeout=15, max_bytes=5_000_000)
     except HTTPError as error:
         raise ValueError(translate_ui(
-            "The official workshop index is unavailable (HTTP {status}). "
+            "The workshop index is unavailable (HTTP {status}). "
             "Please try again later or import a local team ZIP."
         ).format(status=error.code)) from error
     if len(content) > 5_000_000:
@@ -1581,13 +1567,16 @@ class CharacterCodeTab(CustomTab):
         dialog.exec()
 
     def _import_workshop_code(self, code, parent):
-        url = code.get("downloadUrl") or code.get("rawUrl")
-        parsed = urlparse(str(url or ""))
-        # Published workshop indexes can still contain the previous server's URLs.
-        if parsed.hostname == "okwwcharcode.ok-script.com":
-            parsed = parsed._replace(netloc=urlparse(WORKSHOP_TEAMS_ALL_URL).netloc)
-            url = parsed.geturl()
-        if parsed.scheme != "https" or parsed.hostname not in WORKSHOP_ARCHIVE_HOSTS:
+        url = str(code.get("rawUrl") or code.get("downloadUrl") or "")
+        parsed = urlparse(url)
+        # The preserved index contains archive links published before the fork.
+        if parsed.scheme == "https" and parsed.hostname in {"okwwcharcode.ok-script.com", "cfokwwchar.ok-script.com"}:
+            url = WORKSHOP_RAW_BASE_URL + parsed.path
+        elif parsed.scheme == "https" and parsed.hostname == "raw.githubusercontent.com":
+            upstream_path = "/ok-oldking/ok-ww-char-code/main/"
+            if parsed.path.startswith(upstream_path):
+                url = WORKSHOP_RAW_BASE_URL + "/" + parsed.path[len(upstream_path):]
+        if not url.startswith(WORKSHOP_RAW_BASE_URL + "/"):
             show_info_bar(parent, self.tr("Workshop download URL is invalid."), title=self.tr("Error"), error=True)
             return
         try:
