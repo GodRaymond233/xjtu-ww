@@ -43,6 +43,9 @@ jobs:
             requirements.txt
             pyproject.toml
 
+      - name: Install dependencies
+        run: python .github/scripts/install_dependencies.py --bundle
+
       - name: Install build toolchain
         run: python -m pip install "cython>=3" setuptools
 
