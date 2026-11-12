@@ -75,6 +75,7 @@ jobs:
             "dev-$($env:GITHUB_SHA.Substring(0, 7))"
           }
           "APP_VERSION=$version" >> $env:GITHUB_ENV
+          $prerelease = $version -notmatch '^v\d+\.\d+\.\d+$'
           "prerelease=$($prerelease.ToString().ToLowerInvariant())" >> $env:GITHUB_OUTPUT
 
       - name: Strip Python sources from the build tree
