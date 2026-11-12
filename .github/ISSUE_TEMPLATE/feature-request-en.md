@@ -20,7 +20,7 @@ Proposed behavior:
 [Describe the desired behavior clearly]
 
 Relevant task, character, or configuration:
-[Identify the affected part of WW Assist]
+[Identify the affected part of XJTU-WW]
 
 Acceptance examples:
 [Give one or two concrete examples of how the feature should behave]

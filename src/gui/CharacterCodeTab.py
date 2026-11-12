@@ -1,12 +1,8 @@
 import difflib
 import json
 import re
-import tempfile
 from datetime import datetime
 from pathlib import Path
-from urllib.error import HTTPError
-from urllib.parse import quote, urlparse
-from urllib.request import Request, urlopen
 
 from PySide6.QtCore import QPointF, Qt, QSize, QUrl, Signal
 from PySide6.QtGui import (
@@ -41,10 +37,10 @@ from src.char.CustomCharLoader import (
 
 BASE_CHAR_URL = "https://raw.githubusercontent.com/GodRaymond233/xjtu-ww/refs/heads/workshop-preserved/src/char/BaseChar.py"
 UPLOAD_TEAM_URL = "https://github.com/GodRaymond233/xjtu-ww"
-WORKSHOP_RAW_BASE_URL = "https://s2a.godraymond.com/workshop"
-WORKSHOP_TEAMS_ALL_URL = WORKSHOP_RAW_BASE_URL + "/teams.json"
-WORKSHOP_TEAM_URL = WORKSHOP_RAW_BASE_URL + "/teams/{slug}.json"
-WORKSHOP_USER_AGENT = "wwassist-workshop"
+WORKSHOP_BUNDLE_DIR = Path(__file__).resolve().parent.parent.parent / "workshop_bundle"
+WORKSHOP_INDEX = WORKSHOP_BUNDLE_DIR / "teams.json"
+WORKSHOP_CODES_DIR = WORKSHOP_BUNDLE_DIR / "codes"
+WORKSHOP_USER_AGENT = "xjtuww-workshop"
 logger = Logger.get_logger(__name__)
 
 # The team list marks each team with a haloed dot, and both switch buttons wear the
@@ -465,41 +461,46 @@ def workshop_team_slug(team):
 
 
 def workshop_team_url(team):
-    return WORKSHOP_TEAM_URL.format(slug=quote(workshop_team_slug(team), safe="_-"))
+    return WORKSHOP_CODES_DIR / f"{workshop_team_slug(team)}.zip"
 
 
-def _read_workshop_url(url, *, timeout, max_bytes):
-    with urlopen(Request(url, headers={"User-Agent": WORKSHOP_USER_AGENT}), timeout=timeout) as response:
-        return response.read(max_bytes + 1)
+def _workshop_archive_for(code):
+    """Locate the embedded archive for a workshop entry."""
+    filename = Path(str(code.get("filename") or "")).name
+    candidate = WORKSHOP_CODES_DIR / filename
+    if filename and candidate.is_file():
+        return candidate
+    try:
+        slug = workshop_team_slug(str(code.get("team") or ""))
+    except ValueError:
+        return None
+    fallback = WORKSHOP_CODES_DIR / f"{slug}.zip"
+    if fallback.is_file():
+        return fallback
+    return None
+
+
+def _load_workshop_index():
+    """Read the workshop snapshot embedded in this build."""
+    try:
+        payload = json.loads(WORKSHOP_INDEX.read_text(encoding="utf-8"))
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError) as error:
+        raise ValueError(translate_ui("The workshop bundle is unavailable.")) from error
+    if not isinstance(payload, dict) or not isinstance(payload.get("teams"), list):
+        raise ValueError(translate_ui("The workshop bundle is invalid."))
+    return payload
 
 
 def fetch_all_workshop_teams():
-    url = WORKSHOP_TEAMS_ALL_URL
-    logger.info(f"char code workshop all teams request: {url}")
-    try:
-        content = _read_workshop_url(url, timeout=15, max_bytes=5_000_000)
-    except HTTPError as error:
-        raise ValueError(translate_ui(
-            "The workshop index is unavailable (HTTP {status}). "
-            "Please try again later or import a local team ZIP."
-        ).format(status=error.code)) from error
-    if len(content) > 5_000_000:
-        raise ValueError(translate_ui("Workshop response is too large."))
-    try:
-        payload = json.loads(content.decode("utf-8"))
-    except (UnicodeDecodeError, json.JSONDecodeError) as error:
-        raise ValueError(translate_ui("Workshop returned invalid JSON.")) from error
-    if not isinstance(payload, dict) or not isinstance(payload.get("teams"), list):
-        raise ValueError(translate_ui("Workshop response is invalid."))
-
+    """Offline: enumerate the teams embedded in workshop_bundle/."""
+    payload = _load_workshop_index()
     all_codes = []
     for team_entry in payload["teams"]:
         if not isinstance(team_entry, dict):
             continue
         team_str = team_entry.get("team", "")
         members = team_entry.get("members", [])
-        codes = team_entry.get("codes", [])
-        for code in codes:
+        for code in team_entry.get("codes", []):
             if not isinstance(code, dict):
                 continue
             item = dict(code)
@@ -508,33 +509,28 @@ def fetch_all_workshop_teams():
             if "members" not in item or not item["members"]:
                 item["members"] = members
             all_codes.append(item)
-
     return sorted(all_codes, key=lambda code: int(code.get("timestamp") or 0), reverse=True)
 
 
 def fetch_workshop_codes(team):
-    expected_members = sorted((get_english_char_name(name) for name in normalize_team(team)), key=str.casefold)
-    url = workshop_team_url(team)
-    logger.info(f"char code workshop request: {url}")
+    """Offline: list embedded codes for one team."""
+    if isinstance(team, str):
+        team = [name.strip() for name in team.split(',') if name.strip()]
     try:
-        content = _read_workshop_url(url, timeout=15, max_bytes=2_000_000)
-    except HTTPError as error:
-        if error.code == 404:
-            return []
-        raise
-    if len(content) > 2_000_000:
-        raise ValueError(translate_ui("Workshop response is too large."))
-    try:
-        payload = json.loads(content.decode("utf-8"))
-    except (UnicodeDecodeError, json.JSONDecodeError) as error:
-        raise ValueError(translate_ui("Workshop returned invalid JSON.")) from error
-    if not isinstance(payload, dict) or not isinstance(payload.get("codes"), list):
-        raise ValueError(translate_ui("Workshop response is invalid."))
-    members = payload.get("members")
-    if members is not None and sorted(members, key=str.casefold) != expected_members:
-        raise ValueError(translate_ui("Workshop returned a different team."))
-    codes = [code for code in payload["codes"] if isinstance(code, dict)]
-    return sorted(codes, key=lambda code: int(code.get("timestamp") or 0), reverse=True)
+        expected_members = sorted((get_english_char_name(name) for name in normalize_team(team)),
+                                  key=str.casefold)
+    except ValueError:
+        return []
+
+    def entry_members(code):
+        raw = str(code.get("team") or "")
+        names = [name.strip() for name in raw.split(',') if name.strip()]
+        try:
+            return sorted((get_english_char_name(name) for name in normalize_team(names)), key=str.casefold)
+        except ValueError:
+            return None
+
+    return [code for code in fetch_all_workshop_teams() if entry_members(code) == expected_members]
 
 
 def format_workshop_local_time(code, date_only=False):
@@ -1567,28 +1563,13 @@ class CharacterCodeTab(CustomTab):
         dialog.exec()
 
     def _import_workshop_code(self, code, parent):
-        url = str(code.get("rawUrl") or code.get("downloadUrl") or "")
-        parsed = urlparse(url)
-        # The preserved index contains archive links published before this fork.
-        if parsed.scheme == "https" and parsed.hostname in {"okwwcharcode.ok-script.com", "cfokwwchar.ok-script.com"}:
-            url = WORKSHOP_RAW_BASE_URL + parsed.path
-        elif parsed.scheme == "https" and parsed.hostname == "raw.githubusercontent.com":
-            for repository in ("ok-oldking", "GodRaymond233"):
-                upstream_path = f"/{repository}/ok-ww-char-code/main/"
-                if parsed.path.startswith(upstream_path):
-                    url = WORKSHOP_RAW_BASE_URL + "/" + parsed.path[len(upstream_path):]
-                    break
-        if not url.startswith(WORKSHOP_RAW_BASE_URL + "/"):
-            show_info_bar(parent, self.tr("Workshop download URL is invalid."), title=self.tr("Error"), error=True)
+        archive = _workshop_archive_for(code)
+        if archive is None:
+            show_info_bar(parent, self.tr("Workshop archive is missing from this build."),
+                          title=self.tr("Error"), error=True)
             return
         try:
-            content = _read_workshop_url(url, timeout=30, max_bytes=20_000_000)
-            if len(content) > 20_000_000:
-                raise ValueError(self.tr("Workshop archive is too large."))
-            with tempfile.TemporaryDirectory() as temp_dir:
-                archive_path = Path(temp_dir) / Path(str(code.get("filename") or "team.zip")).name
-                archive_path.write_bytes(content)
-                self._preview_and_import_archive(archive_path, expected_team=None)
+            self._preview_and_import_archive(archive, expected_team=None)
         except Exception as e:
             show_info_bar(parent, str(e), title=self.tr("Workshop Error"), error=True)
 

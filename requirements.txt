@@ -48,7 +48,7 @@ jsonschema-specifications==2025.9.1
 mcp==2.3.0
     # via
     #   ok-script
-    #   wwassist (pyproject.toml)
+    #   xjtuww (pyproject.toml)
 mcp-types==2.3.0
     # via mcp
 mouse==0.7.1
@@ -61,19 +61,19 @@ numpy==2.5.2
 ok-pyside-minimal==6.12.0.post2
     # via
     #   ok-script
-    #   wwassist (pyproject.toml)
+    #   xjtuww (pyproject.toml)
 ok-script[ocr,qt]==3.0.4
-    # via wwassist (pyproject.toml)
+    # via xjtuww (pyproject.toml)
 onnxocr-ppocrv5==0.0.23
     # via
     #   ok-script
-    #   wwassist (pyproject.toml)
+    #   xjtuww (pyproject.toml)
 opencv-python==5.0.0.93
-    # via wwassist (pyproject.toml)
+    # via xjtuww (pyproject.toml)
 opentelemetry-api==1.45.2
     # via mcp
 openvino==2026.3.0
-    # via wwassist (pyproject.toml)
+    # via xjtuww (pyproject.toml)
 openvino-telemetry==2025.2.0
     # via openvino
 pillow==12.3.0
@@ -85,7 +85,7 @@ psutil==7.2.2
 pyappify==1.0.13
     # via
     #   ok-script
-    #   wwassist (pyproject.toml)
+    #   xjtuww (pyproject.toml)
 pycaw==20240210
     # via ok-script
 pyclipper==1.4.0

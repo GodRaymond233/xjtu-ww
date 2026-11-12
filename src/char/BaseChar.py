@@ -365,7 +365,7 @@ class BaseChar:
             self.task.skip_combat_check = previous_skip_combat_check
 
     def alert_skill_failed(self):
-        self.task.log_error(self.task.tr('Click skill failed, check if the keybinding is correct in WW Assist settings!'),
+        self.task.log_error(self.task.tr('Click skill failed, check if the keybinding is correct in XJTU-WW settings!'),
                             notify=True)
         self.task.screenshot('click_resonance too long, breaking')
 

@@ -1,9 +1,10 @@
 .venv
 onnxocr/
-wwa_scripts/
-wwa_drop/
-updates/
-working/
+xjtu_scripts/
+xjtu_import/
+*.pyd
+!workshop_bundle/**
+!char_sources/**
 update/
 tesseract
 cache/

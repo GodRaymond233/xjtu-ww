@@ -3,7 +3,7 @@ name: ok-ww-characters
 description: Create, modify, review, and test Wuthering Waves character automation under src/char using the ok-script library's development skills and MCP workflow. Use for character rotations, BaseChar logic, CharFactory registration, Labels features, and English/Chinese combat terminology.
 ---
 
-# WW Assist Characters
+# XJTU-WW Characters
 
 ## Overview
 

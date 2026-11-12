@@ -644,11 +644,11 @@ msgid "not enough stamina"
 msgstr "vigor insuficiente"
 
 msgid ""
-"Click skill failed, check if the keybinding is correct in WW Assist "
+"Click skill failed, check if the keybinding is correct in XJTU-WW "
 "settings!"
 msgstr ""
 "¡Fallo al hacer clic en la habilidad, comprueba si la asignación de teclas "
-"es correcta en la configuración de WW Assist!"
+"es correcta en la configuración de XJTU-WW!"
 
 msgid "Change Time to Night"
 msgstr "Cambiar Hora a Noche"

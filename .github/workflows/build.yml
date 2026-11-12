@@ -43,8 +43,12 @@ jobs:
             requirements.txt
             pyproject.toml
 
-      - name: Install dependencies
-        run: python .github/scripts/install_dependencies.py --bundle
+      - name: Install build toolchain
+        run: python -m pip install "cython>=3" setuptools
+
+      - name: Compile sources to native extensions
+        shell: pwsh
+        run: python setup.py build_ext --inplace --force
 
       - name: Run tests
         timeout-minutes: 20
@@ -68,12 +72,24 @@ jobs:
             "dev-$($env:GITHUB_SHA.Substring(0, 7))"
           }
           "APP_VERSION=$version" >> $env:GITHUB_ENV
-          $prerelease = $version -notmatch '^v\d+\.\d+\.\d+$'
           "prerelease=$($prerelease.ToString().ToLowerInvariant())" >> $env:GITHUB_OUTPUT
+
+      - name: Strip Python sources from the build tree
+        shell: pwsh
+        run: |
+          $stripped = 0
+          Get-ChildItem -Recurse -Filter '*.py' src | Where-Object {
+            $_.Name -ne '__init__.py' -and (Test-Path ($_.FullName -replace '\.py$', '.cp312-win_amd64.pyd'))
+          } | ForEach-Object {
+            Remove-Item $_.FullName
+            $stripped++
+          }
+          if (Test-Path config.py) { Remove-Item config.py; $stripped++ }
+          if ($stripped -lt 100) { throw "Expected to strip 100+ sources, stripped $stripped" }
+          "Stripped $stripped source files; the package ships compiled modules only."
 
       - name: Build portable app
         run: python -m PyInstaller --noconfirm xjtu-ww.spec
-
       - name: Verify portable startup
         run: ./.github/scripts/test_portable.ps1
 
@@ -143,7 +159,7 @@ jobs:
           generate_release_notes: true
           body: |
             解压 Windows 便携包后运行 `xjtu-ww.exe`，直接进入本体主界面。游戏操作需要管理员权限时，请以管理员身份运行。
-            包内已包含 Python、依赖、OCR 模型及工坊入口。更新时解压到新目录，再复制旧目录的 `configs`、`wwa_scripts` 和 `wwa_drop`（如有）。
+            包内已包含 Python、依赖、OCR 模型及工坊入口。更新时解压到新目录，再复制旧目录的 `configs`、`xjtu_scripts` 和 `xjtu_import`（如有）。
           prerelease: ${{ needs.build.outputs.prerelease == 'true' }}
           fail_on_unmatched_files: true
           files: |

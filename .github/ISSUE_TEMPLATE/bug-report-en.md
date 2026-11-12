@@ -40,19 +40,19 @@ Main Echo check for Auto Combat:
 [Confirm whether every character in the team has a Main Echo equipped and its Echo Skill icon is visible]
 
 Input and display environment:
-[Game and WW Assist key mappings; controller use; GPU filters; overlays; multiple monitors, if relevant]
+[Game and XJTU-WW key mappings; controller use; GPU filters; overlays; multiple monitors, if relevant]
 
-Affected WW Assist version:
+Affected XJTU-WW version:
 [For example] 3.5.23
 
-Last known working WW Assist version:
+Last known working XJTU-WW version:
 [If known]
 
 Windows version:
 [For example] Windows 11 Pro 23H2
 
 Logs and screenshots:
-[Use Export Logs in WW Assist and attach the ZIP directly to this issue. Add screenshots showing the state or error]
+[Use Export Logs in XJTU-WW and attach the ZIP directly to this issue. Add screenshots showing the state or error]
 
 Video (optional):
 [Drag a short recording directly into this issue when timing or combat behavior matters]

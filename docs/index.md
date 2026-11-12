@@ -1,4 +1,4 @@
-# WW Assist documentation
+# XJTU-WW documentation
 
 Choose a language to get started.
 

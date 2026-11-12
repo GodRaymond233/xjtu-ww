@@ -1,6 +1,5 @@
 import os
 import json
-import ssl
 import tempfile
 import unittest
 from concurrent.futures import Future
@@ -8,7 +7,6 @@ from collections import Counter
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import patch
-from urllib.error import HTTPError, URLError
 
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
@@ -41,9 +39,10 @@ from src.char.Verina import Verina
 from src.char.YangYangSp import YangYangSp
 from src.gui.CharacterCodeTab import (
     STATE_DOT_SIZE, CharacterCodeTab, ExportTeamDialog, ImportTeamDialog, TeamInfoDialog,
-    TeamSelectionDialog, WorkshopDialog, fetch_all_workshop_teams, fetch_workshop_codes,
-    team_state_color, workshop_team_url,
+    TeamSelectionDialog, WorkshopDialog, _workshop_archive_for, fetch_all_workshop_teams,
+    fetch_workshop_codes, team_state_color, workshop_team_url,
 )
+from src.char.CustomCharLoader import normalize_team
 
 
 class TestCharacterCodeTab(unittest.TestCase):
@@ -225,149 +224,85 @@ class TestCharacterCodeTab(unittest.TestCase):
 
     def test_workshop_url_uses_sorted_team_slug(self):
         self.assertEqual(
-            workshop_team_url((Baizhi, Augusta, Aemeath)),
-            "https://s2a.godraymond.com/workshop/teams/Aemeath_Augusta_Baizhi.json",
+            workshop_team_url((Baizhi, Augusta, Aemeath)).name,
+            "Aemeath_Augusta_Baizhi.zip",
         )
 
     def test_workshop_url_sanitizes_character_name_punctuation(self):
         self.assertEqual(
-            workshop_team_url((YangYangSp, Chisa, Suisui)),
-            "https://s2a.godraymond.com/workshop/teams/Chisa_Suisui_Yangyang_Xuanling.json",
+            workshop_team_url((YangYangSp, Chisa, Suisui)).name,
+            "Chisa_Suisui_Yangyang_Xuanling.zip",
         )
 
-    def test_workshop_codes_are_sorted_by_timestamp_descending(self):
-        payload = {
-            "members": ["Aemeath", "Augusta", "Baizhi"],
-            "codes": [{"name": "older", "timestamp": 10}, {"name": "newer", "timestamp": 20}],
-        }
+    def test_offline_index_lists_embedded_teams(self):
+        codes = fetch_all_workshop_teams()
+        self.assertTrue(codes)
+        timestamps = [int(code.get("timestamp") or 0) for code in codes]
+        self.assertEqual(timestamps, sorted(timestamps, reverse=True))
+        for code in codes:
+            self.assertTrue(code.get("team"))
+            self.assertEqual(len(normalize_team(code["team"].split(", "))), 3)
 
-        class Response:
-            def __enter__(self):
-                return self
+    def test_offline_every_entry_resolves_an_embedded_archive(self):
+        for code in fetch_all_workshop_teams():
+            with self.subTest(code=code.get("filename")):
+                archive = _workshop_archive_for(code)
+                self.assertIsNotNone(archive)
+                self.assertTrue(archive.is_file())
+                self.assertLess(archive.stat().st_size, 20_000_000)
 
-            def __exit__(self, *args):
-                pass
+    def test_offline_fetch_workshop_codes_matches_team(self):
+        codes = fetch_all_workshop_teams()
+        sample = next(code for code in codes if len(code.get("members", [])) == 3)
+        team_names = tuple(sample["team"].split(", "))
+        as_tuple = fetch_workshop_codes(team_names)
+        as_string = fetch_workshop_codes(sample["team"])
+        self.assertEqual(as_tuple, as_string)
+        self.assertIn(sample, as_tuple)
 
-            def read(self, _size):
-                return json.dumps(payload).encode("utf-8")
+    def test_offline_fetch_workshop_codes_rejects_invalid_teams(self):
+        self.assertEqual(fetch_workshop_codes(("OnlyOne",)), [])
+        self.assertEqual(fetch_workshop_codes("not a team"), [])
 
-        with (
-            patch("src.gui.CharacterCodeTab.urlopen", return_value=Response()) as open_url,
-            patch("src.gui.CharacterCodeTab.logger.info") as log_info,
-        ):
-            codes = fetch_workshop_codes((Aemeath, Augusta, Baizhi))
-        self.assertEqual([code["name"] for code in codes], ["newer", "older"])
-        request = open_url.call_args.args[0]
-        self.assertEqual(request.full_url, workshop_team_url((Aemeath, Augusta, Baizhi)))
-        self.assertEqual(request.get_header("User-agent"), "wwassist-workshop")
-        self.assertEqual(open_url.call_args.kwargs, {"timeout": 15})
-        log_info.assert_called_once_with(
-            "char code workshop request: "
-            "https://s2a.godraymond.com/workshop/teams/Aemeath_Augusta_Baizhi.json"
-        )
-
-    def test_workshop_404_is_an_empty_list(self):
-        error = HTTPError("https://example.invalid", 404, "Not Found", {}, None)
-        with patch("src.gui.CharacterCodeTab.urlopen", side_effect=error) as open_url:
-            self.assertEqual(fetch_workshop_codes((Aemeath, Augusta, Baizhi)), [])
-        open_url.assert_called_once()
-
-    def test_unavailable_workshop_index_shows_error_instead_of_an_empty_dialog(self):
+    def test_offline_import_reads_the_embedded_archive(self):
         tab = CharacterCodeTab()
-        missing = HTTPError("https://example.invalid/teams.json", 404, "Not Found", {}, None)
+        try:
+            code = fetch_all_workshop_teams()[0]
+            with patch.object(tab, "_preview_and_import_archive") as preview:
+                tab._import_workshop_code(code, tab)
+            archive = preview.call_args.args[0]
+            self.assertEqual(archive.parent.name, "codes")
+            self.assertTrue(archive.is_file())
+        finally:
+            tab.deleteLater()
+
+    def test_offline_import_reports_missing_archive(self):
+        tab = CharacterCodeTab()
         try:
             with (
-                patch("src.gui.CharacterCodeTab.urlopen", side_effect=missing) as open_url,
+                patch("src.gui.CharacterCodeTab.show_info_bar") as notification,
+                patch.object(tab, "_preview_and_import_archive") as preview,
+            ):
+                tab._import_workshop_code({"filename": "definitely-missing.zip", "team": "A, B, C"}, tab)
+            preview.assert_not_called()
+            notification.assert_called_once()
+            self.assertTrue(notification.call_args.kwargs["error"])
+        finally:
+            tab.deleteLater()
+
+    def test_missing_bundle_reports_error_instead_of_an_empty_dialog(self):
+        tab = CharacterCodeTab()
+        try:
+            with (
+                patch("src.gui.CharacterCodeTab.WORKSHOP_INDEX") as index,
                 patch("src.gui.CharacterCodeTab.WorkshopDialog") as dialog,
                 patch("src.gui.CharacterCodeTab.show_info_bar") as notification,
             ):
+                index.read_text.side_effect = OSError("bundle missing")
                 tab._open_workshop()
-                open_url.assert_called_once()
                 dialog.assert_not_called()
                 notification.assert_called_once()
                 self.assertTrue(notification.call_args.kwargs["error"])
-                self.assertIn("404", notification.call_args.args[1])
-        finally:
-            tab.deleteLater()
-
-    def test_workshop_lists_and_archives_use_the_mirror(self):
-        tab = CharacterCodeTab()
-        payload = json.dumps({"teams": [], "codes": []}).encode()
-        try:
-            for path, fetch in (
-                ("/teams.json", fetch_all_workshop_teams),
-                ("/teams/Aemeath_Augusta_Baizhi.json",
-                 lambda: fetch_workshop_codes((Aemeath, Augusta, Baizhi))),
-                ("/codes/team%20name.zip", lambda: tab._import_workshop_code(
-                    {"downloadUrl": "https://cfokwwchar.ok-script.com/codes/team%20name.zip"}, tab)),
-            ):
-                with (
-                    self.subTest(path=path),
-                    patch("src.gui.CharacterCodeTab.urlopen") as open_url,
-                    patch.object(tab, "_preview_and_import_archive") as preview,
-                ):
-                    open_url.return_value.__enter__.return_value.read.return_value = payload
-                    fetch()
-                    self.assertEqual([call.args[0].full_url for call in open_url.call_args_list], [
-                        "https://s2a.godraymond.com/workshop" + path,
-                    ])
-                    if path.endswith('.zip'):
-                        preview.assert_called_once()
-        finally:
-            tab.deleteLater()
-
-    def test_workshop_transport_failure_reports_the_preserved_source_error(self):
-        error = URLError(ssl.SSLEOFError("TLS connection closed"))
-        with patch("src.gui.CharacterCodeTab.urlopen", side_effect=error) as open_url:
-            with self.assertRaises(URLError):
-                fetch_all_workshop_teams()
-        open_url.assert_called_once()
-
-    def test_workshop_index_sends_app_user_agent(self):
-        payload = {"teams": [{"team": "Test team", "members": ["Aemeath"],
-                              "codes": [{"name": "Test code", "timestamp": 1}]}]}
-        with patch("src.gui.CharacterCodeTab.urlopen") as open_url:
-            open_url.return_value.__enter__.return_value.read.return_value = json.dumps(payload).encode()
-            codes = fetch_all_workshop_teams()
-
-        self.assertEqual(codes[0]["name"], "Test code")
-        self.assertEqual(codes[0]["team"], "Test team")
-        request = open_url.call_args.args[0]
-        self.assertEqual(request.full_url, "https://s2a.godraymond.com/workshop/teams.json")
-        self.assertEqual(request.get_header("User-agent"), "wwassist-workshop")
-        self.assertEqual(open_url.call_args.kwargs, {"timeout": 15})
-
-    def test_workshop_archive_sends_app_user_agent(self):
-        tab = CharacterCodeTab()
-        try:
-            base_url = "https://s2a.godraymond.com/workshop"
-            for code, expected_url in (
-                ({"downloadUrl": "https://cfokwwchar.ok-script.com/codes/team.zip"},
-                 base_url + "/codes/team.zip"),
-                ({"rawUrl": base_url + "/codes/team.zip"}, base_url + "/codes/team.zip"),
-                ({"rawUrl": "https://raw.githubusercontent.com/GodRaymond233/ok-ww-char-code/main/codes/team.zip"},
-                 base_url + "/codes/team.zip"),
-                ({"downloadUrl": "https://okwwcharcode.ok-script.com/codes/team%20name.zip"},
-                 base_url + "/codes/team%20name.zip"),
-                ({"rawUrl": "https://raw.githubusercontent.com/ok-oldking/ok-ww-char-code/main/codes/team.zip",
-                  "downloadUrl": "https://okwwcharcode.ok-script.com/codes/other.zip"},
-                 base_url + "/codes/team.zip"),
-            ):
-                with (
-                    self.subTest(code=code),
-                    patch("src.gui.CharacterCodeTab.urlopen") as open_url,
-                    patch.object(tab, "_preview_and_import_archive") as preview,
-                ):
-                    open_url.return_value.__enter__.return_value.read.return_value = b"archive contents"
-                    preview.side_effect = lambda path, **kwargs: self.assertEqual(
-                        path.read_bytes(), b"archive contents")
-                    tab._import_workshop_code(code, tab)
-
-                    request = open_url.call_args.args[0]
-                    self.assertEqual(request.full_url, expected_url)
-                    self.assertEqual(request.get_header("User-agent"), "wwassist-workshop")
-                    self.assertEqual(open_url.call_args.kwargs, {"timeout": 30})
-                    preview.assert_called_once()
         finally:
             tab.deleteLater()
 

@@ -597,9 +597,9 @@ msgid "not enough stamina"
 msgstr "体力不足"
 
 msgid ""
-"Click skill failed, check if the keybinding is correct in WW Assist "
+"Click skill failed, check if the keybinding is correct in XJTU-WW "
 "settings!"
-msgstr "释放技能失败, 请检查WW Assist按键设置是正确!"
+msgstr "释放技能失败, 请检查XJTU-WW按键设置是正确!"
 
 msgid "Change Time to Night"
 msgstr "自动切换时间到晚上"

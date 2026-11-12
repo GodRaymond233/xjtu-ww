@@ -113,7 +113,7 @@ content. Respect a requested current-screen baseline rather than automatically
 returning to the open world.
 
 Use ok-script MCP for game development and real input/capture validation.
-Computer Use can optionally verify the WW Assist GUI task card; it is not needed by
+Computer Use can optionally verify the XJTU-WW GUI task card; it is not needed by
 the game task. If the desktop plugin is unavailable, state that the GUI Start
 check remains untested while preserving the independently verified MCP results.
 

@@ -1,8 +1,8 @@
 <div align="center">
   <h1 align="center">
-    <img src="icons/icon.png" width="200" alt="WW Assist logo"/>
+    <img src="icons/icon.png" width="200" alt="XJTU-WW logo"/>
     <br/>
-    WW Assist
+    XJTU-WW
   </h1> 
   
   <p>
@@ -58,8 +58,8 @@ If you encounter issues, please check the following steps one by one before aski
     *   It is recommended to turn off GPU filters such as RTX HDR, RTX Dynamic Vibrance, and AMD sharpening.
     *   Use the game's default brightness settings.
     *   Disable any overlays that display information on the game screen (e.g., frame rates from MSI Afterburner, Fraps, etc.).
-3.  **Custom Keybinds**: If you have changed the default in-game keybinds, you must update them accordingly in the `WW Assist` settings. Only the keybinds listed in the settings are supported.
-4.  **Software Version**: Check and ensure you are using the latest version of `WW Assist`.
+3.  **Custom Keybinds**: If you have changed the default in-game keybinds, you must update them accordingly in the `XJTU-WW` settings. Only the keybinds listed in the settings are supported.
+4.  **Software Version**: Check and ensure you are using the latest version of `XJTU-WW`.
 5.  **Game Performance**: Make sure the game can run stably at **60 FPS**. If the frame rate is unstable, try lowering the game's graphics quality or resolution.
 6.  **Permissions**: Extract the portable archive and run `xjtu-ww.exe`. If game interaction requires elevated permissions, right-click it and select "Run as administrator".
 7.  **OpenVINO Error**: If you encounter error `0x000005` on an Intel CPU with an NPU, update to the latest Intel NPU driver.

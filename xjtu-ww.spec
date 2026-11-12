@@ -8,10 +8,17 @@ from PyInstaller.utils.win32.versioninfo import (
 )
 
 root = Path(SPECPATH)
-datas = [(str(root / name), name) for name in ('assets', 'icons', 'i18n')]
+datas = [(str(root / name), name) for name in ('assets', 'icons', 'i18n', 'workshop_bundle', 'char_sources')]
 datas += [(str(root / name), '.') for name in ('LICENSE.txt', 'README.md')]
-# The workshop reads and exports built-in character source files.
-datas += collect_data_files('src', include_py_files=True)
+# Compiled build: src ships as .pyd extensions; char_sources/ carries the
+# character sources the workshop and AI edits read at runtime.
+compiled = sorted(root.glob('src/**/*.cp312-win_amd64.pyd'))
+if not compiled:
+    raise RuntimeError('Compiled src/*.pyd modules are missing; run build_ext first.')
+for module in compiled:
+    datas.append((str(module), str(module.parent.relative_to(root))))
+if (root / 'config.cp312-win_amd64.pyd').is_file():
+    datas.append((str(root / 'config.cp312-win_amd64.pyd'), '.'))
 hiddenimports = collect_submodules('src')
 binaries = collect_dynamic_libs('openvino')
 for package in ('ok', 'onnxocr'):
@@ -32,13 +39,13 @@ version_info = VSVersionInfo(
     ffi=FixedFileInfo(filevers=file_version, prodvers=file_version),
     kids=[
         StringFileInfo([StringTable('040904B0', [
-            StringStruct('FileDescription', 'WW Assist'),
+            StringStruct('FileDescription', 'XJTU-WW'),
             StringStruct('FileVersion', app_version),
-            StringStruct('InternalName', 'wwassist'),
+            StringStruct('InternalName', 'xjtuww'),
             StringStruct('OriginalFilename', 'xjtu-ww.exe'),
-            StringStruct('ProductName', 'WW Assist'),
+            StringStruct('ProductName', 'XJTU-WW'),
             StringStruct('ProductVersion', app_version),
-            StringStruct('Comments', 'Internal WW Assist build.'),
+            StringStruct('Comments', 'Internal XJTU-WW build.'),
         ])]),
         VarFileInfo([VarStruct('Translation', [0x0409, 1200])]),
     ],

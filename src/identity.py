@@ -11,19 +11,19 @@ and monitoring stay unambiguous.
 
 import logging
 
-APP_SLUG = 'wwassist'
-APP_TITLE = 'WW Assist'
-PROCESS_TAG = 'wwa-runtime'
+APP_SLUG = 'xjtuww'
+APP_TITLE = 'XJTU-WW'
+PROCESS_TAG = 'xjtu-ww'
 
 # Win32 named objects (the object namespace adds the Global\ prefix).
-MUTEX_PREFIX = 'wwa-singleton.'
-OVERLAY_WINDOW_CLASS = 'wwa.Overlay'
-NOTIFIER_APP_USER_MODEL_ID = 'wwa.assist.shell'
-LOG_BASENAME = 'wwassist-run'
+MUTEX_PREFIX = 'xjtu-ww-singleton.'
+OVERLAY_WINDOW_CLASS = 'xjtu.Overlay'
+NOTIFIER_APP_USER_MODEL_ID = 'xjtu.ww.shell'
+LOG_BASENAME = 'xjtu-ww'
 
 # Custom-script folders created next to the executable.
-SCRIPTS_FOLDER = 'wwa_scripts'
-IMPORT_FOLDER = 'wwa_drop'
+SCRIPTS_FOLDER = 'xjtu_scripts'
+IMPORT_FOLDER = 'xjtu_import'
 
 _UPSTREAM_TOKENS = (
     'ok-wuthering-waves',
@@ -145,6 +145,29 @@ def _patch_window_classes():
     win32_gdi._window_class_name = OVERLAY_WINDOW_CLASS
 
 
+class _BoundWrapper:
+    """Descriptor adapter.
+
+    Cython compiles module functions to non-descriptor builtins, so wrappers
+    assigned to class attributes (``__init__``, methods) never receive
+    ``self``. This descriptor restores normal method binding for them.
+    """
+
+    __slots__ = ('_fn',)
+
+    def __init__(self, fn):
+        self._fn = fn
+
+    def __get__(self, obj, objtype=None):
+        if obj is None:
+            return self._fn
+
+        def bound(*args, **kwargs):
+            return self._fn(obj, *args, **kwargs)
+
+        return bound
+
+
 def _patch_notifications():
     """Rebrand the system notifier: AUMID, tray window class, balloon text."""
     from ok.notification import system as notifier_module
@@ -152,21 +175,21 @@ def _patch_notifications():
     original_init = notifier_module.WindowsSystemNotifier.__init__
     original_show = notifier_module.WindowsSystemNotifier.show
 
-    def __init__(self, app_name=APP_TITLE, app_icon=None, _original=original_init):
+    def __init__(self, *args, _original=original_init, **kwargs):
+        app_icon = kwargs.get('app_icon') or (args[1] if len(args) > 1 else None)
         _original(self, APP_TITLE, app_icon)
         self.app_id = NOTIFIER_APP_USER_MODEL_ID
 
     def show(self, title, message, error=False, _original=original_show):
         return _original(self, sanitize_text(title), sanitize_text(message), error)
 
-    notifier_module.WindowsSystemNotifier.__init__ = __init__
-    notifier_module.WindowsSystemNotifier.show = show
+    notifier_module.WindowsSystemNotifier.__init__ = _BoundWrapper(__init__)
+    notifier_module.WindowsSystemNotifier.show = _BoundWrapper(show)
 
 
 def _patch_log_page():
     """Point the Log page at our log file and its placeholder text."""
     from pathlib import Path
-    from ok.ui.qt import shell
     from ok.ui.qt.shell import log_page as log_page_module
 
     original_init = log_page_module.LogPage.__init__
@@ -175,7 +198,7 @@ def _patch_log_page():
         default = Path.cwd() / "logs" / f"{LOG_BASENAME}.log"
         _original(self, log_file or default, parent)
 
-    log_page_module.LogPage.__init__ = __init__
+    log_page_module.LogPage.__init__ = _BoundWrapper(__init__)
 
     original_t = log_page_module._t
 
@@ -183,7 +206,6 @@ def _patch_log_page():
         return _original(sanitize_text(text))
 
     log_page_module._t = _t
-    _ = shell
 
 
 def _patch_script_folders():
@@ -210,9 +232,9 @@ def _export_ok_globals():
 def apply():
     """Apply every runtime identity patch. Idempotent, safe to call twice."""
     import ok as ok_package
-    if getattr(ok_package, '_wwa_identity_applied', False):
+    if getattr(ok_package, '_xjtu_identity_applied', False):
         return False
-    ok_package._wwa_identity_applied = True
+    ok_package._xjtu_identity_applied = True
 
     _patch_logging()
     _patch_logger_file()

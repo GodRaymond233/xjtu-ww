@@ -126,7 +126,7 @@ intro entries and confirmed switch-outs. It restores every wrapper and combat
 setting in `finally`. Successful helper returns show automation decisions, not
 damage attribution. Add focused character logging/screenshots only when the
 existing trace cannot explain a suspected problem, following the cleanup rules
-above. Keep the baseline fixed across runs. Do not restart WW Assist for ordinary
+above. Keep the baseline fixed across runs. Do not restart XJTU-WW for ordinary
 evaluation, wrapper changes, or changes to the submitted evaluation file: MCP
 compiles that file again on the next submission.
 

@@ -1,4 +1,4 @@
-# WW Assist Character Patterns
+# XJTU-WW Character Patterns
 
 ## Files To Inspect
 

@@ -1,44 +1,47 @@
+import os
+import pathlib
+
 import setuptools
 from Cython.Build import cythonize
-from distutils.extension import Extension
 from setuptools import Extension
-
-import os
 
 os.environ["PYTHONIOENCODING"] = "utf-8"
 
+ROOT = pathlib.Path(__file__).resolve().parent
+EXCLUDE_FILES = {"__init__.py", "identity.py"}
 
-def find_pyx_packages(base_dir):
+
+def collect_python_extensions(base_dir):
+    """One Extension per .py module under base_dir (and config.py at root).
+
+    __init__.py stays as source: package discovery needs it importable before
+    the compiled modules exist, and it carries no logic worth obfuscating.
+    identity.py stays as source: its monkey-patches need real Python functions;
+    Cython compiles nested defs into non-descriptor builtins that cannot bind
+    ``self`` when assigned to class attributes.
+    """
     extensions = []
-    for dirpath, _, filenames in os.walk(base_dir):
-        for filename in filenames:
-            if filename.endswith(".pyx"):
-                module_path = os.path.join(dirpath, filename).replace('/', '.').replace('\\', '.')
-                module_name = module_path[:-4]  # Remove the .pyx extension
-                extensions.append(
-                    Extension(name=module_name, language="c++", sources=[os.path.join(dirpath, filename)]))
-                print(f'add Extension: {module_name} {[os.path.join(dirpath, filename)]}')
+    for path in sorted(pathlib.Path(base_dir).rglob("*.py")):
+        if path.name in EXCLUDE_FILES:
+            continue
+        module = ".".join(path.with_suffix("").parts)
+        extensions.append(
+            Extension(name=module, language="c++", sources=[str(path)]))
+    config_py = ROOT / "config.py"
+    if config_py.is_file():
+        extensions.append(Extension(name="config", language="c++", sources=["config.py"]))
+    print(f"collected {len(extensions)} modules to compile")
     return extensions
 
 
-def find_packages_with_init_files(base_dir):
-    packages = []
-    for dirpath, dirnames, filenames in os.walk(base_dir):
-        if '__init__.py' in filenames:
-            package = dirpath.replace('/', '.').replace('\\', '.')
-            packages.append(package)
-    return packages
-
-
-base_dir = "src"
-extensions = find_pyx_packages(base_dir)
+extensions = collect_python_extensions("src")
 
 setuptools.setup(
-    name="wwassist",
-    version="0.0.1",
+    name="xjtuww",
+    version="1.1.0",
     author="xjtu-ww maintainers",
     author_email="",
-    description="WW Assist automation runtime",
+    description="XJTU-WW automation runtime",
     url="https://github.com/GodRaymond233/xjtu-ww",
     packages=setuptools.find_packages(),
     include_package_data=True,
@@ -48,5 +51,13 @@ setuptools.setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: Microsoft :: Windows",
     ],
-    ext_modules=cythonize(extensions, compiler_directives={'language_level': "3"})
+    ext_modules=cythonize(
+        extensions,
+        compiler_directives={
+            "language_level": "3",
+            "embedsignature": False,
+            "binding": False,
+        },
+        nthreads=0,
+    ),
 )

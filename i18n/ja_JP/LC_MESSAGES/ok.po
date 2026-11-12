@@ -599,9 +599,9 @@ msgid "not enough stamina"
 msgstr "結晶波長板が不足しています"
 
 msgid ""
-"Click skill failed, check if the keybinding is correct in WW Assist "
+"Click skill failed, check if the keybinding is correct in XJTU-WW "
 "settings!"
-msgstr "スキル発動に失敗しました。WW Assistの設定でキー割り当てが正しいか確認してください！"
+msgstr "スキル発動に失敗しました。XJTU-WWの設定でキー割り当てが正しいか確認してください！"
 
 msgid "Change Time to Night"
 msgstr "時間を夜に変更"

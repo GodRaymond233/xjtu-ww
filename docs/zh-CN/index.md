@@ -1,8 +1,8 @@
 <div align="center">
   <h1 align="center">
-    <img src="icons/icon.png" width="200" alt="WW Assist logo"/>
+    <img src="icons/icon.png" width="200" alt="XJTU-WW logo"/>
     <br/>
-    WW Assist
+    XJTU-WW
   </h1> 
   
   <p>
@@ -60,8 +60,8 @@
     *   建议关闭显卡滤镜，例如 RTX HDR、RTX 动态亮丽（RTX Dynamic Vibrance）、AMD 锐化等。
     *   使用游戏默认的亮度设置。
     *   关闭任何在游戏画面上显示信息的叠加层（如 MSI Afterburner、Fraps 等显示的帧率）。
-3.  **自定义按键**：如果您修改了游戏内的默认按键，请务必在 `WW Assist` 的设置中进行同步配置。仅支持设置中列出的按键。
-4.  **软件版本**：检查并确保您使用的是最新版本的 `WW Assist`。
+3.  **自定义按键**：如果您修改了游戏内的默认按键，请务必在 `XJTU-WW` 的设置中进行同步配置。仅支持设置中列出的按键。
+4.  **软件版本**：检查并确保您使用的是最新版本的 `XJTU-WW`。
 5.  **游戏性能**：请确保游戏能稳定在 **60 FPS** 运行。如果帧率不稳定，请尝试降低游戏画质或分辨率。
 6.  **运行权限**：解压便携包后运行 `xjtu-ww.exe`；游戏操作需要管理员权限时，请右键选择“以管理员身份运行”。
 7.  **OpenVINO 报错**：如果遇到 `0x000005` 报错，并且使用的是带 NPU 的 Intel CPU，请更新至 Intel 最新的 NPU 驱动。

@@ -1,8 +1,8 @@
 # 贡献指南 / Contributing Guide
 
-感谢你愿意为 `WW Assist` 做贡献。本项目是基于图像识别的《鸣潮》自动化工具，仅供个人学习与交流使用。提交贡献前，请先阅读[简体中文文档](../zh-CN/index.md)中的免责声明、开发者专区和社区信息。
+感谢你愿意为 `XJTU-WW` 做贡献。本项目是基于图像识别的《鸣潮》自动化工具，仅供个人学习与交流使用。提交贡献前，请先阅读[简体中文文档](../zh-CN/index.md)中的免责声明、开发者专区和社区信息。
 
-Thank you for contributing to `WW Assist`. This project is an image-recognition-based automation tool for Wuthering Waves, and is intended only for personal learning and communication. Before contributing, please read the disclaimer, developer section, and community information in the [English documentation](../en/index.md).
+Thank you for contributing to `XJTU-WW`. This project is an image-recognition-based automation tool for Wuthering Waves, and is intended only for personal learning and communication. Before contributing, please read the disclaimer, developer section, and community information in the [English documentation](../en/index.md).
 
 ## 提交 PR 前 / Before Opening a PR
 
@@ -140,11 +140,11 @@ You can also run a specific test directly:
 
 Source images and annotations in `ok_templates/` are tracked directly in this repository.
 
-1. 如需添加识别素材，在 WW Assist 的「模板」标签页中添加图片并完成标注。
+1. 如需添加识别素材，在 XJTU-WW 的「模板」标签页中添加图片并完成标注。
 2. 点击「保存」，保存标注并生成识别素材。
 3. 检查生成的修改，将相关的 `ok_templates/` 源图片、标注和 `assets/` 识别素材一起提交。
 
-1. To add recognition assets, add the images and markup in WW Assist's Template tab.
+1. To add recognition assets, add the images and markup in XJTU-WW's Template tab.
 2. Click Save to save the annotations and generate the recognition assets.
 3. Review the generated changes and include the relevant `ok_templates/` source images, annotations, and `assets/` recognition assets in the same PR.
 

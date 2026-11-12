@@ -477,7 +477,7 @@ def _load_team_char_class_from_file(char_cls, team, path):
     if cached and cached[0] == stat.st_mtime_ns and cached[1] == stat.st_size:
         return cached[2]
     custom_cls = _load_class_from_file(
-        char_cls, path, f"wwa_team_{team_key}_{char_cls.__name__}_{stat.st_mtime_ns}"
+        char_cls, path, f"xjtu_team_{team_key}_{char_cls.__name__}_{stat.st_mtime_ns}"
     )
     _team_class_cache[cache_key] = (stat.st_mtime_ns, stat.st_size, custom_cls)
     return custom_cls
@@ -690,10 +690,14 @@ def read_builtin_char_code(char_cls):
     cached = _builtin_code_cache.get(char_cls)
     if cached is not None:
         return cached
-    path = inspect.getsourcefile(char_cls)
-    if not path:
-        raise RuntimeError(f"Cannot find source file for {char_cls.__name__}")
-    code = Path(path).read_text(encoding="utf-8")
+    from src.char._char_sources import read_char_source
+    code = read_char_source(char_cls.__name__)
+    if code is None:
+        # Source checkout: the compiled build ships no importable .py files.
+        path = inspect.getsourcefile(char_cls)
+        if not path:
+            raise RuntimeError(f"Cannot find source file for {char_cls.__name__}")
+        code = Path(path).read_text(encoding="utf-8")
     _builtin_code_cache[char_cls] = code
     return code
 
@@ -757,7 +761,7 @@ def _load_custom_char_class_from_file(char_cls, path):
     if cached and cached[0] == stat.st_mtime_ns and cached[1] == stat.st_size:
         return cached[2]
 
-    module_name = f"wwa_custom_char_{char_cls.__name__}_{stat.st_mtime_ns}"
+    module_name = f"xjtu_custom_char_{char_cls.__name__}_{stat.st_mtime_ns}"
     custom_cls = _load_class_from_file(char_cls, path, module_name)
 
     _custom_class_cache[cache_key] = (stat.st_mtime_ns, stat.st_size, custom_cls)

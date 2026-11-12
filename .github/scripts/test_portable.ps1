@@ -16,8 +16,9 @@ $process = $null
 
 try {
     Copy-Item -LiteralPath $package -Destination $smokeDirectory -Recurse
-    foreach ($required in @('xjtu-ww.exe', 'version.txt', 'src/gui/CharacterCodeTab.py',
-                            'src/char/BaseChar.py', 'onnxocr/models/ppocrv5/det/det.onnx')) {
+    foreach ($required in @('xjtu-ww.exe', 'version.txt', 'src/gui/CharacterCodeTab.cp312-win_amd64.pyd',
+                            'src/char/BaseChar.cp312-win_amd64.pyd', 'workshop_bundle/teams.json',
+                            'onnxocr/models/ppocrv5/det/det.onnx')) {
         if (-not (Test-Path -LiteralPath (Join-Path $smokeDirectory $required))) {
             throw "Missing portable runtime file: $required"
         }
@@ -25,11 +26,11 @@ try {
     $executable = Join-Path $smokeDirectory 'xjtu-ww.exe'
     $identity = [Diagnostics.FileVersionInfo]::GetVersionInfo($executable)
     $version = (Get-Content -LiteralPath (Join-Path $smokeDirectory 'version.txt') -Raw).Trim()
-    if ($identity.ProductName -ne 'WW Assist' -or
-        $identity.FileDescription -ne 'WW Assist' -or
+    if ($identity.ProductName -ne 'XJTU-WW' -or
+        $identity.FileDescription -ne 'XJTU-WW' -or
         $identity.OriginalFilename -ne 'xjtu-ww.exe' -or
         $identity.ProductVersion -ne $version) {
-        throw 'Portable executable metadata does not match the WW Assist package.'
+        throw 'Portable executable metadata does not match the XJTU-WW package.'
     }
     # Exclude developer-installed DLLs from the portable runtime's search path.
     $env:PATH = "$env:SystemRoot\System32;$env:SystemRoot"

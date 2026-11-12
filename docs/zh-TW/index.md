@@ -1,8 +1,8 @@
 <div align="center">
   <h1 align="center">
-    <img src="icons/icon.png" width="200" alt="WW Assist logo"/>
+    <img src="icons/icon.png" width="200" alt="XJTU-WW logo"/>
     <br/>
-    WW Assist
+    XJTU-WW
   </h1> 
   
   <p>
@@ -58,8 +58,8 @@
     *   建議關閉顯示卡濾鏡，例如 RTX HDR、RTX 動態亮麗（RTX Dynamic Vibrance）、AMD 銳化等。
     *   使用遊戲預設的亮度設定。
     *   關閉任何在遊戲畫面上顯示資訊的疊加層（如 MSI Afterburner、Fraps 等顯示的幀率）。
-3.  **自訂按鍵**：如果您修改了遊戲內的預設按鍵，請務必在 `WW Assist` 的設定中同步設定。僅支援設定中列出的按鍵。
-4.  **軟體版本**：檢查並確保您使用的是最新版本的 `WW Assist`。
+3.  **自訂按鍵**：如果您修改了遊戲內的預設按鍵，請務必在 `XJTU-WW` 的設定中同步設定。僅支援設定中列出的按鍵。
+4.  **軟體版本**：檢查並確保您使用的是最新版本的 `XJTU-WW`。
 5.  **遊戲效能**：請確保遊戲能穩定以 **60 FPS** 執行。如果幀率不穩定，請嘗試調低遊戲畫質或解析度。
 6.  **執行權限**：解壓縮可攜式套件後執行 `xjtu-ww.exe`；遊戲操作需要系統管理員權限時，請按右鍵選擇「以系統管理員身分執行」。
 7.  **OpenVINO 錯誤**：如果遇到 `0x000005` 錯誤，並且使用的是配備 NPU 的 Intel CPU，請更新至 Intel 最新的 NPU 驅動程式。
