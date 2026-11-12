@@ -62,12 +62,12 @@ If the change affects UI, recognition results, or user-visible behavior, please 
 
 ## 检查清单 / Checklist
 
-- [ ] 我已阅读 [CONTRIBUTING.md](https://github.com/ok-oldking/ok-wuthering-waves/blob/master/CONTRIBUTING.md) / I have read [CONTRIBUTING.md](https://github.com/ok-oldking/ok-wuthering-waves/blob/master/CONTRIBUTING.md)
+- [ ] 我已阅读 [CONTRIBUTING.md](https://github.com/GodRaymond233/xjtu-ww/blob/master/CONTRIBUTING.md) / I have read [CONTRIBUTING.md](https://github.com/GodRaymond233/xjtu-ww/blob/master/CONTRIBUTING.md)
 - [ ] 我已阅读 README 中的免责声明 / I have read the disclaimer in the README
 - [ ] 我已尽量保持 PR 范围清晰，没有混入无关修改 / I have kept this PR focused and avoided unrelated changes
 - [ ] 我已说明测试结果或无法测试的原因 / I have described the test results or why testing was not possible
 - [ ] 我已在提交前使用 AI 审查最终修改，处理有效问题并说明结果 / I had AI review the final changes before submission, addressed valid findings, and described the results
-- [ ] 如新增识别素材，我已在 ok-ww 的「模板」标签页中添加标注并点击「保存」，并包含相关源文件和生成素材；或本 PR 不涉及新增素材 / If adding recognition assets, I added markup in ok-ww's Template tab, clicked Save, and included the relevant source files and generated assets; or this PR adds no recognition assets
+- [ ] 如新增识别素材，我已在 WW Assist 的「模板」标签页中添加标注并点击「保存」，并包含相关源文件和生成素材；或本 PR 不涉及新增素材 / If adding recognition assets, I added markup in WW Assist's Template tab, clicked Save, and included the relevant source files and generated assets; or this PR adds no recognition assets
 - [ ] 我没有提交日志、缓存、临时文件或个人配置 / I have not committed logs, caches, temporary files, or personal settings
 
 ## 社区联系方式 / Community Contact

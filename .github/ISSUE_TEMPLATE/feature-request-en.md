@@ -8,7 +8,7 @@ assignees: ''
 ---
 
 Search existing issues and discussions first:
-[Issues](https://github.com/ok-oldking/ok-wuthering-waves/issues?q=label%3Aenhancement) · [Discussions](https://github.com/ok-oldking/ok-wuthering-waves/discussions)
+[Issues](https://github.com/GodRaymond233/xjtu-ww/issues?q=label%3Aenhancement) · [Discussions](https://github.com/GodRaymond233/xjtu-ww/discussions)
 
 Problem or limitation:
 [Describe the user problem or workflow limitation, not only the desired implementation]
@@ -20,7 +20,7 @@ Proposed behavior:
 [Describe the desired behavior clearly]
 
 Relevant task, character, or configuration:
-[Identify the affected part of OK-WW]
+[Identify the affected part of WW Assist]
 
 Acceptance examples:
 [Give one or two concrete examples of how the feature should behave]

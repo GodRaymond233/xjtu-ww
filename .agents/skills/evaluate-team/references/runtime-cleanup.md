@@ -2,7 +2,7 @@
 
 Read this for character instrumentation, version switching, or retaining a
 candidate. Reuse the current project's verified MCP runtime; restarting a short
-SDK client is not an OK-WW restart.
+SDK client is not an WW Assist restart.
 
 ## Stop first when testing is stopped
 

@@ -599,8 +599,9 @@ msgid "not enough stamina"
 msgstr "結晶波長板が不足しています"
 
 msgid ""
-"Click skill failed, check if the keybinding is correct in ok-ww settings!"
-msgstr "スキル発動に失敗しました。ok-wwの設定でキー割り当てが正しいか確認してください！"
+"Click skill failed, check if the keybinding is correct in WW Assist "
+"settings!"
+msgstr "スキル発動に失敗しました。WW Assistの設定でキー割り当てが正しいか確認してください！"
 
 msgid "Change Time to Night"
 msgstr "時間を夜に変更"
@@ -1119,8 +1120,8 @@ msgid "Merge Discarded Echoes"
 msgstr "破棄済み音骸を融合"
 
 msgid ""
-"Must have 1000 discarded Echo to Run, Merge discarded Echoes in full "
-"batches of 100."
+"Must have 1000 discarded Echo to Run, Merge discarded Echoes in full batches"
+" of 100."
 msgstr "実行には破棄済み音骸が1000個必要です。破棄済み音骸を100個単位で融合します。"
 
 msgid "Bag Key"
@@ -1147,13 +1148,18 @@ msgstr "破棄済み音骸が1000個超なら融合"
 msgid "Additional Tasks to Run After Daily Task"
 msgstr "デイリータスク後に実行する追加タスク"
 
-msgid "Select optional tasks. Nightmare Nest runs before stamina farming to help complete the daily task; the other tasks run afterward."
+msgid ""
+"Select optional tasks. Nightmare Nest runs before stamina farming to help "
+"complete the daily task; the other tasks run afterward."
 msgstr "任意のタスクを選択します。悪夢の巣はデイリー達成を補助するためスタミナ消費前に実行し、その他のタスクはその後に実行します。"
 
-msgid "Teleport and Farm 4C Echo requires \"Teleport to Boss\" to be enabled in Farm Echo Task."
+msgid ""
+"Teleport and Farm 4C Echo requires \"Teleport to Boss\" to be enabled in "
+"Farm Echo Task."
 msgstr "「テレポートしてコスト4音骸を収集」を実行するには、音骸収集タスクの「ボスへテレポート」を有効にしてください。"
 
-msgid "Auto Farm all Nightmare Nest requires at least one \"Which to Farm\" option."
+msgid ""
+"Auto Farm all Nightmare Nest requires at least one \"Which to Farm\" option."
 msgstr "「すべての悪夢の巣を自動周回」を実行するには、「周回対象」を1つ以上選択してください。"
 
 msgid "Daily Task Completed"
@@ -1186,8 +1192,8 @@ msgstr "📅 デイリータスク"
 msgid "🩺 Diagnosis"
 msgstr "🩺 診断"
 
-msgid "⬆️ 批量强化声骸(游戏与okww语言必须为简体/繁体中文)"
-msgstr "⬆️ 音骸一括強化（ゲームとokwwは簡体字/繁体字中国語が必要）"
+msgid "⬆️ 批量强化声骸(游戏与本工具语言必须为简体/繁体中文)"
+msgstr "⬆️ 音骸一括強化（ゲームと本ツールは簡体字/繁体字中国語が必要）"
 
 msgid "🌀 Farm 4C Echo in Dungeon/World"
 msgstr "🌀 ダンジョン/フィールドでコスト4音骸を周回"
@@ -1234,8 +1240,9 @@ msgstr "Bキーでバッグを開き、フィルターでメインステータ�
 msgid "点击B进入背包, 在过滤器中选择需要强化的声骸, 并按照等级从0排序后开始."
 msgstr "Bキーでバッグを開き、フィルターで強化する音骸を選択し、レベル0から昇順に並べて開始してください。"
 
-msgid "游戏与okww语言必须为简体/繁体中文,必须16:9分辨率,使用1600x900以上分辨率, 勾选需要的, 没勾的都会自动合成"
-msgstr "ゲームとokwwの言語は簡体字/繁体字中国語、解像度は16:9かつ1600x900以上が必要です。必要なものにチェックを入れると、未チェックのものは自動合成されます。"
+msgid "游戏与本工具语言必须为简体/繁体中文,必须16:9分辨率,使用1600x900以上分辨率, 勾选需要的, 没勾的都会自动合成"
+msgstr ""
+"ゲームと本工具の言語は簡体字/繁体字中国語、解像度は16:9かつ1600x900以上が必要です。必要なものにチェックを入れると、未チェックのものは自動合成されます。"
 
 msgid "Switch to Healer before and after Combat"
 msgstr "戦闘前後にヒーラーへ切り替える"
@@ -1396,7 +1403,9 @@ msgstr "景燃"
 msgid "Multi Account Config Task"
 msgstr "複数アカウント設定タスク"
 
-msgid "Log in to accounts in card order and run tasks with independent configurations"
+msgid ""
+"Log in to accounts in card order and run tasks with independent "
+"configurations"
 msgstr "カードの順番でアカウントにログインし、個別の設定でタスクを実行します"
 
 msgid "Special Nightmare"
@@ -1404,7 +1413,6 @@ msgstr "特異悪夢"
 
 msgid "Which Special Nightmare to Teleport"
 msgstr "テレポートする特異悪夢"
-
 
 msgid "Failed to read game assets quality config. Starting with HD assets."
 msgstr "ゲームアセットの品質設定を読み取れませんでした。HDアセットで起動します。"
@@ -1418,17 +1426,14 @@ msgid ""
 msgstr ""
 "現在のイベント画面から開始します。前提ステージをクリアした後、終局消去に1回挑戦し、残りターンがなくなるまで最高得点を目指します。ゲームを最前面にしてください。"
 
-
 msgid "Roccia C6"
 msgstr "ロココ 6凸（メインアタッカー）"
 
 msgid "Export Selected"
 msgstr "選択したチームをエクスポート"
 
-
 msgid "Export Current"
 msgstr "現在のチームをエクスポート"
-
 
 msgid "No current team detected."
 msgstr "現在のチームを検出できませんでした。"

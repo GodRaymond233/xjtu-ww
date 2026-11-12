@@ -8,10 +8,10 @@ assignees: ''
 ---
 
 Check the troubleshooting guide:
-[Documentation troubleshooting](https://ok-oldking.github.io/ok-wuthering-waves/en/#troubleshooting)
+[Documentation troubleshooting](https://github.com/GodRaymond233/xjtu-ww/en/#troubleshooting)
 
 Search existing issues:
-[https://github.com/ok-oldking/ok-wuthering-waves/issues?q=](https://github.com/ok-oldking/ok-wuthering-waves/issues?q=)
+[https://github.com/GodRaymond233/xjtu-ww/issues?q=](https://github.com/GodRaymond233/xjtu-ww/issues?q=)
 
 Question:
 [Clearly describe what you want to know]
@@ -22,7 +22,7 @@ FAQ result:
 What you have already tried:
 [List documentation, settings, or troubleshooting steps you checked]
 
-OK-WW version:
+WW Assist version:
 [For example] 3.5.23
 
 Windows version and relevant settings:

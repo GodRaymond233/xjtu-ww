@@ -477,7 +477,7 @@ def _load_team_char_class_from_file(char_cls, team, path):
     if cached and cached[0] == stat.st_mtime_ns and cached[1] == stat.st_size:
         return cached[2]
     custom_cls = _load_class_from_file(
-        char_cls, path, f"ok_ww_team_{team_key}_{char_cls.__name__}_{stat.st_mtime_ns}"
+        char_cls, path, f"wwa_team_{team_key}_{char_cls.__name__}_{stat.st_mtime_ns}"
     )
     _team_class_cache[cache_key] = (stat.st_mtime_ns, stat.st_size, custom_cls)
     return custom_cls
@@ -757,7 +757,7 @@ def _load_custom_char_class_from_file(char_cls, path):
     if cached and cached[0] == stat.st_mtime_ns and cached[1] == stat.st_size:
         return cached[2]
 
-    module_name = f"ok_ww_custom_char_{char_cls.__name__}_{stat.st_mtime_ns}"
+    module_name = f"wwa_custom_char_{char_cls.__name__}_{stat.st_mtime_ns}"
     custom_cls = _load_class_from_file(char_cls, path, module_name)
 
     _custom_class_cache[cache_key] = (stat.st_mtime_ns, stat.st_size, custom_cls)

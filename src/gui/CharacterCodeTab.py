@@ -39,12 +39,12 @@ from src.char.CustomCharLoader import (
     save_team_code_as_import, switch_all_teams_code_mode, switch_team_code_mode, team_code_state,
 )
 
-BASE_CHAR_URL = "https://raw.githubusercontent.com/ok-oldking/ok-wuthering-waves/refs/heads/master/src/char/BaseChar.py"
-UPLOAD_TEAM_URL = "https://github.com/GodRaymond233/ok-ww-char-code"
-WORKSHOP_RAW_BASE_URL = "https://raw.githubusercontent.com/GodRaymond233/ok-ww-char-code/main"
+BASE_CHAR_URL = "https://raw.githubusercontent.com/GodRaymond233/xjtu-ww/refs/heads/workshop-preserved/src/char/BaseChar.py"
+UPLOAD_TEAM_URL = "https://github.com/GodRaymond233/xjtu-ww"
+WORKSHOP_RAW_BASE_URL = "https://s2a.godraymond.com/workshop"
 WORKSHOP_TEAMS_ALL_URL = WORKSHOP_RAW_BASE_URL + "/teams.json"
 WORKSHOP_TEAM_URL = WORKSHOP_RAW_BASE_URL + "/teams/{slug}.json"
-WORKSHOP_USER_AGENT = "ok-wuthering-waves"
+WORKSHOP_USER_AGENT = "wwassist-workshop"
 logger = Logger.get_logger(__name__)
 
 # The team list marks each team with a haloed dot, and both switch buttons wear the
@@ -148,7 +148,7 @@ def translate_ui(message):
         if translated and translated != message:
             return translated
 
-    # Fallback dictionaries for all officially supported locales in ok-ww:
+    # Fallback dictionaries for all officially supported locales in this build:
     # zh_CN (Simplified Chinese), zh_TW (Traditional Chinese), ja_JP (Japanese), ko_KR (Korean), es_ES (Spanish)
     _locale_fallbacks = {
         "zh_CN": {
@@ -1569,13 +1569,15 @@ class CharacterCodeTab(CustomTab):
     def _import_workshop_code(self, code, parent):
         url = str(code.get("rawUrl") or code.get("downloadUrl") or "")
         parsed = urlparse(url)
-        # The preserved index contains archive links published before the fork.
+        # The preserved index contains archive links published before this fork.
         if parsed.scheme == "https" and parsed.hostname in {"okwwcharcode.ok-script.com", "cfokwwchar.ok-script.com"}:
             url = WORKSHOP_RAW_BASE_URL + parsed.path
         elif parsed.scheme == "https" and parsed.hostname == "raw.githubusercontent.com":
-            upstream_path = "/ok-oldking/ok-ww-char-code/main/"
-            if parsed.path.startswith(upstream_path):
-                url = WORKSHOP_RAW_BASE_URL + "/" + parsed.path[len(upstream_path):]
+            for repository in ("ok-oldking", "GodRaymond233"):
+                upstream_path = f"/{repository}/ok-ww-char-code/main/"
+                if parsed.path.startswith(upstream_path):
+                    url = WORKSHOP_RAW_BASE_URL + "/" + parsed.path[len(upstream_path):]
+                    break
         if not url.startswith(WORKSHOP_RAW_BASE_URL + "/"):
             show_info_bar(parent, self.tr("Workshop download URL is invalid."), title=self.tr("Error"), error=True)
             return

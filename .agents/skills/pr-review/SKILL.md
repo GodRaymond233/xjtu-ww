@@ -1,6 +1,6 @@
 ---
 name: pr-review
-description: Review a single GitHub PR or a range of PRs in ok-wuthering-waves, verify their claims and merge value, recommend merges, and comment on and close PRs with concrete problems. Trigger on 'review pr 1752', 'review pr starting 1752', or 'merge pr 1467'. Merge requests squash through GitHub and synchronize local master.
+description: Review a single GitHub PR or a range of PRs in xjtu-ww, verify their claims and merge value, recommend merges, and comment on and close PRs with concrete problems. Trigger on 'review pr 1752', 'review pr starting 1752', or 'merge pr 1467'. Merge requests squash through GitHub and synchronize local master.
 ---
 
 # Review and merge PRs

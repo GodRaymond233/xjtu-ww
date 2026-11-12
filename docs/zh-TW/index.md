@@ -1,12 +1,12 @@
 <div align="center">
   <h1 align="center">
-    <img src="https://raw.githubusercontent.com/ok-oldking/ok-wuthering-waves/master/icons/icon.png" width="200" alt="ok-ww logo"/>
+    <img src="icons/icon.png" width="200" alt="WW Assist logo"/>
     <br/>
-    ok-ww
+    WW Assist
   </h1> 
   
   <p>
-    一個基於圖像辨識的鳴潮自動化程式，支援背景執行，基於 <a href="https://ok-script.com">ok-script</a> 開發。
+    一個基於圖像辨識的鳴潮自動化程式，支援背景執行，獨立維護的內部構建。
   </p>
   
   <p><i>透過 Windows 介面模擬使用者操作，無記憶體讀取、無檔案修改</i></p>
@@ -18,7 +18,7 @@
   <a href="https://discord.gg/vVyCatEBgA"><img src="https://img.shields.io/discord/296598043787132928?color=5865f2&amp;label=%20Discord" alt="Discord" /></a>
 </div>
 
-<p align="center"><strong>官方網站：</strong> <a href="https://ok-script.com/ok-ww">https://ok-script.com/ok-ww</a></p>
+<p align="center"><strong>內部發行版：</strong> 無公開官網</p>
 
 ### [English](../en/index.md) | [简体中文](../zh-CN/index.md) | 繁體中文 | [日本語](../ja/index.md)
 
@@ -58,8 +58,8 @@
     *   建議關閉顯示卡濾鏡，例如 RTX HDR、RTX 動態亮麗（RTX Dynamic Vibrance）、AMD 銳化等。
     *   使用遊戲預設的亮度設定。
     *   關閉任何在遊戲畫面上顯示資訊的疊加層（如 MSI Afterburner、Fraps 等顯示的幀率）。
-3.  **自訂按鍵**：如果您修改了遊戲內的預設按鍵，請務必在 `ok-ww` 的設定中同步設定。僅支援設定中列出的按鍵。
-4.  **軟體版本**：檢查並確保您使用的是最新版本的 `ok-ww`。
+3.  **自訂按鍵**：如果您修改了遊戲內的預設按鍵，請務必在 `WW Assist` 的設定中同步設定。僅支援設定中列出的按鍵。
+4.  **軟體版本**：檢查並確保您使用的是最新版本的 `WW Assist`。
 5.  **遊戲效能**：請確保遊戲能穩定以 **60 FPS** 執行。如果幀率不穩定，請嘗試調低遊戲畫質或解析度。
 6.  **執行權限**：解壓縮可攜式套件後執行 `xjtu-ww.exe`；遊戲操作需要系統管理員權限時，請按右鍵選擇「以系統管理員身分執行」。
 7.  **OpenVINO 錯誤**：如果遇到 `0x000005` 錯誤，並且使用的是配備 NPU 的 Intel CPU，請更新至 Intel 最新的 NPU 驅動程式。
@@ -83,15 +83,15 @@
 
 | 技能 | 簡介 |
 | --- | --- |
-| [evaluate-team](https://github.com/ok-oldking/ok-wuthering-waves/blob/master/.agents/skills/evaluate-team/SKILL.md) | 透過多次戰鬥評估目前隊伍的自動戰鬥循環並提出建議。 |
-| [improve-team](https://github.com/ok-oldking/ok-wuthering-waves/blob/master/.agents/skills/improve-team/SKILL.md) | 根據隊伍評估結果提出並驗證角色自動戰鬥改進。 |
-| [ok-script-develop](https://github.com/ok-oldking/ok-wuthering-waves/blob/master/.agents/skills/ok-script-develop/SKILL.md) | 使用 ok-script 開發和驗證遊戲自動化功能。 |
-| [ok-script-tasks](https://github.com/ok-oldking/ok-wuthering-waves/blob/master/.agents/skills/ok-script-tasks/SKILL.md) | 建立、修改或審查自動化任務。 |
-| [ok-ww-characters](https://github.com/ok-oldking/ok-wuthering-waves/blob/master/.agents/skills/ok-ww-characters/SKILL.md) | 開發、審查和測試角色自動戰鬥邏輯。 |
-| [ok-script-i18n](https://github.com/ok-oldking/ok-wuthering-waves/blob/master/.agents/skills/ok-script-i18n/SKILL.md) | 新增、同步和編譯任務介面翻譯。 |
-| [pr-review](https://github.com/ok-oldking/ok-wuthering-waves/blob/master/.agents/skills/pr-review/SKILL.md) | 審查或合併本專案的 GitHub PR。 |
-| [deploy](https://github.com/ok-oldking/ok-wuthering-waves/blob/master/.agents/skills/deploy/SKILL.md) | 提交已完成的修改、建立版本標籤並發布。 |
-| [use-local-venv](https://github.com/ok-oldking/ok-wuthering-waves/blob/master/.agents/skills/use-local-venv/SKILL.md) | 執行 Python 命令時優先使用倉庫的本地虛擬環境。 |
+| [evaluate-team](/.agents/skills/evaluate-team/SKILL.md) | 透過多次戰鬥評估目前隊伍的自動戰鬥循環並提出建議。 |
+| [improve-team](/.agents/skills/improve-team/SKILL.md) | 根據隊伍評估結果提出並驗證角色自動戰鬥改進。 |
+| [ok-script-develop](/.agents/skills/ok-script-develop/SKILL.md) | 使用 ok-script 開發和驗證遊戲自動化功能。 |
+| [ok-script-tasks](/.agents/skills/ok-script-tasks/SKILL.md) | 建立、修改或審查自動化任務。 |
+| [ok-ww-characters](.agents/skills/ok-ww-characters/SKILL.md) | 開發、審查和測試角色自動戰鬥邏輯。 |
+| [ok-script-i18n](/.agents/skills/ok-script-i18n/SKILL.md) | 新增、同步和編譯任務介面翻譯。 |
+| [pr-review](/.agents/skills/pr-review/SKILL.md) | 審查或合併本專案的 GitHub PR。 |
+| [deploy](/.agents/skills/deploy/SKILL.md) | 提交已完成的修改、建立版本標籤並發布。 |
+| [use-local-venv](/.agents/skills/use-local-venv/SKILL.md) | 執行 Python 命令時優先使用倉庫的本地虛擬環境。 |
 
 ### 命令列參數
 
@@ -109,7 +109,6 @@
 
 *   **Discord**: [點擊加入](https://discord.gg/vVyCatEBgA)
 
-本專案基於 [ok-script](https://ok-script.com) 框架開發，簡單易維護。歡迎有興趣的開發者使用 [ok-script](https://ok-script.com) 開發您自己的自動化專案。
 
 ## ❤️ 贊助與致謝
 
@@ -118,6 +117,5 @@
 
 ### 致謝
 *   [lazydog28/mc_auto_boss](https://github.com/lazydog28/mc_auto_boss)
-*   [ok-oldking/OnnxOCR](https://github.com/ok-oldking/OnnxOCR)
 *   [zhiyiYo/PyQt-Fluent-Widgets](https://github.com/zhiyiYo/PyQt-Fluent-Widgets)
 *   [Toufool/AutoSplit](https://github.com/Toufool/AutoSplit)

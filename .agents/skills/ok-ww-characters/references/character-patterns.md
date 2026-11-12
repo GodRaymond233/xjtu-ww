@@ -1,4 +1,4 @@
-# OK-WW Character Patterns
+# WW Assist Character Patterns
 
 ## Files To Inspect
 

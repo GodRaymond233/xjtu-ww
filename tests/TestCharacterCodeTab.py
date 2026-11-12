@@ -226,13 +226,13 @@ class TestCharacterCodeTab(unittest.TestCase):
     def test_workshop_url_uses_sorted_team_slug(self):
         self.assertEqual(
             workshop_team_url((Baizhi, Augusta, Aemeath)),
-            "https://raw.githubusercontent.com/GodRaymond233/ok-ww-char-code/main/teams/Aemeath_Augusta_Baizhi.json",
+            "https://s2a.godraymond.com/workshop/teams/Aemeath_Augusta_Baizhi.json",
         )
 
     def test_workshop_url_sanitizes_character_name_punctuation(self):
         self.assertEqual(
             workshop_team_url((YangYangSp, Chisa, Suisui)),
-            "https://raw.githubusercontent.com/GodRaymond233/ok-ww-char-code/main/teams/Chisa_Suisui_Yangyang_Xuanling.json",
+            "https://s2a.godraymond.com/workshop/teams/Chisa_Suisui_Yangyang_Xuanling.json",
         )
 
     def test_workshop_codes_are_sorted_by_timestamp_descending(self):
@@ -259,11 +259,11 @@ class TestCharacterCodeTab(unittest.TestCase):
         self.assertEqual([code["name"] for code in codes], ["newer", "older"])
         request = open_url.call_args.args[0]
         self.assertEqual(request.full_url, workshop_team_url((Aemeath, Augusta, Baizhi)))
-        self.assertEqual(request.get_header("User-agent"), "ok-wuthering-waves")
+        self.assertEqual(request.get_header("User-agent"), "wwassist-workshop")
         self.assertEqual(open_url.call_args.kwargs, {"timeout": 15})
         log_info.assert_called_once_with(
             "char code workshop request: "
-            "https://raw.githubusercontent.com/GodRaymond233/ok-ww-char-code/main/teams/Aemeath_Augusta_Baizhi.json"
+            "https://s2a.godraymond.com/workshop/teams/Aemeath_Augusta_Baizhi.json"
         )
 
     def test_workshop_404_is_an_empty_list(self):
@@ -290,7 +290,7 @@ class TestCharacterCodeTab(unittest.TestCase):
         finally:
             tab.deleteLater()
 
-    def test_workshop_lists_and_archives_use_the_preserved_repository(self):
+    def test_workshop_lists_and_archives_use_the_mirror(self):
         tab = CharacterCodeTab()
         payload = json.dumps({"teams": [], "codes": []}).encode()
         try:
@@ -309,7 +309,7 @@ class TestCharacterCodeTab(unittest.TestCase):
                     open_url.return_value.__enter__.return_value.read.return_value = payload
                     fetch()
                     self.assertEqual([call.args[0].full_url for call in open_url.call_args_list], [
-                        "https://raw.githubusercontent.com/GodRaymond233/ok-ww-char-code/main" + path,
+                        "https://s2a.godraymond.com/workshop" + path,
                     ])
                     if path.endswith('.zip'):
                         preview.assert_called_once()
@@ -333,18 +333,20 @@ class TestCharacterCodeTab(unittest.TestCase):
         self.assertEqual(codes[0]["name"], "Test code")
         self.assertEqual(codes[0]["team"], "Test team")
         request = open_url.call_args.args[0]
-        self.assertEqual(request.full_url, "https://raw.githubusercontent.com/GodRaymond233/ok-ww-char-code/main/teams.json")
-        self.assertEqual(request.get_header("User-agent"), "ok-wuthering-waves")
+        self.assertEqual(request.full_url, "https://s2a.godraymond.com/workshop/teams.json")
+        self.assertEqual(request.get_header("User-agent"), "wwassist-workshop")
         self.assertEqual(open_url.call_args.kwargs, {"timeout": 15})
 
     def test_workshop_archive_sends_app_user_agent(self):
         tab = CharacterCodeTab()
         try:
-            base_url = "https://raw.githubusercontent.com/GodRaymond233/ok-ww-char-code/main"
+            base_url = "https://s2a.godraymond.com/workshop"
             for code, expected_url in (
                 ({"downloadUrl": "https://cfokwwchar.ok-script.com/codes/team.zip"},
                  base_url + "/codes/team.zip"),
                 ({"rawUrl": base_url + "/codes/team.zip"}, base_url + "/codes/team.zip"),
+                ({"rawUrl": "https://raw.githubusercontent.com/GodRaymond233/ok-ww-char-code/main/codes/team.zip"},
+                 base_url + "/codes/team.zip"),
                 ({"downloadUrl": "https://okwwcharcode.ok-script.com/codes/team%20name.zip"},
                  base_url + "/codes/team%20name.zip"),
                 ({"rawUrl": "https://raw.githubusercontent.com/ok-oldking/ok-ww-char-code/main/codes/team.zip",
@@ -363,7 +365,7 @@ class TestCharacterCodeTab(unittest.TestCase):
 
                     request = open_url.call_args.args[0]
                     self.assertEqual(request.full_url, expected_url)
-                    self.assertEqual(request.get_header("User-agent"), "ok-wuthering-waves")
+                    self.assertEqual(request.get_header("User-agent"), "wwassist-workshop")
                     self.assertEqual(open_url.call_args.kwargs, {"timeout": 30})
                     preview.assert_called_once()
         finally:

@@ -17,4 +17,4 @@
 
 ## Workshop
 
-- Use `GodRaymond233/ok-ww-char-code` on `main` for the workshop index and archives. Rewrite legacy upstream/CDN archive links to this fork when reading the preserved index.
+- Use `GodRaymond233/ok-ww-char-code` on `main` as the authoritative workshop source. Serve client indexes and archives through `https://s2a.godraymond.com/workshop`; rewrite legacy upstream/CDN archive links to this mirror.

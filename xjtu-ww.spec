@@ -32,13 +32,13 @@ version_info = VSVersionInfo(
     ffi=FixedFileInfo(filevers=file_version, prodvers=file_version),
     kids=[
         StringFileInfo([StringTable('040904B0', [
-            StringStruct('FileDescription', 'XJTU-WW Workshop'),
+            StringStruct('FileDescription', 'WW Assist'),
             StringStruct('FileVersion', app_version),
-            StringStruct('InternalName', 'xjtu-ww'),
+            StringStruct('InternalName', 'wwassist'),
             StringStruct('OriginalFilename', 'xjtu-ww.exe'),
-            StringStruct('ProductName', 'XJTU-WW'),
+            StringStruct('ProductName', 'WW Assist'),
             StringStruct('ProductVersion', app_version),
-            StringStruct('Comments', 'Internal workshop edition based on ok-wuthering-waves.'),
+            StringStruct('Comments', 'Internal WW Assist build.'),
         ])]),
         VarFileInfo([VarStruct('Translation', [0x0409, 1200])]),
     ],

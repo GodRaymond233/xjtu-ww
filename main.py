@@ -7,7 +7,8 @@ if __name__ == '__main__':
     multiprocessing.freeze_support()
     if getattr(sys, 'frozen', False):
         os.chdir(Path(sys.executable).resolve().parent)
-
+    from src.identity import apply as apply_identity
+    apply_identity()
     from config import config
     from ok import OK
 

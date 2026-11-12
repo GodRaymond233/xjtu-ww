@@ -16,15 +16,15 @@ SPEC.loader.exec_module(extract_issue_log)
 
 class ExtractIssueLogTest(unittest.TestCase):
     def test_accepts_expected_github_attachment_url(self):
-        url = "https://github.com/user-attachments/files/30814966/OK-WW-log.zip"
+        url = "https://github.com/user-attachments/files/30814966/wwassist-log.zip"
         self.assertEqual(url, extract_issue_log.validate_attachment_url(url))
 
     def test_rejects_non_github_and_lookalike_urls(self):
         invalid_urls = [
-            "http://github.com/user-attachments/files/30814966/OK-WW-log.zip",
-            "https://example.com/user-attachments/files/30814966/OK-WW-log.zip",
-            "https://github.com.evil.test/user-attachments/files/30814966/OK-WW-log.zip",
-            "https://github.com/user-attachments/files/not-an-id/OK-WW-log.zip",
+            "http://github.com/user-attachments/files/30814966/wwassist-log.zip",
+            "https://example.com/user-attachments/files/30814966/wwassist-log.zip",
+            "https://github.com.evil.test/user-attachments/files/30814966/wwassist-log.zip",
+            "https://github.com/user-attachments/files/not-an-id/wwassist-log.zip",
             "https://github.com/user-attachments/files/30814966/other.zip",
         ]
         for url in invalid_urls:
@@ -37,16 +37,16 @@ class ExtractIssueLogTest(unittest.TestCase):
             archive_path = root / "archive.zip"
             output_root = root / "output"
             with zipfile.ZipFile(archive_path, "w", zipfile.ZIP_DEFLATED) as archive:
-                archive.writestr("OK-WW-log/logs/ok-script.log", "diagnostic log\n")
+                archive.writestr("wwassist-log/logs/ok-script.log", "diagnostic log\n")
                 archive.writestr(
-                    "OK-WW-log/screenshots/task/first.png",
+                    "wwassist-log/screenshots/task/first.png",
                     b"\x89PNG\r\n\x1a\nimage data",
                 )
                 archive.writestr(
-                    "OK-WW-log/screenshots/second.jpg", b"\xff\xd8\xffimage data"
+                    "wwassist-log/screenshots/second.jpg", b"\xff\xd8\xffimage data"
                 )
-                archive.writestr("OK-WW-log/screenshots/ignored.txt", "not an image")
-                archive.writestr("OK-WW-log/notes.txt", "must not be extracted")
+                archive.writestr("wwassist-log/screenshots/ignored.txt", "not an image")
+                archive.writestr("wwassist-log/notes.txt", "must not be extracted")
 
             log, screenshots = extract_issue_log.extract_archive(archive_path, output_root)
 
@@ -91,7 +91,7 @@ class ExtractIssueLogTest(unittest.TestCase):
                         "{'width': 1280, 'height': 720, 'full_path': 'private'}",
                         "pyappify app_version:*v3.5.27*, app_profile:China, "
                         "pyappify_version:*1*.*1*.*9* pyappify_upgradeable:True, "
-                        "pyappify_executable:D:\\ok-ww\\ok-ww.exe",
+                        "pyappify_executable:D:\\WW Assist\\wwassist.exe",
                         "DeviceManager:update_pc_device pc_device: "
                         "{'width': *1920*, 'height': *1080*, "
                         "'full_path': 'E:\\\\Games\\\\private.exe'}",
@@ -224,7 +224,7 @@ class ExtractIssueLogTest(unittest.TestCase):
             ):
                 with self.assertRaises(extract_issue_log.UnsafeArchiveError):
                     extract_issue_log.download_and_extract(
-                        "https://github.com/user-attachments/files/30814966/OK-WW-log.zip",
+                        "https://github.com/user-attachments/files/30814966/wwassist-log.zip",
                         output_root,
                     )
             self.assertFalse(output_root.exists())

@@ -246,14 +246,14 @@ config = {
     },
     'links': {
         'default': {
-            'github': 'https://github.com/ok-oldking/ok-wuthering-waves',
-            'discord': 'https://discord.gg/vVyCatEBgA',
-            'faq': 'https://ok-script.com/ok-ww/'
+            'github': 'https://github.com/GodRaymond233/xjtu-ww',
+            'discord': '',
+            'faq': 'https://s2a.godraymond.com/workshop'
         },
         'zh_CN': {
-            'github': 'https://github.com/ok-oldking/ok-wuthering-waves',
-            'discord': 'https://discord.gg/vVyCatEBgA',
-            'faq': 'https://ok-script.com/ok-ww',
+            'github': 'https://github.com/GodRaymond233/xjtu-ww',
+            'discord': '',
+            'faq': 'https://s2a.godraymond.com/workshop',
         },
     },
     'about': """
@@ -267,15 +267,15 @@ config = {
         <strong>使用本软件可能会导致账号被封。</strong> 请在了解风险后再使用。
     </p>
     <p style="color:red;">
-        <strong>本版本仅供内部使用。</strong>
+        <strong>本版本为 WW Assist 内部发行版。</strong>
     </p>
 """,
     'screenshots_folder': "screenshots",
-    'gui_title': 'XJTU-WW',  # Optional
+    'gui_title': 'WW Assist',  # Optional
     'game_name': 'Wuthering Waves',
     # 'coco_feature_folder': get_path(__file__, 'assets/coco_feature'),  # required if using feature detection
-    'log_file': 'logs/ok-ww.log',  # Optional, auto rotating every day
-    'error_log_file': 'logs/ok-ww_error.log',
+    'log_file': 'logs/wwassist-run.log',  # Optional, auto rotating every day
+    'error_log_file': 'logs/wwassist_error.log',
     'version': version,
     'onetime_tasks': [  # tasks to execute
         ["src.task.DailyTask", "DailyTask"],

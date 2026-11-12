@@ -1,12 +1,12 @@
 <div align="center">
   <h1 align="center">
-    <img src="https://raw.githubusercontent.com/ok-oldking/ok-wuthering-waves/master/icons/icon.png" width="200" alt="ok-ww logo"/>
+    <img src="icons/icon.png" width="200" alt="WW Assist logo"/>
     <br/>
-    ok-ww
+    WW Assist
   </h1> 
   
   <p>
-    An image-recognition-based automation tool for Wuthering Waves, with background mode support, developed with <a href="https://ok-script.com">ok-script</a>.
+    An image-recognition-based automation tool for Wuthering Waves, with background mode support.
   </p>
   
   <p><i>Operates by simulating the Windows user interface, with no memory reading or file modification.</i></p>
@@ -18,7 +18,7 @@
   <a href="https://discord.gg/vVyCatEBgA"><img src="https://img.shields.io/discord/296598043787132928?color=5865f2&amp;label=%20Discord" alt="Discord" /></a>
 </div>
 
-<p align="center"><strong>Official site:</strong> <a href="https://ok-script.com/ok-ww">https://ok-script.com/ok-ww</a></p>
+<p align="center"><strong>Official site:</strong> 内部发行版，无公开官网。</p>
 
 ### English | [简体中文](../zh-CN/index.md) | [繁體中文](../zh-TW/index.md) | [日本語](../ja/index.md)
 
@@ -58,8 +58,8 @@ If you encounter issues, please check the following steps one by one before aski
     *   It is recommended to turn off GPU filters such as RTX HDR, RTX Dynamic Vibrance, and AMD sharpening.
     *   Use the game's default brightness settings.
     *   Disable any overlays that display information on the game screen (e.g., frame rates from MSI Afterburner, Fraps, etc.).
-3.  **Custom Keybinds**: If you have changed the default in-game keybinds, you must update them accordingly in the `ok-ww` settings. Only the keybinds listed in the settings are supported.
-4.  **Software Version**: Check and ensure you are using the latest version of `ok-ww`.
+3.  **Custom Keybinds**: If you have changed the default in-game keybinds, you must update them accordingly in the `WW Assist` settings. Only the keybinds listed in the settings are supported.
+4.  **Software Version**: Check and ensure you are using the latest version of `WW Assist`.
 5.  **Game Performance**: Make sure the game can run stably at **60 FPS**. If the frame rate is unstable, try lowering the game's graphics quality or resolution.
 6.  **Permissions**: Extract the portable archive and run `xjtu-ww.exe`. If game interaction requires elevated permissions, right-click it and select "Run as administrator".
 7.  **OpenVINO Error**: If you encounter error `0x000005` on an Intel CPU with an NPU, update to the latest Intel NPU driver.
@@ -83,15 +83,15 @@ Before evaluating or improving a team, select the team and enter 深境再临 or
 
 | Skill | Description |
 | --- | --- |
-| [evaluate-team](https://github.com/ok-oldking/ok-wuthering-waves/blob/master/.agents/skills/evaluate-team/SKILL.md) | Evaluate the current team's automated combat over multiple runs and suggest improvements. |
-| [improve-team](https://github.com/ok-oldking/ok-wuthering-waves/blob/master/.agents/skills/improve-team/SKILL.md) | Propose and validate combat improvements based on a team evaluation. |
-| [ok-script-develop](https://github.com/ok-oldking/ok-wuthering-waves/blob/master/.agents/skills/ok-script-develop/SKILL.md) | Develop and validate game automation with ok-script. |
-| [ok-script-tasks](https://github.com/ok-oldking/ok-wuthering-waves/blob/master/.agents/skills/ok-script-tasks/SKILL.md) | Create, modify, or review automation tasks. |
-| [ok-ww-characters](https://github.com/ok-oldking/ok-wuthering-waves/blob/master/.agents/skills/ok-ww-characters/SKILL.md) | Develop, review, and test character combat logic. |
-| [ok-script-i18n](https://github.com/ok-oldking/ok-wuthering-waves/blob/master/.agents/skills/ok-script-i18n/SKILL.md) | Add, synchronize, and compile task UI translations. |
-| [pr-review](https://github.com/ok-oldking/ok-wuthering-waves/blob/master/.agents/skills/pr-review/SKILL.md) | Review or merge this project's GitHub PRs. |
-| [deploy](https://github.com/ok-oldking/ok-wuthering-waves/blob/master/.agents/skills/deploy/SKILL.md) | Commit completed changes, create a version tag, and publish. |
-| [use-local-venv](https://github.com/ok-oldking/ok-wuthering-waves/blob/master/.agents/skills/use-local-venv/SKILL.md) | Prefer the repository's local virtual environment for Python commands. |
+| [evaluate-team](/.agents/skills/evaluate-team/SKILL.md) | Evaluate the current team's automated combat over multiple runs and suggest improvements. |
+| [improve-team](/.agents/skills/improve-team/SKILL.md) | Propose and validate combat improvements based on a team evaluation. |
+| [ok-script-develop](/.agents/skills/ok-script-develop/SKILL.md) | Develop and validate game automation with ok-script. |
+| [ok-script-tasks](/.agents/skills/ok-script-tasks/SKILL.md) | Create, modify, or review automation tasks. |
+| [ok-ww-characters](.agents/skills/ok-ww-characters/SKILL.md) | Develop, review, and test character combat logic. |
+| [ok-script-i18n](/.agents/skills/ok-script-i18n/SKILL.md) | Add, synchronize, and compile task UI translations. |
+| [pr-review](/.agents/skills/pr-review/SKILL.md) | Review or merge this project's GitHub PRs. |
+| [deploy](/.agents/skills/deploy/SKILL.md) | Commit completed changes, create a version tag, and publish. |
+| [use-local-venv](/.agents/skills/use-local-venv/SKILL.md) | Prefer the repository's local virtual environment for Python commands. |
 
 ### Command-Line Arguments
 
@@ -107,7 +107,6 @@ You can use command-line arguments for automated startup.
 
 ## 💬 Join Us
 
-This project is developed using the [ok-script](https://ok-script.com) framework and is designed to be simple and easy to maintain. Developers interested in creating their own automation projects are welcome to use [ok-script](https://ok-script.com).
 
 ## ❤️ Sponsors & Acknowledgements
 
@@ -116,6 +115,5 @@ This project is developed using the [ok-script](https://ok-script.com) framework
 
 ### Acknowledgements
 *   [lazydog28/mc_auto_boss](https://github.com/lazydog28/mc_auto_boss)
-*   [ok-oldking/OnnxOCR](https://github.com/ok-oldking/OnnxOCR)
 *   [zhiyiYo/PyQt-Fluent-Widgets](https://github.com/zhiyiYo/PyQt-Fluent-Widgets)
 *   [Toufool/AutoSplit](https://github.com/Toufool/AutoSplit)

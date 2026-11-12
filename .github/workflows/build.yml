@@ -143,7 +143,7 @@ jobs:
           generate_release_notes: true
           body: |
             解压 Windows 便携包后运行 `xjtu-ww.exe`，直接进入本体主界面。游戏操作需要管理员权限时，请以管理员身份运行。
-            包内已包含 Python、依赖、OCR 模型及工坊入口。更新时解压到新目录，再复制旧目录的 `configs`、`ok_tasks` 和 `ok_import`（如有）。
+            包内已包含 Python、依赖、OCR 模型及工坊入口。更新时解压到新目录，再复制旧目录的 `configs`、`wwa_scripts` 和 `wwa_drop`（如有）。
           prerelease: ${{ needs.build.outputs.prerelease == 'true' }}
           fail_on_unmatched_files: true
           files: |

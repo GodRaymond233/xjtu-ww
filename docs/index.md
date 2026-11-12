@@ -1,4 +1,4 @@
-# ok-ww documentation
+# WW Assist documentation
 
 Choose a language to get started.
 

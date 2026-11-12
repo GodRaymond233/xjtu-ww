@@ -1,12 +1,12 @@
 <div align="center">
   <h1 align="center">
-    <img src="https://raw.githubusercontent.com/ok-oldking/ok-wuthering-waves/master/icons/icon.png" width="200" alt="ok-ww logo"/>
+    <img src="icons/icon.png" width="200" alt="WW Assist logo"/>
     <br/>
-    ok-ww
+    WW Assist
   </h1> 
   
   <p>
-    <a href="https://ok-script.com">ok-script</a> で開発された、鳴潮（Wuthering Waves）向けの画像認識ベースの自動化ツールです。バックグラウンドモードに対応しています。
+    鳴潮（Wuthering Waves）向けの画像認識ベースの自動化ツールです。バックグラウンドモードに対応しています。
   </p>
   
   <p><i>Windows のユーザーインターフェースをシミュレートして動作し、メモリの読み取りやファイルの改変は一切行いません。</i></p>
@@ -18,7 +18,7 @@
   <a href="https://discord.gg/vVyCatEBgA"><img src="https://img.shields.io/discord/296598043787132928?color=5865f2&amp;label=%20Discord" alt="Discord" /></a>
 </div>
 
-<p align="center"><strong>公式サイト:</strong> <a href="https://ok-script.com/ok-ww">https://ok-script.com/ok-ww</a></p>
+<p align="center"><strong>公式サイト:</strong> 内部发行版，无公开官网。</p>
 
 ### [English](../en/index.md) | [简体中文](../zh-CN/index.md) | [繁體中文](../zh-TW/index.md) | 日本語
 
@@ -58,8 +58,8 @@
     *   RTX HDR、RTX Dynamic Vibrance、AMD シャープニングなどの GPU フィルターは無効にすることをおすすめします。
     *   ゲームのデフォルトの明るさ設定を使用してください。
     *   ゲーム画面上に情報を表示するオーバーレイ（MSI Afterburner や Fraps などのフレームレート表示等）を無効にしてください。
-3.  **カスタムキー設定**: ゲーム内のデフォルトのキー設定を変更している場合は、`ok-ww` の設定でも同様に更新する必要があります。設定に記載されているキー設定のみがサポートされています。
-4.  **ソフトウェアのバージョン**: 最新バージョンの `ok-ww` を使用していることを確認してください。
+3.  **カスタムキー設定**: ゲーム内のデフォルトのキー設定を変更している場合は、`WW Assist` の設定でも同様に更新する必要があります。設定に記載されているキー設定のみがサポートされています。
+4.  **ソフトウェアのバージョン**: 最新バージョンの `WW Assist` を使用していることを確認してください。
 5.  **ゲームのパフォーマンス**: ゲームが **60 FPS** で安定して動作することを確認してください。フレームレートが不安定な場合は、ゲームのグラフィック品質や解像度を下げてみてください。
 6.  **実行権限**: ポータブル版を展開し、`xjtu-ww.exe` を実行してください。ゲーム操作に管理者権限が必要な場合は、右クリックして「管理者として実行」を選択してください。
 7.  **OpenVINO エラー**: NPU 搭載の Intel CPU で `0x000005` エラーが発生した場合は、Intel の最新 NPU ドライバーに更新してください。
@@ -83,15 +83,15 @@
 
 | スキル | 概要 |
 | --- | --- |
-| [evaluate-team](https://github.com/ok-oldking/ok-wuthering-waves/blob/master/.agents/skills/evaluate-team/SKILL.md) | 複数回の戦闘で現在のチームの自動戦闘を評価し、改善案を提示します。 |
-| [improve-team](https://github.com/ok-oldking/ok-wuthering-waves/blob/master/.agents/skills/improve-team/SKILL.md) | チームの評価に基づき、自動戦闘の改善を提案・検証します。 |
-| [ok-script-develop](https://github.com/ok-oldking/ok-wuthering-waves/blob/master/.agents/skills/ok-script-develop/SKILL.md) | ok-script を使ってゲーム自動化機能を開発・検証します。 |
-| [ok-script-tasks](https://github.com/ok-oldking/ok-wuthering-waves/blob/master/.agents/skills/ok-script-tasks/SKILL.md) | 自動化タスクを作成、変更、レビューします。 |
-| [ok-ww-characters](https://github.com/ok-oldking/ok-wuthering-waves/blob/master/.agents/skills/ok-ww-characters/SKILL.md) | キャラクターの自動戦闘ロジックを開発、レビュー、テストします。 |
-| [ok-script-i18n](https://github.com/ok-oldking/ok-wuthering-waves/blob/master/.agents/skills/ok-script-i18n/SKILL.md) | タスク UI の翻訳を追加、同期、コンパイルします。 |
-| [pr-review](https://github.com/ok-oldking/ok-wuthering-waves/blob/master/.agents/skills/pr-review/SKILL.md) | 本プロジェクトの GitHub PR をレビューまたはマージします。 |
-| [deploy](https://github.com/ok-oldking/ok-wuthering-waves/blob/master/.agents/skills/deploy/SKILL.md) | 完了した変更をコミットし、バージョンタグを作成して公開します。 |
-| [use-local-venv](https://github.com/ok-oldking/ok-wuthering-waves/blob/master/.agents/skills/use-local-venv/SKILL.md) | Python コマンドにリポジトリ内の仮想環境を優先して使用します。 |
+| [evaluate-team](/.agents/skills/evaluate-team/SKILL.md) | 複数回の戦闘で現在のチームの自動戦闘を評価し、改善案を提示します。 |
+| [improve-team](/.agents/skills/improve-team/SKILL.md) | チームの評価に基づき、自動戦闘の改善を提案・検証します。 |
+| [ok-script-develop](/.agents/skills/ok-script-develop/SKILL.md) | ok-script を使ってゲーム自動化機能を開発・検証します。 |
+| [ok-script-tasks](/.agents/skills/ok-script-tasks/SKILL.md) | 自動化タスクを作成、変更、レビューします。 |
+| [ok-ww-characters](.agents/skills/ok-ww-characters/SKILL.md) | キャラクターの自動戦闘ロジックを開発、レビュー、テストします。 |
+| [ok-script-i18n](/.agents/skills/ok-script-i18n/SKILL.md) | タスク UI の翻訳を追加、同期、コンパイルします。 |
+| [pr-review](/.agents/skills/pr-review/SKILL.md) | 本プロジェクトの GitHub PR をレビューまたはマージします。 |
+| [deploy](/.agents/skills/deploy/SKILL.md) | 完了した変更をコミットし、バージョンタグを作成して公開します。 |
+| [use-local-venv](/.agents/skills/use-local-venv/SKILL.md) | Python コマンドにリポジトリ内の仮想環境を優先して使用します。 |
 
 ### コマンドライン引数
 
@@ -107,7 +107,6 @@
 
 ## 💬 参加しよう
 
-本プロジェクトは [ok-script](https://ok-script.com) フレームワークをベースに開発されており、シンプルでメンテナンスしやすい構成です。独自の自動化プロジェクトを作成したい開発者の方は、ぜひ [ok-script](https://ok-script.com) をご利用ください。
 
 ## ❤️ スポンサーと謝辞
 
@@ -116,6 +115,5 @@
 
 ### 謝辞
 *   [lazydog28/mc_auto_boss](https://github.com/lazydog28/mc_auto_boss)
-*   [ok-oldking/OnnxOCR](https://github.com/ok-oldking/OnnxOCR)
 *   [zhiyiYo/PyQt-Fluent-Widgets](https://github.com/zhiyiYo/PyQt-Fluent-Widgets)
 *   [Toufool/AutoSplit](https://github.com/Toufool/AutoSplit)

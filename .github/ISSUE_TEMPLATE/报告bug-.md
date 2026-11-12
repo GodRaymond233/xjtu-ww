@@ -8,13 +8,13 @@ assignees: ''
 ---
 
 先搜索现有ISSUE:
-[https://github.com/ok-oldking/ok-wuthering-waves/issues?q=](https://github.com/ok-oldking/ok-wuthering-waves/issues?q=)
+[https://github.com/GodRaymond233/xjtu-ww/issues?q=](https://github.com/GodRaymond233/xjtu-ww/issues?q=)
 
 请先挨个检查:
-[疑难解答](https://github.com/ok-oldking/ok-wuthering-waves#-疑难解答-troubleshooting)
+[疑难解答](https://github.com/GodRaymond233/xjtu-ww#-疑难解答-troubleshooting)
 
 讨论区
-[https://github.com/ok-oldking/ok-wuthering-waves/discussions](https://github.com/ok-oldking/ok-wuthering-waves/discussions)
+[https://github.com/GodRaymond233/xjtu-ww/discussions](https://github.com/GodRaymond233/xjtu-ww/discussions)
 
 错误摘要:
 [请用一句话说明什么功能坏了]
@@ -43,19 +43,19 @@ assignees: ''
 [请确认队伍中每个角色都已装备主声骸，并且界面上能看到声骸技能图标]
 
 输入及显示环境:
-[如有关，请填写游戏与 OK-WW 键位、手柄、显卡滤镜、覆盖层、多显示器情况]
+[如有关，请填写游戏与 WW Assist 键位、手柄、显卡滤镜、覆盖层、多显示器情况]
 
-出现问题的 OK-WW 版本:
+出现问题的 WW Assist 版本:
 [例如] 3.5.23
 
-最近正常的 OK-WW 版本:
+最近正常的 WW Assist 版本:
 [如已知，请填写]
 
 Windows 操作系统:
 [例如] Windows 11 Pro 23H2 22631.3593
 
 日志和截图:
-[点击 OK-WW 的“导出日志”，将生成的 ZIP 直接上传到本 ISSUE，并附上能说明问题的截图]
+[点击 WW Assist 的“导出日志”，将生成的 ZIP 直接上传到本 ISSUE，并附上能说明问题的截图]
 
 录屏（可选）:
 [如问题与操作时序或战斗行为有关，可将短录屏直接拖入本 ISSUE]

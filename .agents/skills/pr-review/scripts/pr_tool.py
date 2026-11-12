@@ -95,7 +95,7 @@ class GitHub:
         if method != "GET" and not token:
             raise ToolError("GitHub write needs GH_TOKEN, GITHUB_TOKEN, or a Git credential.")
         headers = {"Accept": "application/vnd.github+json",
-                   "X-GitHub-Api-Version": "2022-11-28", "User-Agent": "ok-ww-pr-review"}
+                   "X-GitHub-Api-Version": "2022-11-28", "User-Agent": "wwassist-pr-review"}
         if token and not (method == "GET" and self._public_reads and path != "user"):
             headers["Authorization"] = f"Bearer {token}"
         if data is not None:
@@ -225,7 +225,7 @@ def collect(repo, api, number, output=None, prepare=False):
         directory = Path(output).resolve()
         directory.mkdir(parents=True, exist_ok=False)
     else:
-        directory = Path(tempfile.mkdtemp(prefix=f"ok-ww-pr-{number}-")).resolve()
+        directory = Path(tempfile.mkdtemp(prefix=f"wwassist-pr-{number}-")).resolve()
     checkout = directory / "checkout"
     record = {
         "repository": repo.name, "repository_root": str(repo.root), "number": number,
@@ -269,7 +269,7 @@ def comment(repo, api, number, directory, body_file, model):
     body = (f"{body}\n\nReviewed by {model}.\n\n"
             "Please reopen this PR after fixing the problems, or if you have a different opinion about this review.")
     digest = hashlib.sha256(body.encode("utf-8")).hexdigest()[:20]
-    marker = f"<!-- ok-ww-pr-review:{record['head']}:{digest} -->"
+    marker = f"<!-- wwassist-pr-review:{record['head']}:{digest} -->"
     me = api.request("user")
     posted = None
     for previous in api.pages(f"issues/{number}/comments"):

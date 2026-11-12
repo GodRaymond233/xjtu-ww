@@ -597,8 +597,9 @@ msgid "not enough stamina"
 msgstr "体力不足"
 
 msgid ""
-"Click skill failed, check if the keybinding is correct in ok-ww settings!"
-msgstr "释放技能失败, 请检查ok-ww按键设置是正确!"
+"Click skill failed, check if the keybinding is correct in WW Assist "
+"settings!"
+msgstr "释放技能失败, 请检查WW Assist按键设置是正确!"
 
 msgid "Change Time to Night"
 msgstr "自动切换时间到晚上"
@@ -1171,8 +1172,8 @@ msgid "Merge Discarded Echoes"
 msgstr "融合已弃置声骸"
 
 msgid ""
-"Must have 1000 discarded Echo to Run, Merge discarded Echoes in full "
-"batches of 100."
+"Must have 1000 discarded Echo to Run, Merge discarded Echoes in full batches"
+" of 100."
 msgstr "运行前必须有1000个已弃置声骸，每批融合100个。"
 
 msgid "Bag Key"
@@ -1199,13 +1200,18 @@ msgstr "已弃置声骸超过1000时融合"
 msgid "Additional Tasks to Run After Daily Task"
 msgstr "每日任务后运行的附加任务"
 
-msgid "Select optional tasks. Nightmare Nest runs before stamina farming to help complete the daily task; the other tasks run afterward."
+msgid ""
+"Select optional tasks. Nightmare Nest runs before stamina farming to help "
+"complete the daily task; the other tasks run afterward."
 msgstr "选择可选任务。梦魇巢穴会在消耗体力前运行，以协助完成每日任务；其他任务将在之后运行。"
 
-msgid "Teleport and Farm 4C Echo requires \"Teleport to Boss\" to be enabled in Farm Echo Task."
+msgid ""
+"Teleport and Farm 4C Echo requires \"Teleport to Boss\" to be enabled in "
+"Farm Echo Task."
 msgstr "选择“传送并刷取4C声骸”时，必须在刷取声骸任务中启用“传送至首领”。"
 
-msgid "Auto Farm all Nightmare Nest requires at least one \"Which to Farm\" option."
+msgid ""
+"Auto Farm all Nightmare Nest requires at least one \"Which to Farm\" option."
 msgstr "选择“自动刷取所有梦魇巢穴”时，“刷取目标”必须至少选择一项。"
 
 msgid "Daily Task Completed"
@@ -1238,8 +1244,8 @@ msgstr "📅 每日任务"
 msgid "🩺 Diagnosis"
 msgstr "🩺 诊断"
 
-msgid "⬆️ 批量强化声骸(游戏与okww语言必须为简体/繁体中文)"
-msgstr "⬆️ 批量强化声骸（游戏与okww语言必须为简体/繁体中文）"
+msgid "⬆️ 批量强化声骸(游戏与本工具语言必须为简体/繁体中文)"
+msgstr "⬆️ 批量强化声骸（游戏与本工具语言必须为简体/繁体中文）"
 
 msgid "🌀 Farm 4C Echo in Dungeon/World"
 msgstr "🌀 副本/大世界刷4C声骸"
@@ -1286,8 +1292,8 @@ msgstr "点击B进入背包，在过滤器中选择需要修改主属性的声�
 msgid "点击B进入背包, 在过滤器中选择需要强化的声骸, 并按照等级从0排序后开始."
 msgstr "点击B进入背包，在过滤器中选择需要强化的声骸，并按等级从0开始排序后运行。"
 
-msgid "游戏与okww语言必须为简体/繁体中文,必须16:9分辨率,使用1600x900以上分辨率, 勾选需要的, 没勾的都会自动合成"
-msgstr "游戏与okww语言必须为简体/繁体中文，分辨率必须为16:9且不低于1600x900。勾选需要保留的声骸，未勾选的会自动合成。"
+msgid "游戏与本工具语言必须为简体/繁体中文,必须16:9分辨率,使用1600x900以上分辨率, 勾选需要的, 没勾的都会自动合成"
+msgstr "游戏与本工具语言必须为简体/繁体中文，分辨率必须为16:9且不低于1600x900。勾选需要保留的声骸，未勾选的会自动合成。"
 
 msgid "All fields are required."
 msgstr "所有字段均为必填项。"
@@ -1445,7 +1451,9 @@ msgstr "景燃"
 msgid "Multi Account Config Task"
 msgstr "多账号配置执行"
 
-msgid "Log in to accounts in card order and run tasks with independent configurations"
+msgid ""
+"Log in to accounts in card order and run tasks with independent "
+"configurations"
 msgstr "按卡片顺序登录账号，并使用各账号的独立配置执行任务"
 
 msgid "Hsin"
@@ -1456,7 +1464,6 @@ msgstr "特异梦魇"
 
 msgid "Which Special Nightmare to Teleport"
 msgstr "传送到第几个特异梦魇"
-
 
 msgid "Failed to read game assets quality config. Starting with HD assets."
 msgstr "读取游戏资源画质配置失败，将使用高清（HD）资源启动。"
@@ -1469,17 +1476,14 @@ msgid ""
 "Final Elimination for the highest possible score until turns run out."
 msgstr "从活动当前界面开始，完成前置关卡后挑战一局终局消除，尽可能争取高分，直到回合耗尽后自然结算。运行期间需要游戏处于前台。"
 
-
 msgid "Roccia C6"
 msgstr "洛可可6链（主输出）"
 
 msgid "Export Selected"
 msgstr "导出所选队伍"
 
-
 msgid "Export Current"
 msgstr "导出当前队伍"
-
 
 msgid "No current team detected."
 msgstr "未检测到当前队伍。"

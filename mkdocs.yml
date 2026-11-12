@@ -1,8 +1,8 @@
-site_name: ok-ww
-site_description: Documentation for the ok-ww Wuthering Waves automation tool
-site_url: https://ok-script.com/ok-ww/
-repo_url: https://github.com/ok-oldking/ok-wuthering-waves
-repo_name: ok-oldking/ok-wuthering-waves
+site_name: WW Assist
+site_description: Documentation for the WW Assist internal build
+site_url: https://s2a.godraymond.com/workshop/
+repo_url: https://github.com/GodRaymond233/xjtu-ww
+repo_name: GodRaymond233/xjtu-ww
 edit_uri: edit/master/docs/
 
 theme:

@@ -50,7 +50,7 @@
 #   - ghcr.io/github/gh-aw-node@sha256:bac2192f6374d6262116399b34fc5e143d576f82719e90a18261cae7480f4d4e
 #   - ghcr.io/github/github-mcp-server:v1.11.0@sha256:fbec75de11c255213fa08d80fb166abe73d851fff631c51c0079872967720699
 
-name: "OK-WW issue triage assistant"
+name: "WW Assist issue triage assistant"
 on:
   issue_comment:
     types:
@@ -72,12 +72,12 @@ concurrency:
   group: "gh-aw-${{ github.workflow }}-${{ github.event.issue.number || github.run_id }}"
   queue: max
 
-run-name: "OK-WW issue triage assistant"
+run-name: "WW Assist issue triage assistant"
 
 env:
   OTEL_EXPORTER_OTLP_ENDPOINT: ${{ vars.GH_AW_DEFAULT_OTLP_ENDPOINT }}
   OTEL_SERVICE_NAME: gh-aw.issue-triage
-  OTEL_RESOURCE_ATTRIBUTES: 'gh-aw.workflow.name=OK-WW%20issue%20triage%20assistant,gh-aw.repository=${{ github.repository }},gh-aw.run.id=${{ github.run_id }},github.run_id=${{ github.run_id }},gh-aw.engine.id=copilot'
+  OTEL_RESOURCE_ATTRIBUTES: 'gh-aw.workflow.name=WW Assist%20issue%20triage%20assistant,gh-aw.repository=${{ github.repository }},gh-aw.run.id=${{ github.run_id }},github.run_id=${{ github.run_id }},gh-aw.engine.id=copilot'
   OTEL_EXPORTER_OTLP_HEADERS: ${{ secrets.GH_AW_DEFAULT_OTLP_HEADERS }}
   GH_AW_OTLP_ENDPOINTS: '[{"url":"${{ vars.GH_AW_DEFAULT_OTLP_ENDPOINT }}","headers":"${{ secrets.GH_AW_DEFAULT_OTLP_HEADERS }}"}]'
   GH_AW_OTLP_IF_MISSING: ignore
@@ -123,7 +123,7 @@ jobs:
           job-name: ${{ github.job }}
           safe-output-artifact-client: ${{ env.GH_AW_MAX_DAILY_AI_CREDITS != '' }}
         env:
-          GH_AW_SETUP_WORKFLOW_NAME: "OK-WW issue triage assistant"
+          GH_AW_SETUP_WORKFLOW_NAME: "WW Assist issue triage assistant"
           GH_AW_CURRENT_WORKFLOW_REF: ${{ github.repository }}/.github/workflows/issue-triage.lock.yml@${{ github.ref }}
           GH_AW_INFO_VERSION: "1.0.94"
           GH_AW_INFO_AWF_VERSION: "v0.28.10"
@@ -139,7 +139,7 @@ jobs:
           GH_AW_INFO_VERSION: "1.0.94"
           GH_AW_INFO_AGENT_VERSION: "1.0.94"
           GH_AW_INFO_CLI_VERSION: "v0.87.10"
-          GH_AW_INFO_WORKFLOW_NAME: "OK-WW issue triage assistant"
+          GH_AW_INFO_WORKFLOW_NAME: "WW Assist issue triage assistant"
           GH_AW_INFO_EXPERIMENTAL: "false"
           GH_AW_INFO_SUPPORTS_TOOLS_ALLOWLIST: "true"
           GH_AW_INFO_STAGED: "false"
@@ -190,7 +190,7 @@ jobs:
         if: ${{ env.GH_AW_MAX_DAILY_AI_CREDITS != '' }}
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         env:
-          GH_AW_WORKFLOW_NAME: "OK-WW issue triage assistant"
+          GH_AW_WORKFLOW_NAME: "WW Assist issue triage assistant"
           GH_AW_WORKFLOW_ID: "issue-triage"
           GH_AW_RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           GH_AW_WORKFLOW_DISPATCH_AW_CONTEXT: ${{ github.event.inputs.aw_context || '' }}
@@ -446,7 +446,7 @@ jobs:
           trace-id: ${{ needs.activation.outputs.setup-trace-id }}
           parent-span-id: ${{ needs.activation.outputs.setup-parent-span-id || needs.activation.outputs.setup-span-id }}
         env:
-          GH_AW_SETUP_WORKFLOW_NAME: "OK-WW issue triage assistant"
+          GH_AW_SETUP_WORKFLOW_NAME: "WW Assist issue triage assistant"
           GH_AW_CURRENT_WORKFLOW_REF: ${{ github.repository }}/.github/workflows/issue-triage.lock.yml@${{ github.ref }}
           GH_AW_INFO_VERSION: "1.0.94"
           GH_AW_INFO_AWF_VERSION: "v0.28.10"
@@ -560,7 +560,7 @@ jobs:
         env:
           GH_AW_FILE_ROOT: "${{ runner.temp }}/gh-aw"
           GH_AW_FILE_CONFIG: "{\"files\":[{\"path\":\"safeoutputs/config.json\",\"content_env\":\"GH_AW_SAFE_OUTPUTS_CONFIG\"}]}"
-          GH_AW_SAFE_OUTPUTS_CONFIG: "{\"add_comment\":{\"hide_older_comments\":true,\"max\":1},\"add_labels\":{\"allowed\":[\"bug\",\"enhancement\",\"question\",\"documentation\",\"duplicate\",\"invalid\",\"more-information-needed\",\"faq-candidate\",\"area: combat/character\",\"area: daily/farming\",\"area: startup/update\",\"area: recognition/input\",\"area: account\",\"area: ui/config\",\"area: other\",\"priority: high\",\"priority: normal\",\"priority: low\"],\"issue_intent\":true,\"max\":4},\"assign_to_user\":{\"allowed\":[\"ok-oldking\",\"${{ github.event.issue.user.login }}\"],\"max\":1,\"unassign_first\":true},\"close_issue\":{\"max\":1,\"state_reason\":\"not_planned\"},\"create_report_incomplete_issue\":{},\"missing_data\":{},\"missing_tool\":{},\"noop\":{\"max\":1,\"report-as-issue\":\"false\"},\"remove_labels\":{\"allowed\":[\"bug\",\"enhancement\",\"question\",\"documentation\",\"duplicate\",\"invalid\",\"more-information-needed\",\"faq-candidate\",\"request-ai-triage\",\"area: combat/character\",\"area: daily/farming\",\"area: startup/update\",\"area: recognition/input\",\"area: account\",\"area: ui/config\",\"area: other\",\"priority: high\",\"priority: normal\",\"priority: low\"],\"max\":10},\"reopen-triggering-issue\":{\"description\":\"Reopen only the issue that triggered this trusted follow-up run; this cannot change its title or body.\",\"inputs\":{\"requested-information-received\":{\"default\":null,\"description\":\"Confirm that the reporter supplied the information previously requested.\",\"required\":true,\"type\":\"boolean\"}}},\"report_incomplete\":{}}"
+          GH_AW_SAFE_OUTPUTS_CONFIG: "{\"add_comment\":{\"hide_older_comments\":true,\"max\":1},\"add_labels\":{\"allowed\":[\"bug\",\"enhancement\",\"question\",\"documentation\",\"duplicate\",\"invalid\",\"more-information-needed\",\"faq-candidate\",\"area: combat/character\",\"area: daily/farming\",\"area: startup/update\",\"area: recognition/input\",\"area: account\",\"area: ui/config\",\"area: other\",\"priority: high\",\"priority: normal\",\"priority: low\"],\"issue_intent\":true,\"max\":4},\"assign_to_user\":{\"allowed\":[\"GodRaymond233\",\"${{ github.event.issue.user.login }}\"],\"max\":1,\"unassign_first\":true},\"close_issue\":{\"max\":1,\"state_reason\":\"not_planned\"},\"create_report_incomplete_issue\":{},\"missing_data\":{},\"missing_tool\":{},\"noop\":{\"max\":1,\"report-as-issue\":\"false\"},\"remove_labels\":{\"allowed\":[\"bug\",\"enhancement\",\"question\",\"documentation\",\"duplicate\",\"invalid\",\"more-information-needed\",\"faq-candidate\",\"request-ai-triage\",\"area: combat/character\",\"area: daily/farming\",\"area: startup/update\",\"area: recognition/input\",\"area: account\",\"area: ui/config\",\"area: other\",\"priority: high\",\"priority: normal\",\"priority: low\"],\"max\":10},\"reopen-triggering-issue\":{\"description\":\"Reopen only the issue that triggered this trusted follow-up run; this cannot change its title or body.\",\"inputs\":{\"requested-information-received\":{\"default\":null,\"description\":\"Confirm that the reporter supplied the information previously requested.\",\"required\":true,\"type\":\"boolean\"}}},\"report_incomplete\":{}}"
         with:
           script: |
             const path = require('path');
@@ -1317,7 +1317,7 @@ jobs:
           trace-id: ${{ needs.activation.outputs.setup-trace-id }}
           parent-span-id: ${{ needs.activation.outputs.setup-parent-span-id || needs.activation.outputs.setup-span-id }}
         env:
-          GH_AW_SETUP_WORKFLOW_NAME: "OK-WW issue triage assistant"
+          GH_AW_SETUP_WORKFLOW_NAME: "WW Assist issue triage assistant"
           GH_AW_CURRENT_WORKFLOW_REF: ${{ github.repository }}/.github/workflows/issue-triage.lock.yml@${{ github.ref }}
           GH_AW_INFO_VERSION: "1.0.94"
           GH_AW_INFO_AWF_VERSION: "v0.28.10"
@@ -1426,7 +1426,7 @@ jobs:
         env:
           GH_AW_AGENT_OUTPUT: ${{ steps.setup-agent-output-env.outputs.GH_AW_AGENT_OUTPUT }}
           GH_AW_NOOP_MAX: "1"
-          GH_AW_WORKFLOW_NAME: "OK-WW issue triage assistant"
+          GH_AW_WORKFLOW_NAME: "WW Assist issue triage assistant"
           GH_AW_WORKFLOW_SOURCE_URL: "${{ github.server_url }}/${{ github.repository }}/blob/${{ github.ref_name }}/.github/workflows/issue-triage.md"
           GH_AW_RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           GH_AW_AGENT_CONCLUSION: ${{ needs.agent.result }}
@@ -1449,7 +1449,7 @@ jobs:
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         env:
           GH_AW_AGENT_OUTPUT: ${{ steps.setup-agent-output-env.outputs.GH_AW_AGENT_OUTPUT }}
-          GH_AW_WORKFLOW_NAME: "OK-WW issue triage assistant"
+          GH_AW_WORKFLOW_NAME: "WW Assist issue triage assistant"
           GH_AW_WORKFLOW_SOURCE_URL: "${{ github.server_url }}/${{ github.repository }}/blob/${{ github.ref_name }}/.github/workflows/issue-triage.md"
           GH_AW_RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           GH_AW_DETECTION_CONCLUSION: ${{ needs.detection.outputs.detection_conclusion }}
@@ -1469,7 +1469,7 @@ jobs:
         env:
           GH_AW_AGENT_OUTPUT: ${{ steps.setup-agent-output-env.outputs.GH_AW_AGENT_OUTPUT }}
           GH_AW_MISSING_TOOL_CREATE_ISSUE: "true"
-          GH_AW_WORKFLOW_NAME: "OK-WW issue triage assistant"
+          GH_AW_WORKFLOW_NAME: "WW Assist issue triage assistant"
           GH_AW_WORKFLOW_SOURCE_URL: "${{ github.server_url }}/${{ github.repository }}/blob/${{ github.ref_name }}/.github/workflows/issue-triage.md"
         with:
           github-token: ${{ secrets.GH_AW_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
@@ -1486,7 +1486,7 @@ jobs:
         env:
           GH_AW_AGENT_OUTPUT: ${{ steps.setup-agent-output-env.outputs.GH_AW_AGENT_OUTPUT }}
           GH_AW_REPORT_INCOMPLETE_CREATE_ISSUE: "true"
-          GH_AW_WORKFLOW_NAME: "OK-WW issue triage assistant"
+          GH_AW_WORKFLOW_NAME: "WW Assist issue triage assistant"
           GH_AW_WORKFLOW_SOURCE_URL: "${{ github.server_url }}/${{ github.repository }}/blob/${{ github.ref_name }}/.github/workflows/issue-triage.md"
         with:
           github-token: ${{ secrets.GH_AW_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
@@ -1503,7 +1503,7 @@ jobs:
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         env:
           GH_AW_AGENT_OUTPUT: ${{ steps.setup-agent-output-env.outputs.GH_AW_AGENT_OUTPUT }}
-          GH_AW_WORKFLOW_NAME: "OK-WW issue triage assistant"
+          GH_AW_WORKFLOW_NAME: "WW Assist issue triage assistant"
           GH_AW_WORKFLOW_SOURCE_URL: "${{ github.server_url }}/${{ github.repository }}/blob/${{ github.ref_name }}/.github/workflows/issue-triage.md"
           GH_AW_RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           GH_AW_AGENT_CONCLUSION: ${{ needs.agent.result }}
@@ -1553,7 +1553,7 @@ jobs:
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         env:
           GH_AW_AGENT_OUTPUT: ${{ steps.setup-agent-output-env.outputs.GH_AW_AGENT_OUTPUT }}
-          GH_AW_WORKFLOW_NAME: "OK-WW issue triage assistant"
+          GH_AW_WORKFLOW_NAME: "WW Assist issue triage assistant"
           GH_AW_WORKFLOW_SOURCE_URL: "${{ github.server_url }}/${{ github.repository }}/blob/${{ github.ref_name }}/.github/workflows/issue-triage.md"
           GH_AW_RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           GH_AW_REPORT_FAILED_JOBS: "true"
@@ -1594,7 +1594,7 @@ jobs:
           trace-id: ${{ needs.activation.outputs.setup-trace-id }}
           parent-span-id: ${{ needs.activation.outputs.setup-parent-span-id || needs.activation.outputs.setup-span-id }}
         env:
-          GH_AW_SETUP_WORKFLOW_NAME: "OK-WW issue triage assistant"
+          GH_AW_SETUP_WORKFLOW_NAME: "WW Assist issue triage assistant"
           GH_AW_CURRENT_WORKFLOW_REF: ${{ github.repository }}/.github/workflows/issue-triage.lock.yml@${{ github.ref }}
           GH_AW_INFO_VERSION: "1.0.94"
           GH_AW_INFO_AWF_VERSION: "v0.28.10"
@@ -1662,7 +1662,7 @@ jobs:
         if: always() && steps.detection_guard.outputs.run_detection == 'true'
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         env:
-          WORKFLOW_NAME: "OK-WW issue triage assistant"
+          WORKFLOW_NAME: "WW Assist issue triage assistant"
           WORKFLOW_DESCRIPTION: "Use GitHub Copilot to classify, tag, investigate, and answer repository issues"
           HAS_PATCH: ${{ needs.agent.outputs.has_patch }}
           GH_AW_DETECTION_CONTINUE_ON_ERROR: "true"
@@ -1725,7 +1725,7 @@ jobs:
           RUNNER_TEMP: ${{ runner.temp }}
           S2STOKENS: true
           TRACEPARENT: ${{ env.GITHUB_AW_OTEL_TRACE_ID != '' && env.GITHUB_AW_OTEL_PARENT_SPAN_ID != '' && format('00-{0}-{1}-01', env.GITHUB_AW_OTEL_TRACE_ID, env.GITHUB_AW_OTEL_PARENT_SPAN_ID) || '' }}
-          WORKFLOW_NAME: "OK-WW issue triage assistant"
+          WORKFLOW_NAME: "WW Assist issue triage assistant"
           WORKFLOW_DESCRIPTION: "Use GitHub Copilot to classify, tag, investigate, and answer repository issues"
           HAS_PATCH: ${{ needs.agent.outputs.has_patch }}
           GH_AW_DETECTION_CONTINUE_ON_ERROR: "true"
@@ -1913,7 +1913,7 @@ jobs:
       GH_AW_RUNTIME_FEATURES: ${{ vars.GH_AW_RUNTIME_FEATURES }}
       GH_AW_THREAT_DETECTION_AIC: ${{ needs.detection.outputs.aic }}
       GH_AW_WORKFLOW_ID: "issue-triage"
-      GH_AW_WORKFLOW_NAME: "OK-WW issue triage assistant"
+      GH_AW_WORKFLOW_NAME: "WW Assist issue triage assistant"
       GH_AW_WORKFLOW_SOURCE_URL: "${{ github.server_url }}/${{ github.repository }}/blob/${{ github.ref_name }}/.github/workflows/issue-triage.md"
     outputs:
       assign_to_user_assigned: ${{ steps.process_safe_outputs.outputs.assigned }}
@@ -1943,7 +1943,7 @@ jobs:
           trace-id: ${{ needs.activation.outputs.setup-trace-id }}
           parent-span-id: ${{ needs.activation.outputs.setup-parent-span-id || needs.activation.outputs.setup-span-id }}
         env:
-          GH_AW_SETUP_WORKFLOW_NAME: "OK-WW issue triage assistant"
+          GH_AW_SETUP_WORKFLOW_NAME: "WW Assist issue triage assistant"
           GH_AW_CURRENT_WORKFLOW_REF: ${{ github.repository }}/.github/workflows/issue-triage.lock.yml@${{ github.ref }}
           GH_AW_INFO_VERSION: "1.0.94"
           GH_AW_INFO_AWF_VERSION: "v0.28.10"
@@ -1986,7 +1986,7 @@ jobs:
           GITHUB_SERVER_URL: ${{ github.server_url }}
           GITHUB_API_URL: ${{ github.api_url }}
           GH_AW_SAFE_OUTPUT_JOBS: "{\"reopen_triggering_issue\":\"\"}"
-          GH_AW_SAFE_OUTPUTS_HANDLER_CONFIG: "{\"add_comment\":{\"hide_older_comments\":true,\"max\":1},\"add_labels\":{\"allowed\":[\"bug\",\"enhancement\",\"question\",\"documentation\",\"duplicate\",\"invalid\",\"more-information-needed\",\"faq-candidate\",\"area: combat/character\",\"area: daily/farming\",\"area: startup/update\",\"area: recognition/input\",\"area: account\",\"area: ui/config\",\"area: other\",\"priority: high\",\"priority: normal\",\"priority: low\"],\"issue_intent\":true,\"max\":4},\"assign_to_user\":{\"allowed\":[\"ok-oldking\",\"${{ github.event.issue.user.login }}\"],\"max\":1,\"unassign_first\":true},\"close_issue\":{\"max\":1,\"state_reason\":\"not_planned\"},\"create_report_incomplete_issue\":{},\"missing_data\":{},\"missing_tool\":{},\"noop\":{\"max\":1,\"report-as-issue\":\"false\"},\"remove_labels\":{\"allowed\":[\"bug\",\"enhancement\",\"question\",\"documentation\",\"duplicate\",\"invalid\",\"more-information-needed\",\"faq-candidate\",\"request-ai-triage\",\"area: combat/character\",\"area: daily/farming\",\"area: startup/update\",\"area: recognition/input\",\"area: account\",\"area: ui/config\",\"area: other\",\"priority: high\",\"priority: normal\",\"priority: low\"],\"max\":10},\"report_incomplete\":{}}"
+          GH_AW_SAFE_OUTPUTS_HANDLER_CONFIG: "{\"add_comment\":{\"hide_older_comments\":true,\"max\":1},\"add_labels\":{\"allowed\":[\"bug\",\"enhancement\",\"question\",\"documentation\",\"duplicate\",\"invalid\",\"more-information-needed\",\"faq-candidate\",\"area: combat/character\",\"area: daily/farming\",\"area: startup/update\",\"area: recognition/input\",\"area: account\",\"area: ui/config\",\"area: other\",\"priority: high\",\"priority: normal\",\"priority: low\"],\"issue_intent\":true,\"max\":4},\"assign_to_user\":{\"allowed\":[\"GodRaymond233\",\"${{ github.event.issue.user.login }}\"],\"max\":1,\"unassign_first\":true},\"close_issue\":{\"max\":1,\"state_reason\":\"not_planned\"},\"create_report_incomplete_issue\":{},\"missing_data\":{},\"missing_tool\":{},\"noop\":{\"max\":1,\"report-as-issue\":\"false\"},\"remove_labels\":{\"allowed\":[\"bug\",\"enhancement\",\"question\",\"documentation\",\"duplicate\",\"invalid\",\"more-information-needed\",\"faq-candidate\",\"request-ai-triage\",\"area: combat/character\",\"area: daily/farming\",\"area: startup/update\",\"area: recognition/input\",\"area: account\",\"area: ui/config\",\"area: other\",\"priority: high\",\"priority: normal\",\"priority: low\"],\"max\":10},\"report_incomplete\":{}}"
         with:
           github-token: ${{ secrets.GH_AW_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
           script: |

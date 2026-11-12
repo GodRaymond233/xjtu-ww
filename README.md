@@ -1,14 +1,14 @@
 <div align="center">
   <h1 align="center">
-    <img src="icons/icon.png" width="200" alt="ok-ww logo"/>
+    <img src="icons/icon.png" width="200" alt="WW Assist logo"/>
     <br/>
-    ok-ww
+    WW Assist
   </h1>
 
   <p>
-    一个基于图像识别的鸣潮自动化程序，支持后台运行，基于 <a href="https://ok-script.com">ok-script</a> 开发。
+    一个基于图像识别的鸣潮自动化程序（内部发行版），支持后台运行。
     <br />
-    An image-recognition-based automation tool for Wuthering Waves, with background mode support, developed with <a href="https://ok-script.com">ok-script</a>.
+    An image-recognition-based automation tool for Wuthering Waves (internal WW Assist build), with background mode support.
   </p>
 
   <p><i>通过 Windows 接口模拟用户进行操作，无内存读取、无文件修改</i></p>
@@ -18,11 +18,10 @@
 <div align="center">
 
 ![平台](https://img.shields.io/badge/platform-Windows-blue)
-[![Discord](https://img.shields.io/discord/296598043787132928?color=5865f2&label=%20Discord)](https://discord.gg/vVyCatEBgA)
 
 </div>
 
-<p align="center"><strong>官方网站：</strong> <a href="https://ok-script.com/ok-ww">https://ok-script.com/ok-ww</a></p>
+<p align="center"><strong>内部发行版：</strong> 本项目为独立维护的内部构建，与任何其他分发渠道无关。</p>
 
 ### [English](docs/en/index.md) | 中文说明 | [繁體中文](docs/zh-TW/index.md) | [日本語](docs/ja/index.md)
 
@@ -47,8 +46,7 @@
 
 解压 `xjtu-ww-*-windows-x64.zip`，运行文件夹内的 `xjtu-ww.exe`。
 包内已包含 Python、依赖、OCR 模型和工坊入口；游戏操作需要管理员权限时，请以管理员身份运行。
-更新时解压到新目录，再复制旧目录的 `configs`、`ok_tasks` 和 `ok_import`（如有）。
-本地构建方法见[开发指南](docs/development/contributing.md)。
+更新时解压到新目录，再复制旧目录的 `configs`、`wwa_scripts` 和 `wwa_drop`（如有）。
 
 ## ✨ 主要功能
 <img width="1774" height="1182" alt="QQ_1762960844719" src="https://github.com/user-attachments/assets/c5eb0145-0d45-44f9-85b3-184de0ef20bf" />
@@ -69,8 +67,8 @@
     *   建议关闭显卡滤镜，例如 RTX HDR、RTX 动态亮丽（RTX Dynamic Vibrance）、AMD 锐化等。
     *   使用游戏默认的亮度设置。
     *   关闭任何在游戏画面上显示信息的叠加层（如 MSI Afterburner、Fraps 等显示的帧率）。
-3.  **自定义按键**：如果您修改了游戏内的默认按键，请务必在 `ok-ww` 的设置中进行同步配置。仅支持设置中列出的按键。
-4.  **软件版本**：检查并确保您使用的是最新版本的 `ok-ww`。
+3.  **自定义按键**：如果您修改了游戏内的默认按键，请务必在 `WW Assist` 的设置中进行同步配置。仅支持设置中列出的按键。
+4.  **软件版本**：检查并确保您使用的是最新版本的 `WW Assist`。
 5.  **游戏性能**：请确保游戏能稳定在 **60 FPS** 运行。如果帧率不稳定，请尝试降低游戏画质或分辨率。
 6.  **运行权限**：解压便携包后运行 `xjtu-ww.exe`；游戏操作需要管理员权限时，请右键选择“以管理员身份运行”。
 7.  **OpenVINO 报错**：如果遇到 `0x000005` 报错，并且使用的是带 NPU 的 Intel CPU，请更新至 Intel 最新的 NPU 驱动。
@@ -116,19 +114,10 @@
 *   `-t` 或 `--task`: 启动后自动执行第 N 个任务。`1` 代表任务列表中的第一个。
 *   `-e` 或 `--exit`: 任务执行完毕后自动退出程序。
 
-## 💬 加入我们
+## 💬 反馈
 
-*   **Discord**: [点击加入](https://discord.gg/vVyCatEBgA)
+内部发行版不提供公开社区支持渠道。问题请通过内部渠道反馈。
 
-本项目基于 [ok-script](https://ok-script.com) 框架开发，简单易维护。欢迎有兴趣的开发者使用 [ok-script](https://ok-script.com) 开发您自己的自动化项目。
+## ❤️ 致谢
 
-## ❤️ 赞助与致谢
-
-### 赞助商 (Sponsors)
-*   **EXE 签名**: Free code signing provided by [SignPath.io](https://signpath.io/), certificate by [SignPath Foundation](https://signpath.org/).
-
-### 致谢
-*   [lazydog28/mc_auto_boss](https://github.com/lazydog28/mc_auto_boss)
-*   [ok-oldking/OnnxOCR](https://github.com/ok-oldking/OnnxOCR)
-*   [zhiyiYo/PyQt-Fluent-Widgets](https://github.com/zhiyiYo/PyQt-Fluent-Widgets)
-*   [Toufool/AutoSplit](https://github.com/Toufool/AutoSplit)
+本项目为独立维护的内部构建。致谢 [lazydog28/mc_auto_boss](https://github.com/lazydog28/mc_auto_boss)、[zhiyiYo/PyQt-Fluent-Widgets](https://github.com/zhiyiYo/PyQt-Fluent-Widgets)、[Toufool/AutoSplit](https://github.com/Toufool/AutoSplit)。
