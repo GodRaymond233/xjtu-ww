@@ -25,11 +25,11 @@ try {
     $executable = Join-Path $smokeDirectory 'xjtu-ww.exe'
     $identity = [Diagnostics.FileVersionInfo]::GetVersionInfo($executable)
     $version = (Get-Content -LiteralPath (Join-Path $smokeDirectory 'version.txt') -Raw).Trim()
-    if ($identity.ProductName -ne 'XJTU-WW' -or
-        $identity.FileDescription -ne 'XJTU-WW Workshop' -or
+    if ($identity.ProductName -ne 'WW Assist' -or
+        $identity.FileDescription -ne 'WW Assist' -or
         $identity.OriginalFilename -ne 'xjtu-ww.exe' -or
         $identity.ProductVersion -ne $version) {
-        throw 'Portable executable metadata does not match the XJTU-WW package.'
+        throw 'Portable executable metadata does not match the WW Assist package.'
     }
     # Exclude developer-installed DLLs from the portable runtime's search path.
     $env:PATH = "$env:SystemRoot\System32;$env:SystemRoot"
