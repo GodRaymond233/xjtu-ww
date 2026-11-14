@@ -156,24 +156,30 @@ class Zani(BaseChar):
         return State.DONE
 
     def click_liber2(self):
-        start = time.time()
+        if not self.task.use_liberation:
+            return False
+        total_start = time.time()
+        start = total_start
+        previous_liberation = self.task.in_liberation
         self.task.in_liberation = True
         send_key = True
-        not_liber_box = self.task.box_of_screen_scaled(2560, 1440, 1909, 1274, 1957, 1322, name='zani_not_liber_box', hcenter=True)
-        while not self.task.find_one('target_enemy_long_inner', box=not_liber_box, threshold=0.75):
-            if time.time() - start > 6:
-                self.task.in_liberation = False
-                if not self.check_liber():
-                    self.update_blazes()
-                return
-            if self.current_resonance() == 0:
-                start = time.time()
-            elif time.time() - start > 1.5:
-                send_key = False
-            if send_key:
-                self.send_liberation_key()
-            self.task.next_frame()
-        self.task.in_liberation = False
+        try:
+            not_liber_box = self.task.box_of_screen_scaled(2560, 1440, 1909, 1274, 1957, 1322, name='zani_not_liber_box', hcenter=True)
+            while not self.task.find_one('target_enemy_long_inner', box=not_liber_box, threshold=0.75):
+                if time.time() - total_start > 6:
+                    self.task.in_liberation = False
+                    if not self.check_liber():
+                        self.update_blazes()
+                    return
+                if self.current_resonance() == 0:
+                    start = time.time()
+                elif time.time() - start > 1.5:
+                    send_key = False
+                if send_key:
+                    self.send_liberation_key()
+                self.task.next_frame()
+        finally:
+            self.task.in_liberation = previous_liberation
         current = time.time()
         duration = 2.25
         if current - start >= duration:
@@ -299,9 +305,11 @@ class Zani(BaseChar):
                 if (result := self.wait_forte_full(sleep)) != State.DONE:
                     return result
                 self.task.mouse_down()
-                if (result := self.wait_forte_full(0.6)) != State.DONE:
-                    return result
-                self.task.mouse_up()
+                try:
+                    if (result := self.wait_forte_full(0.6)) != State.DONE:
+                        return result
+                finally:
+                    self.task.mouse_up()
                 wait_chair = 1.15
                 if (result := self.wait_forte_full(0.85, send_click=True)) != State.DONE:
                     return result

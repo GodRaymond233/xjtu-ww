@@ -2,9 +2,10 @@
 onnxocr/
 xjtu_scripts/
 xjtu_import/
+ok_tasks/
+ok_import/
 *.pyd
 !workshop_bundle/**
-!char_sources/**
 update/
 tesseract
 cache/

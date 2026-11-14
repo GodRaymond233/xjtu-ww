@@ -34,26 +34,28 @@ class Cantarella(BaseChar):
                 return self.switch_next_char()             
         forte_delay = time.time()
         count = -0.1
-        while self.time_elapsed_accounting_for_freeze(self.last_heavy) < 8 and not self.is_mouse_forte_full():
-            now = time.time()
-            if self.resonance_available() and self.click_resonance(send_click=False):
-                if not perform_under_outro:
+        try:
+            while self.time_elapsed_accounting_for_freeze(self.last_heavy) < 8 and not self.is_mouse_forte_full():
+                now = time.time()
+                if self.resonance_available() and self.click_resonance(send_click=False):
+                    if not perform_under_outro:
+                        self.task.mouse_up()
+                        return self.switch_next_char() 
+                if not perform_under_outro and self.need_fast_perform() and self.time_elapsed_accounting_for_freeze(self.last_perform) > 1.1:
+                    break 
+                if now - forte_delay > count:
                     self.task.mouse_up()
-                    return self.switch_next_char() 
-            if not perform_under_outro and self.need_fast_perform() and self.time_elapsed_accounting_for_freeze(self.last_perform) > 1.1:
-                break 
-            if now - forte_delay > count:
-                self.task.mouse_up()
-                self.sleep(0.2)
-                self.task.mouse_down()
-                count += 1
-            if self.is_forte_full():
-                forte_delay = now
-            elif now - forte_delay > 0.5:
-                break
-            self.check_combat()
-            self.task.next_frame()
-        self.task.mouse_up()
+                    self.sleep(0.2)
+                    self.task.mouse_down()
+                    count += 1
+                if self.is_forte_full():
+                    forte_delay = now
+                elif now - forte_delay > 0.5:
+                    break
+                self.check_combat()
+                self.task.next_frame()
+        finally:
+            self.task.mouse_up()
         self.click_echo()
         self.switch_next_char()
             

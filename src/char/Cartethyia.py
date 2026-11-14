@@ -34,6 +34,7 @@ class Cartethyia(BaseChar):
         self.sword3_half_box = target_box
 
     def on_combat_end(self, chars):
+        from src.char.Cartethyia import Cartethyia
         if not self.is_cartethyia:
             next_char = str((self.index + 1) % len(chars) + 1)
             self.logger.debug(f'on_combat_end {self.index} switch next char: {next_char}')
@@ -41,7 +42,7 @@ class Cartethyia(BaseChar):
             while time.time() - start < 6:
                 self.task.load_chars()
                 current_char = self.task.get_current_char(raise_exception=False)
-                if not isinstance(current_char, type(self)):
+                if current_char is None or not current_char.is_character(Cartethyia):
                     break
                 else:
                     self.task.send_key(next_char)
@@ -256,12 +257,14 @@ class Cartethyia(BaseChar):
             if not has_perform_action:
                 self.logger.info('acquire missing buffs')
             self.task.mouse_down()
-            start = time.time()
-            while time.time() - start < 1.5:
-                if self.task.find_one('forte_cartethyia_sword1', threshold=0.9):
-                    break
-                self.task.next_frame()
-            self.task.mouse_up()
+            try:
+                start = time.time()
+                while time.time() - start < 1.5:
+                    if self.task.find_one('forte_cartethyia_sword1', threshold=0.9):
+                        break
+                    self.task.next_frame()
+            finally:
+                self.task.mouse_up()
             self.check_combat()
             self.logger.debug(f'sword1: heavy_att duration {time.time() - start}')
         if not any(self.buffs.values()):

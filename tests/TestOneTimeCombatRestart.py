@@ -39,7 +39,8 @@ class TestOneTimeCombatRestart(unittest.TestCase):
             raise TaskDisabledException()
 
         self.task.do_run = Mock(side_effect=interrupt_rotation)
-        self.task.run()
+        with self.assertRaises(TaskDisabledException):
+            self.task.run()
         self.assertFalse(self.task.enabled)
         self.assertIs(self.task.chars[0], char)
 

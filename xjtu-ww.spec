@@ -8,8 +8,12 @@ from PyInstaller.utils.win32.versioninfo import (
 )
 
 root = Path(SPECPATH)
-datas = [(str(root / name), name) for name in ('assets', 'icons', 'i18n', 'workshop_bundle', 'char_sources')]
+datas = [(str(root / name), name) for name in ('assets', 'icons', 'i18n', 'workshop_bundle')]
 datas += [(str(root / name), '.') for name in ('LICENSE.txt', 'README.md')]
+char_sources = root / 'build' / 'char_sources'
+if not (char_sources / 'BaseChar.py').is_file():
+    raise RuntimeError('Run .github/scripts/build_char_sources.py before compiling and stripping sources.')
+datas.append((str(char_sources), 'char_sources'))
 # Compiled build: src ships as .pyd extensions; char_sources/ carries the
 # character sources the workshop and AI edits read at runtime.
 compiled = sorted(root.glob('src/**/*.cp312-win_amd64.pyd'))

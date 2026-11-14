@@ -213,15 +213,16 @@ class Phoebe(BaseChar):
                 if time.time() - outer_start > 2:
                     return False
                 self.task.mouse_down()
-                mouse_hold_start = time.time()
-                while time.time() - mouse_hold_start < 0.5:
-                    if not self.heavy_attack_ready():
-                        self.task.mouse_up()
-                        return True
-                    if flying := self.flying():
-                        break
-                    self.task.next_frame()
-                self.task.mouse_up()
+                try:
+                    mouse_hold_start = time.time()
+                    while time.time() - mouse_hold_start < 0.5:
+                        if not self.heavy_attack_ready():
+                            return True
+                        if flying := self.flying():
+                            break
+                        self.task.next_frame()
+                finally:
+                    self.task.mouse_up()
                 if flying:
                     self.logger.info('flying')
                     self.task.wait_until(lambda: not self.flying(),
@@ -303,12 +304,14 @@ class Phoebe(BaseChar):
                 if time.time() - outer_start > 2:
                     return State.TIMEOUT
                 key_down()
-                key_hold_start = time.time()
-                while condition() or time.time() - key_hold_start < 0.4:
-                    if time.time() - key_hold_start > 1:
-                        break
-                    self.task.next_frame()
-                key_up()
+                try:
+                    key_hold_start = time.time()
+                    while condition() or time.time() - key_hold_start < 0.4:
+                        if time.time() - key_hold_start > 1:
+                            break
+                        self.task.next_frame()
+                finally:
+                    key_up()
                 if self.flying():
                     self.logger.info('flying')
                     self.task.wait_until(lambda: not self.flying(),
@@ -483,7 +486,7 @@ class Phoebe(BaseChar):
     def shorekeeper_auto_dodge(self):
         from src.char.ShoreKeeper import ShoreKeeper
         for i, char in enumerate(self.task.chars):
-            if isinstance(char, ShoreKeeper):
+            if char.is_character(ShoreKeeper):
                 return char.auto_dodge(condition = self.flying)
 
 phoebe_blue_color = {

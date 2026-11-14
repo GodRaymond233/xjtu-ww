@@ -116,23 +116,21 @@ class FarmEchoTask(WWOneTimeTask, BaseCombatTask):
         return True
 
     def run(self, retries=3):
-        # 一条龙经 run_task_by_class 调用时执行器不会设置 start_time, 每小时声骸数会按 1970 年起算而恒为 0;
-        # 领奖/月卡重试会再次进入 run, 已有计数时不重新计时
+        self.aim_boss = None
+        # 一条龙调用也需设置计时；领奖重试保留本次会话状态。
         if not self.info.get('Echo Count'):
             self.start_time = time.time()
         WWOneTimeTask.run(self)
         self.use_liberation = self.config.get('Use Liberation')
-        try:
-            return self.do_run()
-        except TaskDisabledException as e:
-            pass
-        except Exception as e:
-            logger.error('farm 4c error, try handle monthly card', e)
-            # 有上限: 认不出的双按钮弹窗会被当成领奖弹窗关掉, 重进后又弹, 无限循环 (#1649)
-            if retries > 0 and (self.handle_claim_button() or self.handle_monthly_card()):
-                self.run(retries - 1)
-            else:
+        for attempt in range(retries + 1):
+            try:
+                return self.do_run()
+            except TaskDisabledException:
                 raise
+            except Exception as e:
+                logger.error('farm 4c error, try handle monthly card', e)
+                if attempt >= retries or not (self.handle_claim_button() or self.handle_monthly_card()):
+                    raise
 
     def do_run(self, max_recovery_retries=3):
         count = 0
@@ -266,6 +264,8 @@ class FarmEchoTask(WWOneTimeTask, BaseCombatTask):
                 self._just_entered_boss_realm = True
             else:
                 walk_result = self.walk_after_boss_teleport()
+        except TaskDisabledException:
+            raise
         except Exception as e:
             raise RuntimeError(self.tr('Teleport to boss failed')) from e
 
@@ -338,11 +338,8 @@ class FarmEchoTask(WWOneTimeTask, BaseCombatTask):
             return 'f'
 
         self.middle_click(after_sleep=0.2)
-        self.send_key_down(direction)
-        self.sleep(0.1)
-        self.mouse_down(key='right')
-        start = time.time()
-        try:
+        with self.hold_movement(direction, running=True):
+            start = time.time()
             while time.time() - start < time_out:
                 if self.in_combat(target=True) or self.in_combat():
                     return 'combat'
@@ -350,10 +347,6 @@ class FarmEchoTask(WWOneTimeTask, BaseCombatTask):
                     return 'f'
                 self.middle_click(interval=0.5)
                 self.sleep(0.02)
-        finally:
-            self.send_key_up(direction)
-            self.sleep(0.1)
-            self.mouse_up(key='right')
         raise RuntimeError(self.tr('Teleport to boss failed: can not walk to combat or F'))
 
     def enter_configured_boss_realm_from_f(self):
@@ -514,21 +507,22 @@ class FarmEchoTask(WWOneTimeTask, BaseCombatTask):
         current_direction = None
         current_adjust = None
         self.center_camera()
-        while time.time() - start_time < time_out:
-            self.sleep(0.01)
-            if self.in_combat(target=True):
-                break
-            angle = self.get_mini_map_turn_angle('boss_check_mark_minimap', threshold=threshold, x_offset=-1,
-                                                 y_offset=1)
-            if angle is None:
-                angle = 0
-            current_direction, current_adjust, should_continue = self._navigate_based_on_angle(
-                angle, current_direction, current_adjust
-            )
-            if should_continue:
-                continue
-
-        self._stop_movement(current_direction)
+        try:
+            while time.time() - start_time < time_out:
+                self.sleep(0.01)
+                if self.in_combat(target=True):
+                    break
+                angle = self.get_mini_map_turn_angle('boss_check_mark_minimap', threshold=threshold, x_offset=-1,
+                                                     y_offset=1)
+                if angle is None:
+                    angle = 0
+                current_direction, current_adjust, should_continue = self._navigate_based_on_angle(
+                    angle, current_direction, current_adjust
+                )
+                if should_continue:
+                    continue
+        finally:
+            self._stop_movement(current_direction)
         if not self.in_combat(target=True):
             self.teleport_to_nearest_boss()
             self.sleep(0.5)

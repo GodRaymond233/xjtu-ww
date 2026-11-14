@@ -97,22 +97,24 @@ class Douling(BaseChar):
                 # one hexagram is not enough for an enhanced heavy, holding would cast 鬼门占卦 (self damage) instead
                 return
             self.task.mouse_down()
-            start = time.time()
-            interrupted = False
-            spent = 0
-            while time.time() - start < duration:
-                if self.flying():
-                    interrupted = True
-                    break
-                if gua:
-                    # each enhanced heavy consumes two hexagrams, release once fewer than two are left
-                    self.task.next_frame()
-                    spent = spent + 1 if len(self.gua()) < 2 else 0
-                    if spent >= 2:
+            try:
+                start = time.time()
+                interrupted = False
+                spent = 0
+                while time.time() - start < duration:
+                    if self.flying():
+                        interrupted = True
                         break
-                else:
-                    self.sleep(0.1)
-            self.task.mouse_up()
+                    if gua:
+                        # each enhanced heavy consumes two hexagrams, release once fewer than two are left
+                        self.task.next_frame()
+                        spent = spent + 1 if len(self.gua()) < 2 else 0
+                        if spent >= 2:
+                            break
+                    else:
+                        self.sleep(0.1)
+            finally:
+                self.task.mouse_up()
             self.sleep(0.01)
             if not interrupted:
                 return

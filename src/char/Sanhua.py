@@ -10,22 +10,24 @@ class Sanhua(BaseChar):
         self.sleep(0.02)
         start = time.time()
         self.task.mouse_down()
-        self.wait_down(click=False)
-        if self.click_liberation(send_click=False):
-            liber_clicked = True
-            sleep_time += 0.1
-            self.sleep(0.15, False)
-        elif self.resonance_available():
+        try:
+            self.wait_down(click=False)
+            if self.click_liberation(send_click=False):
+                liber_clicked = True
+                sleep_time += 0.1
+                self.sleep(0.15, False)
+            elif self.resonance_available():
+                self.task.mouse_up()
+                self.click_resonance(send_click=False)
+                start = time.time()
+                self.task.mouse_down()
+                self.sleep(0.1, False)
+            sleep_time -= self.time_elapsed_accounting_for_freeze(start)
+            self.logger.info('Sanhua to_sleep {}'.format(sleep_time))
+            if sleep_time > 0:
+                self.sleep(sleep_time, False)
+        finally:
             self.task.mouse_up()
-            self.click_resonance(send_click=False)
-            start = time.time()
-            self.task.mouse_down()
-            self.sleep(0.1, False)
-        sleep_time -= self.time_elapsed_accounting_for_freeze(start)
-        self.logger.info('Sanhua to_sleep {}'.format(sleep_time))
-        if sleep_time > 0:
-            self.sleep(sleep_time, False)
-        self.task.mouse_up()
         self.sleep(0.8)
         if liber_clicked:
             self.click_resonance(send_click=False)

@@ -2,6 +2,16 @@
 
 Release history starts at v3.0.0.
 
+## Unreleased — 1.2.0 review fixes
+
+- Preserve task cancellation, release held inputs on all exits, and bound Zani's second Liberation wait.
+- Keep custom character identities intact; validate imported teams before replacement and load the latest saved source without stale bytecode.
+- Protect unsaved workshop edits and keep the selected team aligned with the editor.
+- Distinguish account identities, fail failed account switches explicitly, and reset farming targets between runs.
+- Stop safely on unreadable Echo stats; correct main-stat matching, completion counts and Garden completion detection.
+- Correct Suisui, Shorekeeper and Ciaccona rotation branches and honor disabled Liberation in custom rotations.
+- Generate portable character sources from the current build, including Lily. Use canonical `ok_tasks` / `ok_import` folders and migrate legacy `xjtu_*` folders without overwriting conflicts.
+
 ## v3.8.1 (2026-11-14)
 
 - Fixed tasks started from the command line (`-t`/`-e`) not running after the game launches.

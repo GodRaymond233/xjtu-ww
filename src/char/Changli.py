@@ -101,6 +101,8 @@ class Changli(BaseChar):
         return forte
 
     def liberation_and_heavy(self, con_less_than=-1, send_click=False, wait_if_cd_ready=0, timeout=5):
+        if not self.task.use_liberation:
+            return False
         if con_less_than > 0:
             if self.get_current_con() > con_less_than:
                 return False
@@ -136,28 +138,30 @@ class Changli(BaseChar):
                 return False
         start = time.time()
         hold = False
-        while not self.task.in_team()[0]:
-            self.task.in_liberation = True
-            if not clicked:
-                clicked = True
-                self.record_liberation_use()
-            if send_click:
-                self.click(interval=0.1)
-            if time.time() - start > 1.5 and not hold:
-                self.task.mouse_down()
-                hold = True
-            if time.time() - start > 7:
-                self.task.in_liberation = False
-                self.task.raise_not_in_combat('too long a liberation, the boss was killed by the liberation')
-            self.task.next_frame()
-        duration = time.time() - start
-        self.add_freeze_duration(start, duration)
-        self.task.in_liberation = False
-        if clicked:
-            self.logger.info(f'click_liberation end {duration}')
-            self.task.wait_until(lambda: self.task.in_team()[0] and self.is_mouse_forte_full(), time_out=0.6)
-            self.task.wait_until(lambda: self.task.in_team()[0] and not self.is_mouse_forte_full(), time_out=0.6)
-        self.task.mouse_up()
+        try:
+            while not self.task.in_team()[0]:
+                self.task.in_liberation = True
+                if not clicked:
+                    clicked = True
+                    self.record_liberation_use()
+                if send_click:
+                    self.click(interval=0.1)
+                if time.time() - start > 1.5 and not hold:
+                    self.task.mouse_down()
+                    hold = True
+                if time.time() - start > 7:
+                    self.task.in_liberation = False
+                    self.task.raise_not_in_combat('too long a liberation, the boss was killed by the liberation')
+                self.task.next_frame()
+            duration = time.time() - start
+            self.add_freeze_duration(start, duration)
+            self.task.in_liberation = False
+            if clicked:
+                self.logger.info(f'click_liberation end {duration}')
+                self.task.wait_until(lambda: self.task.in_team()[0] and self.is_mouse_forte_full(), time_out=0.6)
+                self.task.wait_until(lambda: self.task.in_team()[0] and not self.is_mouse_forte_full(), time_out=0.6)
+        finally:
+            self.task.mouse_up()
         self.check_combat()
         return clicked
 

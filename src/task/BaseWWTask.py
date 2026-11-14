@@ -1,6 +1,7 @@
 import math
 import re
 import time
+from contextlib import contextmanager
 from datetime import datetime, timedelta
 from typing import List
 
@@ -159,54 +160,57 @@ class BaseWWTask(BaseTask):
         last_direction = None
         start = time.time()
         no_echo_start = 0
-        while time.time() - start < time_out:
-            self.next_frame()
-            if self.pick_f():
-                self.log_debug('pick echo success')
-                self._stop_last_direction(last_direction)
-                return True
-            if self.in_combat():
-                self.log_debug('pick echo has_target return fail')
-                self._stop_last_direction(last_direction)
-                return False
-            echos = self.find_echos(threshold=echo_threshold)
-            if not echos:
-                if no_echo_start == 0:
-                    no_echo_start = time.time()
-                elif time.time() - no_echo_start > 3:
-                    self.log_debug(f'walk front to_echo, no echos found, break')
-                    break
-                next_direction = 'w'
-            else:
-                no_echo_start = 0
-                echo = echos[0]
-                center_distance = echo.center()[0] - self.width_of_screen(0.5)
-                threshold = 0.05 if not last_direction else 0.15
-                if abs(center_distance) < self.height_of_screen(threshold):
-                    if echo.y + echo.height > self.height_of_screen(0.65):
-                        next_direction = 's'
-                    else:
-                        next_direction = 'w'
-                elif center_distance > 0:
-                    next_direction = 'd'
+        try:
+            while time.time() - start < time_out:
+                self.next_frame()
+                if self.pick_f():
+                    self.log_debug('pick echo success')
+                    return True
+                if self.in_combat():
+                    self.log_debug('pick echo has_target return fail')
+                    return False
+                echos = self.find_echos(threshold=echo_threshold)
+                if not echos:
+                    if no_echo_start == 0:
+                        no_echo_start = time.time()
+                    elif time.time() - no_echo_start > 3:
+                        self.log_debug(f'walk front to_echo, no echos found, break')
+                        break
+                    next_direction = 'w'
                 else:
-                    next_direction = 'a'
-            last_direction = self._walk_direction(last_direction, next_direction)
-            if update_function is not None:
-                update_function()
-        self._stop_last_direction(last_direction)
+                    no_echo_start = 0
+                    echo = echos[0]
+                    center_distance = echo.center()[0] - self.width_of_screen(0.5)
+                    threshold = 0.05 if not last_direction else 0.15
+                    if abs(center_distance) < self.height_of_screen(threshold):
+                        if echo.y + echo.height > self.height_of_screen(0.65):
+                            next_direction = 's'
+                        else:
+                            next_direction = 'w'
+                    elif center_distance > 0:
+                        next_direction = 'd'
+                    else:
+                        next_direction = 'a'
+                last_direction = self._walk_direction(last_direction, next_direction)
+                if update_function is not None:
+                    update_function()
+        finally:
+            self._stop_last_direction(last_direction)
 
     def _walk_direction(self, last_direction, next_direction):
         if next_direction != last_direction:
             self._stop_last_direction(last_direction)
             if next_direction:
-                self.send_key_down(next_direction)
+                try:
+                    self.send_key_down(next_direction)
+                except BaseException:
+                    self.send_key_up(next_direction)
+                    raise
         return next_direction
 
     def _stop_last_direction(self, last_direction):
         if last_direction:
             self.send_key_up(last_direction)
-            self.sleep(0.01)
         return None
 
     def walk_to_box(self, find_function, time_out=30, end_condition=None, y_offset=0.05, x_threshold=0.07,
@@ -229,73 +233,75 @@ class BaseWWTask(BaseTask):
         running = False
         last_target = None
         centered = False
-        while time.time() - start < time_out:
-            self.next_frame()
-            if end_condition:
-                ended = end_condition()
-                if ended:
-                    logger.info(f'do_walk_to_box ended {ended}')
-                    break
-            treasure_icon = find_function()
-            if isinstance(treasure_icon, list):
-                if len(treasure_icon) > 0:
-                    treasure_icon = treasure_icon[0]
+        try:
+            while time.time() - start < time_out:
+                self.next_frame()
+                if end_condition:
+                    ended = end_condition()
+                    if ended:
+                        logger.info(f'do_walk_to_box ended {ended}')
+                        break
+                treasure_icon = find_function()
+                if isinstance(treasure_icon, list):
+                    if len(treasure_icon) > 0:
+                        treasure_icon = treasure_icon[0]
+                    else:
+                        treasure_icon = None
+                if treasure_icon:
+                    last_target = treasure_icon
+                if last_target is None:
+                    next_direction = self.opposite_direction(last_direction)
+                    self.log_info(self.tr('find_function not found, change to opposite direction'))
                 else:
-                    treasure_icon = None
-            if treasure_icon:
-                last_target = treasure_icon
-            if last_target is None:
-                next_direction = self.opposite_direction(last_direction)
-                self.log_info(self.tr('find_function not found, change to opposite direction'))
-            else:
-                x, y = last_target.center()
-                y = max(0, y - self.height_of_screen(y_offset))
-                x_abs = abs(x - self.width_of_screen(0.5))
-                threshold = 0.04 if not last_direction else x_threshold
-                centered = centered or x_abs <= self.width_of_screen(threshold)
-                if not centered:
-                    if x > self.width_of_screen(0.5):
-                        next_direction = 'd'
+                    x, y = last_target.center()
+                    y = max(0, y - self.height_of_screen(y_offset))
+                    x_abs = abs(x - self.width_of_screen(0.5))
+                    threshold = 0.04 if not last_direction else x_threshold
+                    centered = centered or x_abs <= self.width_of_screen(threshold)
+                    if not centered:
+                        if x > self.width_of_screen(0.5):
+                            next_direction = 'd'
+                        else:
+                            next_direction = 'a'
                     else:
-                        next_direction = 'a'
-                else:
-                    if last_direction == 's':
-                        center = 0.45
-                    elif last_direction == 'w':
-                        center = 0.6
-                    else:
-                        center = 0.5
-                    if y > self.height_of_screen(center):
-                        next_direction = 's'
-                    else:
-                        next_direction = 'w'
-            if next_direction != last_direction:
-                if last_direction:
-                    self.send_key_up(last_direction)
-                    self.sleep(0.001)
-                last_direction = next_direction
-                if next_direction:
-                    self.send_key_down(next_direction)
-            if running:
-                if not self.find_one('on_the_wall', threshold=0.7):
-                    self.log_info(self.tr('not on the wall, stop running'))
-                    self.mouse_up(key='right')
-            else:
-                if next_direction == 'w' and self.find_one('on_the_wall', threshold=0.7):
+                        if last_direction == 's':
+                            center = 0.45
+                        elif last_direction == 'w':
+                            center = 0.6
+                        else:
+                            center = 0.5
+                        if y > self.height_of_screen(center):
+                            next_direction = 's'
+                        else:
+                            next_direction = 'w'
+                if next_direction != last_direction:
+                    if last_direction:
+                        self.send_key_up(last_direction)
+                    last_direction = next_direction
+                    if next_direction:
+                        self.send_key_down(next_direction)
+                if running:
+                    if not self.find_one('on_the_wall', threshold=0.7):
+                        self.log_info(self.tr('not on the wall, stop running'))
+                        self.mouse_up(key='right')
+                        running = False
+                elif next_direction == 'w' and self.find_one('on_the_wall', threshold=0.7):
                     self.log_info(self.tr('on the wall, start running'))
                     running = True
                     self.mouse_down(key='right')
                     self.sleep(0.1)
-            if use_hook and next_direction == 'w':
-                if self.find_one('tool_teleport', 0.75):
-                    self.send_key(self.key_config['Tool Key'])
-                    self.sleep(3)
-                    continue
-        if last_direction:
-            self.send_key_up(last_direction)
-            self.sleep(0.001)
-        if running:
-            self.send_key_up(self.key_config.get('Dodge Key'))
+                if use_hook and next_direction == 'w':
+                    if self.find_one('tool_teleport', 0.75):
+                        self.send_key(self.key_config['Tool Key'])
+                        self.sleep(3)
+                        continue
+        finally:
+            try:
+                if last_direction:
+                    self.send_key_up(last_direction)
+            finally:
+                if running:
+                    self.mouse_up(key='right')
         if not end_condition:
             return last_direction is not None
         else:
@@ -465,22 +471,33 @@ class BaseWWTask(BaseTask):
             can_continue = True
         return can_continue, used
 
+    @contextmanager
+    def hold_movement(self, direction, running=False):
+        mouse_attempted = False
+        try:
+            self.send_key_down(direction)
+            if running:
+                self.sleep(0.1)
+                mouse_attempted = True
+                self.mouse_down(key='right')
+            yield
+        finally:
+            # Release even when a backend raises after partially pressing an input.
+            try:
+                self.send_key_up(direction)
+            finally:
+                if mouse_attempted:
+                    self.mouse_up(key='right')
+
     def send_key_and_wait_f(self, direction, raise_if_not_found, time_out, running=False, target_text=None,
                             check_combat=False):
         if time_out <= 0:
             return
-        self.send_key_down(direction)
-        if running:
-            self.sleep(0.1)
-            self.mouse_down(key='right')
-        f_found = self.wait_until(
-            lambda: self.find_f_with_text(target_text=target_text) or (check_combat and self.in_combat()),
-            time_out=time_out,
-            raise_if_not_found=False)
-        self.send_key_up(direction)
-        if running:
-            self.sleep(0.1)
-            self.mouse_up(key='right')
+        with self.hold_movement(direction, running):
+            f_found = self.wait_until(
+                lambda: self.find_f_with_text(target_text=target_text) or (check_combat and self.in_combat()),
+                time_out=time_out,
+                raise_if_not_found=False)
         if not f_found:
             if raise_if_not_found:
                 raise CannotFindException(self.tr('cant find the f to enter'))
@@ -493,25 +510,17 @@ class BaseWWTask(BaseTask):
                   post_walk=0):
         if time_out <= 0:
             return
-        self.send_key_down(direction)
-        if running:
-            self.sleep(0.1)
-            logger.debug(f'run_until condiction {condiction} direction {direction}')
-            self.mouse_down(key='right')
-        start = time.time()
-        result = None
-        while time.time() - start < time_out:
-            if result := condiction():
-                break
-            if target:
-                self.middle_click(interval=0.5)
-            self.sleep(0.02)
-        if result and post_walk:
-            self.sleep(post_walk)
-        self.send_key_up(direction)
-        if running:
-            self.sleep(0.1)
-            self.mouse_up(key='right')
+        with self.hold_movement(direction, running):
+            start = time.time()
+            result = None
+            while time.time() - start < time_out:
+                if result := condiction():
+                    break
+                if target:
+                    self.middle_click(interval=0.5)
+                self.sleep(0.02)
+            if result and post_walk:
+                self.sleep(post_walk)
 
         if raise_if_not_found and not result:
             raise Exception(self.tr('wait condition failed while walking'))
@@ -868,8 +877,10 @@ class BaseWWTask(BaseTask):
     def _stop_movement(self, current_direction):
         """Releases keys and mouse to stop character movement."""
         if current_direction is not None:
-            self.mouse_up(key='right')
-            self.send_key_up(current_direction)
+            try:
+                self.mouse_up(key='right')
+            finally:
+                self.send_key_up(current_direction)
 
     def _navigate_based_on_angle(self, angle, current_direction, current_adjust):
         """
@@ -891,10 +902,9 @@ class BaseWWTask(BaseTask):
                 minor_adjust = None
 
             if minor_adjust:
-                self.send_key_down(minor_adjust)
-                self.sleep(0.1)
-                self.middle_click(down_time=0.1)
-                self.send_key_up(minor_adjust)
+                with self.hold_movement(minor_adjust):
+                    self.sleep(0.1)
+                    self.middle_click(down_time=0.1)
                 self.sleep(0.01)
                 # Tell the caller to continue to the next loop iteration
                 return current_direction, current_adjust, True
@@ -918,15 +928,18 @@ class BaseWWTask(BaseTask):
         if current_direction != new_direction:
             self.log_info(self.tr('changed direction {angle} {current_direction} -> {new_direction}').format(angle=angle, current_direction=current_direction, new_direction=new_direction))
             if current_direction:
-                self.mouse_up(key='right')
-                self.send_key_up(current_direction)
+                self._stop_movement(current_direction)
                 self.wait_until(self.in_combat, time_out=0.2)
             self.turn_direction(new_direction)
-            self.send_key_down('w')
-            self.wait_until(self.in_combat, time_out=0.2)
-            self.mouse_down(key='right')
-            current_direction = 'w'  # After turning, we always move forward
-            self.wait_until(self.in_combat, time_out=1)
+            try:
+                self.send_key_down('w')
+                self.wait_until(self.in_combat, time_out=0.2)
+                self.mouse_down(key='right')
+                current_direction = 'w'  # After turning, we always move forward
+                self.wait_until(self.in_combat, time_out=1)
+            except BaseException:
+                self._stop_movement('w')
+                raise
 
         return current_direction, current_adjust, False
 
@@ -987,10 +1000,9 @@ class BaseWWTask(BaseTask):
         return 'unknown_lang'
 
     def open_esc_menu(self):
-        self.send_key_down('alt')
-        self.sleep(0.05)
-        self.click_relative(0.95, 0.04)
-        self.send_key_up('alt')
+        with self.hold_movement('alt'):
+            self.sleep(0.05)
+            self.click_relative(0.95, 0.04)
         self.sleep(0.5)
 
     def open_boss_book(self, name, after_sleep=2):
@@ -1027,11 +1039,10 @@ class BaseWWTask(BaseTask):
             self.log_info(self.tr('send {book_key} key to open').format(book_key=book_key))
         if self.in_team_and_world():
             self.log_info(self.tr('send f2 key mouse key to open the book'))
-            self.send_key_down('alt')
-            self.sleep(0.05)
-            self.click_relative(0.77, 0.05)
-            self.sleep(0.02)
-            self.send_key_up('alt')
+            with self.hold_movement('alt'):
+                self.sleep(0.05)
+                self.click_relative(0.77, 0.05)
+                self.sleep(0.02)
             self.sleep(4)
         gray_book_boss = self.wait_book(feature)
         if not gray_book_boss:
@@ -1067,7 +1078,7 @@ class BaseWWTask(BaseTask):
             ['confirm_btn_hcenter_vcenter', 'confirm_btn_highlight_hcenter_vcenter'],
             relative_x=-1, raise_if_not_found=False,
             threshold=0.6,
-            time_out=1)
+            time_out=timeout)
 
     def click_skip_dialog_confirm(self):
         skip_dialog_confirm = self.find_one(

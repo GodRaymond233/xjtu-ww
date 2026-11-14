@@ -871,7 +871,6 @@ class CharacterCodeTab(CustomTab):
         self.char_by_name = {char_cls.__name__: char_cls for char_cls in self.characters}
         self.current_team = None
         self.current_char_cls = None
-        self.current_team_row = -1
         self.current_member_index = -1
         self.clean_code = ""
         self.loading_editor = False
@@ -1012,6 +1011,8 @@ class CharacterCodeTab(CustomTab):
         return result
 
     def _refresh_team_list(self, selected_team=None):
+        if not self._guard_unsaved_changes():
+            return
         selected_team = normalize_team(selected_team) if selected_team else self.current_team
         teams = list_custom_teams()
         states = {team: team_code_state(team) for team in teams}
@@ -1067,7 +1068,10 @@ class CharacterCodeTab(CustomTab):
             return
         if not self._guard_unsaved_changes():
             self.suppress_selection_guard = True
-            self.team_list.setCurrentRow(self.current_team_row)
+            previous_row = next((index for index in range(self.team_list.count())
+                                 if normalize_team(self.team_list.item(index).data(Qt.UserRole))
+                                 == self.current_team), -1)
+            self.team_list.setCurrentRow(previous_row)
             self.suppress_selection_guard = False
             return
         item = self.team_list.item(row)
@@ -1077,7 +1081,6 @@ class CharacterCodeTab(CustomTab):
         # A list rebuild re-selects the same team, which must not jump back to the first member.
         member_index = max(self.current_member_index, 0) if team == self.current_team else 0
         self.current_team = team
-        self.current_team_row = row
         self.member_combo.blockSignals(True)
         self.member_combo.clear()
         for class_name in self.current_team:
@@ -1175,6 +1178,8 @@ class CharacterCodeTab(CustomTab):
         dialog = TeamSelectionDialog(self.characters, defaults, self.window())
         if not dialog.exec():
             return
+        if not self._guard_unsaved_changes():
+            return
         team = normalize_team(dialog.selected_names())
         try:
             create_custom_team(team)
@@ -1195,6 +1200,8 @@ class CharacterCodeTab(CustomTab):
             self.window(),
         )
         if not box.exec():
+            return
+        if not self._guard_unsaved_changes():
             return
         try:
             delete_custom_team(team)
@@ -1589,6 +1596,8 @@ class CharacterCodeTab(CustomTab):
         )
         dialog = ImportTeamDialog(info["manifest"], translated_team, self.window())
         if not dialog.exec():
+            return False
+        if not self._guard_unsaved_changes():
             return False
         try:
             import_custom_team(info)

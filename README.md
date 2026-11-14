@@ -46,7 +46,8 @@
 
 解压 `xjtu-ww-*-windows-x64.zip`，运行文件夹内的 `xjtu-ww.exe`。
 包内已包含 Python、依赖、OCR 模型和工坊入口；游戏操作需要管理员权限时，请以管理员身份运行。
-更新时解压到新目录，再复制旧目录的 `configs`、`xjtu_scripts` 和 `xjtu_import`（如有）。
+更新时解压到新目录，再复制旧目录的 `configs`、`ok_tasks` 和 `ok_import`（如有）。
+旧版 `xjtu_scripts`、`xjtu_import` 也应复制；首次启动会迁移到对应的 `ok_*` 目录。若存在同名但内容不同的文件，启动会停止并报告冲突，不覆盖任何文件；请先备份并解决冲突。
 
 ## ✨ 主要功能
 <img width="1774" height="1182" alt="QQ_1762960844719" src="https://github.com/user-attachments/assets/c5eb0145-0d45-44f9-85b3-184de0ef20bf" />

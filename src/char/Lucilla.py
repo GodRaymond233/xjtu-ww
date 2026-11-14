@@ -69,7 +69,7 @@ class Lucilla(BaseChar):
         仅在大招可用(能量满且无CD)时才放招; 未就绪只返回 False, 由外层(perform_combat 循环)
         统一处理攒能量/长CD切人。不能用"非长CD就放"——那会在能量没满时空放声骸/大招。
         """
-        if not self.liberation_available():
+        if not self.task.use_liberation or not self.liberation_available():
             return False
 
         if self.echo_available():

@@ -31,12 +31,13 @@ class Linnai(BaseChar):
             self.click_resonance()
         self.task.wait_until(self.is_mouse_forte_full, post_action=self.click, time_out=2)
         self.task.mouse_down()
-        if self.task.wait_until(lambda: not self.is_mouse_forte_full(), time_out=5):
+        try:
+            consumed = self.task.wait_until(lambda: not self.is_mouse_forte_full(), time_out=5)
+        finally:
             self.task.mouse_up()
+        if consumed:
             self.sleep(0.4)
             self.perform_under_intro()
-        else:
-            self.task.mouse_up()
             
     def perform_under_intro(self):
         if not self.wait_for_accelerate_ready():

@@ -81,6 +81,8 @@ class Rebecca(BaseChar):
             self.heavy_attack(0.5)
 
     def perform_hmg_mode(self):
+        if not self.task.use_liberation:
+            return False
         enter_start = time.time()
         while time.time() - enter_start < self.LIB_ENTER_DURATION:
             self.send_liberation_key()

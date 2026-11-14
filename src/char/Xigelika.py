@@ -53,11 +53,13 @@ class Xigelika(BaseChar):
                 return False
             self.task.send_key_down(self.get_resonance_key())
             wait = lambda: not self.is_forte_full()
-        ret = self.task.wait_until(wait, time_out=1.2)
-        if use_mouse:
-            self.task.mouse_up()
-        else:
-            self.task.send_key_up(self.get_resonance_key())
+        try:
+            ret = self.task.wait_until(wait, time_out=1.2)
+        finally:
+            if use_mouse:
+                self.task.mouse_up()
+            else:
+                self.task.send_key_up(self.get_resonance_key())
         self.sleep(0.01)
         return ret
 
@@ -72,7 +74,7 @@ class Xigelika(BaseChar):
     def shorekeeper_auto_dodge(self):
         from src.char.ShoreKeeper import ShoreKeeper
         for i, char in enumerate(self.task.chars):
-            if isinstance(char, ShoreKeeper):
+            if char.is_character(ShoreKeeper):
                 return char.auto_dodge(condition = self.flying)  
                 
     def is_forte_full(self):

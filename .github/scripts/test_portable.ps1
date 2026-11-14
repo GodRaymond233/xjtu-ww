@@ -18,6 +18,8 @@ try {
     Copy-Item -LiteralPath $package -Destination $smokeDirectory -Recurse
     foreach ($required in @('xjtu-ww.exe', 'version.txt', 'src/gui/CharacterCodeTab.cp312-win_amd64.pyd',
                             'src/char/BaseChar.cp312-win_amd64.pyd', 'workshop_bundle/teams.json',
+                            'char_sources/BaseChar.py', 'char_sources/Lily.py',
+                            'char_sources/Zani.py',
                             'onnxocr/models/ppocrv5/det/det.onnx')) {
         if (-not (Test-Path -LiteralPath (Join-Path $smokeDirectory $required))) {
             throw "Missing portable runtime file: $required"

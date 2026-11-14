@@ -59,16 +59,22 @@ class Carlotta(BaseChar):
         self.switch_next_char()
 
     def click_liberation_1(self):
+        if not self.task.use_liberation:
+            return False
         if self.press_w == 1:
             self.task.send_key_down(key='w')
-            click = self.click_liberation()
-            self.task.send_key_up(key='w')
+            try:
+                click = self.click_liberation()
+            finally:
+                self.task.send_key_up(key='w')
             return click
         else:
             return self.click_liberation()
 
     def click_liberation(self, con_less_than=-1, send_click=False, wait_if_cd_ready=0.1,
                          animation_min_duration=0, click_f=True):
+        if not self.task.use_liberation:
+            return False
         self.logger.debug('click_liberation start')
         start = time.time()
         last_click = 0
@@ -330,7 +336,7 @@ class Carlotta(BaseChar):
     def shorekeeper_auto_dodge(self):
         from src.char.ShoreKeeper import ShoreKeeper
         for i, char in enumerate(self.task.chars):
-            if isinstance(char, ShoreKeeper):
+            if char.is_character(ShoreKeeper):
                 return char.auto_dodge(condition=self.flying)
 
 

@@ -85,6 +85,8 @@ commit and workflow run in `build-info.json`.
 
 ```powershell
 .\.venv\Scripts\python.exe .github/scripts/install_dependencies.py --bundle
+.\.venv\Scripts\python.exe .github/scripts/build_char_sources.py
+.\.venv\Scripts\python.exe setup.py build_ext --inplace --force
 $env:APP_VERSION = "dev"
 .\.venv\Scripts\python.exe -m PyInstaller --noconfirm xjtu-ww.spec
 .\.github\scripts\test_portable.ps1
@@ -92,6 +94,7 @@ $env:APP_VERSION = "dev"
 
 构建结果位于 `dist/xjtu-ww`，运行其中的 `xjtu-ww.exe` 直接进入主界面。
 发布时压缩整个目录；Python、依赖、OCR 模型和工坊所需角色源码均包含在内。
+角色源码快照由当前注册表生成到 `build/char_sources`，不再维护第二份源码；必须在剥离 `.py` 之前生成。
 需要管理员权限进行游戏操作时，请以管理员身份运行。更新时解压到新目录，并复制旧目录的
 `configs`、`ok_tasks` 和 `ok_import`（如有）。
 
@@ -99,6 +102,9 @@ The result is `dist/xjtu-ww`; run `xjtu-ww.exe` to open the app. Distribute the 
 directory, which includes Python, dependencies, OCR models, and character sources for
 the workshop. Run as administrator when game interaction requires elevation. To update,
 extract into a new directory and copy `configs`, `ok_tasks`, and `ok_import`, if present.
+
+旧版 `xjtu_scripts`、`xjtu_import` 会在启动时迁移到框架统一使用的 `ok_tasks`、`ok_import`；内容不同的同名文件必须先备份并解决冲突。
+Legacy `xjtu_scripts` and `xjtu_import` folders are migrated at startup. Conflicting files are never overwritten; back them up and resolve the conflict before restarting.
 
 ## 测试 / Testing
 

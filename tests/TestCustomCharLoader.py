@@ -1,3 +1,5 @@
+import os
+import py_compile
 import tempfile
 import unittest
 import zipfile
@@ -24,6 +26,9 @@ from src.char.CustomCharLoader import (
 )
 from src.char.Mortefi import Mortefi
 from src.char.Verina import Verina
+from src.char.Lily import Lily
+from src.char.CustomCharLoader import get_custom_team_folder, load_team_char_class
+from src.char._char_sources import char_source_path, read_char_source
 
 
 class TestCustomCharLoader(unittest.TestCase):
@@ -39,6 +44,79 @@ class TestCustomCharLoader(unittest.TestCase):
         clear_team_char_cache()
         Config.config_folder = self.old_config_folder
         self.temp_dir.cleanup()
+
+    def test_builtin_sources_prefer_checkout_and_include_lily(self):
+        snapshot = Path(self.temp_dir.name) / "snapshot"
+        snapshot.mkdir()
+        (snapshot / "Lily.py").write_text("stale snapshot", encoding="utf-8")
+        source = Path(__file__).resolve().parents[1] / "src" / "char" / "Lily.py"
+        with patch("src.char._char_sources.CHAR_SOURCES_DIR", snapshot):
+            self.assertEqual(char_source_path("Lily"), source)
+            self.assertEqual(read_builtin_char_code(Lily), source.read_text(encoding="utf-8"))
+            with patch("src.char._char_sources.CHAR_SOURCE_DIR", snapshot / "missing"):
+                self.assertEqual(read_char_source("Lily"), "stale snapshot")
+
+    def test_same_second_same_size_update_ignores_timestamp_bytecode(self):
+        path = get_custom_char_file(Mortefi)
+        first = self._team_code("first")
+        second = self._team_code("other")
+        path.write_text(first, encoding="utf-8")
+        timestamp = 1_700_000_000_100_000_000
+        os.utime(path, ns=(timestamp, timestamp))
+        py_compile.compile(str(path), doraise=True)
+        set_custom_char_enabled(Mortefi, True)
+        self.assertEqual(load_custom_char_class(Mortefi).team_marker, "first")
+        path.write_text(second, encoding="utf-8")
+        os.utime(path, ns=(timestamp + 100_000_000, timestamp + 100_000_000))
+        self.assertEqual(load_custom_char_class(Mortefi).team_marker, "other")
+
+    def test_archive_preview_does_not_execute_and_failed_import_keeps_old_team(self):
+        team = (Mortefi, Chixia, Verina)
+        self._import_team(team)
+        folder = get_custom_team_folder(team)
+        before = {path.name: path.read_bytes() for path in folder.iterdir() if path.is_file()}
+        previous = load_team_char_class(Mortefi, team)
+        archive = Path(self.temp_dir.name) / "invalid.zip"
+        marker = Path(self.temp_dir.name) / "executed"
+        manifest = dict(read_team_manifest(team), name="New", description="Description",
+                        author="Tester", version="2", team="Chixia, Mortefi, Verina")
+        for invalid in ("raise RuntimeError('cannot load')\nclass Verina: pass\n",
+                        "class Verina: pass\n"):
+            with self.subTest(code=invalid):
+                with zipfile.ZipFile(archive, "w") as output:
+                    output.writestr("team.json", json.dumps(manifest))
+                    for char_cls in team:
+                        code = invalid if char_cls is Verina else self._char_code(char_cls, "new")
+                        if char_cls is Chixia:
+                            code = f"from pathlib import Path\nPath({str(marker)!r}).touch()\n" + code
+                        output.writestr(f"{char_cls.__name__}.py", code)
+                marker.unlink(missing_ok=True)
+                info = inspect_team_archive(archive)
+                self.assertFalse(marker.exists())
+                with self.assertRaises(RuntimeError):
+                    import_custom_team(info)
+                self.assertTrue(marker.exists())
+                self.assertEqual({path.name: path.read_bytes() for path in folder.iterdir()
+                                  if path.is_file()}, before)
+                self.assertIs(load_team_char_class(Mortefi, team), previous)
+
+    def test_successful_import_loads_classes_from_committed_paths(self):
+        team = (Mortefi, Chixia, Verina)
+        self._import_team(team)
+        previous = load_team_char_class(Mortefi, team)
+        codes = {char_cls.__name__: self._char_code(char_cls, "new") +
+                 "    source_path = __file__\n    module_name = __name__\n" for char_cls in team}
+        folder = import_custom_team({"team": team, "manifest": {"version": "2"}, "codes": codes})
+        for char_cls in team:
+            loaded = load_team_char_class(char_cls, team)
+            self.assertEqual(loaded.team_marker, "new")
+            self.assertEqual(Path(loaded.source_path), folder / f"{char_cls.__name__}.py")
+            self.assertTrue(Path(loaded.source_path).is_file())
+            self.assertEqual(loaded.module_name, loaded.__module__)
+            self.assertEqual(read_team_import_code(team, char_cls), codes[char_cls.__name__])
+        self.assertIsNot(load_team_char_class(Mortefi, team), previous)
+        self.assertEqual(read_team_manifest(team)["version"], "2")
+        self.assertFalse(folder.with_name(folder.name + ".backup").exists())
 
     def test_loads_enabled_custom_char_class(self):
         code = """

@@ -111,6 +111,15 @@ class BaseChar:
         self.cycle_intro_time = 1.2
         self.target_box_short_combat_check = False
 
+    def is_character(self, character_cls):
+        """Match game identity independently of custom rotation inheritance."""
+        from src.char.CharFactory import char_dict
+        name = getattr(self, "char_name", None)
+        if not name:
+            return isinstance(self, character_cls)
+        info = char_dict.get(name)
+        return info is not None and issubclass(info["cls"], character_cls)
+
     def set_char_type(self, char_type=CharType.MAIN_DPS):
         """设置角色定位，默认为主输出。"""
         self._char_type = CharType(char_type or CharType.MAIN_DPS)
@@ -489,8 +498,10 @@ class BaseChar:
             check_fun = self.is_forte_full
         if check_fun():
             self.task.mouse_down()
-            success = self.task.wait_until(lambda: not check_fun(), time_out=2)
-            self.task.mouse_up()
+            try:
+                success = self.task.wait_until(lambda: not check_fun(), time_out=2)
+            finally:
+                self.task.mouse_up()
             self.sleep(0.05)
             return success
 
@@ -502,6 +513,8 @@ class BaseChar:
             interval (float, optional): 按键按下和释放的间隔。默认为 -1 (使用默认值)。
             down_time (float, optional): 按键按下的持续时间。默认为 0.01。
         """
+        if not self.task.use_liberation:
+            return False
         self._liberation_available = False
         self.task.send_key(self.get_liberation_key(), interval=interval, down_time=down_time, after_sleep=after_sleep)
 
@@ -898,14 +911,16 @@ class BaseChar:
             interval (float, optional): 每次发送按键的间隔。默认为 0.1。
             direction_key (str, optional): 如果指定，则在点击期间同时按下此键（如 'w'、'a'、's'、'd'）。
         """
-        if direction_key is not None:
-            self.task.send_key_down(direction_key)
-            self.task.next_frame()
-        start = time.time()
-        while time.time() - start < duration:
-            self.task.click(interval=interval, key="right")
-        if direction_key is not None:
-            self.task.send_key_up(direction_key)
+        try:
+            if direction_key is not None:
+                self.task.send_key_down(direction_key)
+                self.task.next_frame()
+            start = time.time()
+            while time.time() - start < duration:
+                self.task.click(interval=interval, key="right")
+        finally:
+            if direction_key is not None:
+                self.task.send_key_up(direction_key)
 
     def normal_attack(self):
         """执行一次普通攻击。"""
@@ -922,8 +937,10 @@ class BaseChar:
         self.check_combat()
         self.logger.debug('heavy attack start')
         self.task.mouse_down()
-        self.sleep(duration)
-        self.task.mouse_up()
+        try:
+            self.sleep(duration)
+        finally:
+            self.task.mouse_up()
         self.sleep(0.01)
         self.logger.debug('heavy attack end')
 

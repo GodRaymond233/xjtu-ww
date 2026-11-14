@@ -1,12 +1,8 @@
 """Runtime identity layer.
 
-This build rebrands everything the process exposes to the operating system:
-log file names, the log stream itself, the single-instance marker in %TEMP%,
-Win32 window class names, the AppUserModelID, notification source names, the
-exported diagnostic log filename, and the custom-script folders. Every value
-below deliberately diverges from the upstream `ok-ww` / `ok-script`
-distribution; keep new runtime-visible strings in this module so disk scans
-and monitoring stay unambiguous.
+This build rebrands process identity, logs, single-instance markers, window
+classes and notifications. Custom scripts keep the framework's canonical
+directories so discovery, template editing and packaging share one location.
 """
 
 import logging
@@ -21,9 +17,9 @@ OVERLAY_WINDOW_CLASS = 'xjtu.Overlay'
 NOTIFIER_APP_USER_MODEL_ID = 'xjtu.ww.shell'
 LOG_BASENAME = 'xjtu-ww'
 
-# Custom-script folders created next to the executable.
-SCRIPTS_FOLDER = 'xjtu_scripts'
-IMPORT_FOLDER = 'xjtu_import'
+# Keep the framework's canonical paths for discovery, editing and packaging.
+SCRIPTS_FOLDER = 'ok_tasks'
+IMPORT_FOLDER = 'ok_import'
 
 _UPSTREAM_TOKENS = (
     'ok-wuthering-waves',
@@ -208,15 +204,51 @@ def _patch_log_page():
     log_page_module._t = _t
 
 
-def _patch_script_folders():
-    """Rename the custom-script folders created beside the executable."""
-    import os
-    from ok.core import script_packager
+def _migrate_script_folders():
+    """Move the previous distribution's folders without overwriting user files."""
+    from pathlib import Path
 
-    script_packager.OK_TASKS_FOLDER = SCRIPTS_FOLDER
-    script_packager.OK_IMPORT_FOLDER = IMPORT_FOLDER
-    script_packager.get_ok_tasks_folder = lambda: os.path.join(os.getcwd(), SCRIPTS_FOLDER)
-    script_packager.get_ok_import_folder = lambda: os.path.join(os.getcwd(), IMPORT_FOLDER)
+    pairs = [(Path('xjtu_scripts'), Path(SCRIPTS_FOLDER)),
+             (Path('xjtu_import'), Path(IMPORT_FOLDER))]
+    # Preflight both trees before moving anything; a conflict needs user resolution.
+    for old, new in pairs:
+        if old.exists():
+            _check_folder_merge(old, new)
+    for old, new in pairs:
+        if old.exists():
+            _merge_script_folder(old, new)
+
+
+def _check_folder_merge(source, destination):
+    import filecmp
+    import os
+
+    if not destination.exists() and not destination.is_symlink():
+        return
+    if source.is_symlink() or destination.is_symlink():
+        same = (source.is_symlink() and destination.is_symlink()
+                and os.readlink(source) == os.readlink(destination))
+    elif source.is_dir() and destination.is_dir():
+        for child in source.iterdir():
+            _check_folder_merge(child, destination / child.name)
+        return
+    else:
+        same = (source.is_file() and destination.is_file()
+                and filecmp.cmp(source, destination, shallow=False))
+    if not same:
+        raise FileExistsError(f'Cannot migrate scripts: conflicting files {source} and {destination}')
+
+
+def _merge_script_folder(source, destination):
+    if not destination.exists() and not destination.is_symlink():
+        source.rename(destination)
+    elif source.is_dir() and not source.is_symlink():
+        for child in source.iterdir():
+            _merge_script_folder(child, destination / child.name)
+        source.rmdir()
+    else:
+        # Preflight established that this entry is identical to the destination.
+        source.unlink()
 
 
 def _export_ok_globals():
@@ -234,6 +266,7 @@ def apply():
     import ok as ok_package
     if getattr(ok_package, '_xjtu_identity_applied', False):
         return False
+    _migrate_script_folders()
     ok_package._xjtu_identity_applied = True
 
     _patch_logging()
@@ -241,7 +274,6 @@ def apply():
     _patch_mutex()
     _patch_window_classes()
     _patch_notifications()
-    _patch_script_folders()
     _patch_log_page()
     _export_ok_globals()
     return True

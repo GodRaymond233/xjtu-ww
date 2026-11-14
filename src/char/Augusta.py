@@ -49,7 +49,7 @@ class Augusta(BaseChar):
                         if self.perform_majesty():
                             self.send_echo_key()
                         return self.switch_next_char()
-            if self.liberation_available():
+            if self.task.use_liberation and self.liberation_available():
                 self.logger.debug('Augusta performs single liberation')
                 if self.task.wait_until(lambda: not self.liberation_available(), post_action=self.send_liberation_key,
                                         time_out=2):
@@ -69,23 +69,31 @@ class Augusta(BaseChar):
         return True
 
     def perform_majesty(self, time_out=0.6, wait_down=False):
-        self.task.send_key_down(self.get_liberation_key())
-        self.task.in_liberation = True
-        if wait_down:
-            time_out = 0.2
-            self.task.wait_until(lambda: not self.task.in_team()[0] or not self.flying(), time_out=2)
-        self.task.wait_until(lambda: not self.task.in_team()[0], time_out=time_out)
-        start = time.time()
-        self.task.send_key_up(self.get_liberation_key())
-        if self.task.in_team()[0]:
-            self.logger.debug('Augusta performs majesty failed: not in animation')
-            self.task.in_liberation = False
+        if not self.task.use_liberation:
             return False
-        self.task.wait_until(lambda: self.task.in_team()[0], post_action=self.click, time_out=10)
-        self.add_freeze_duration(start, time.time() - start)
-        self.logger.info(f'click_liberation end {time.time() - start}')
-
-        return True
+        previous_liberation = self.task.in_liberation
+        try:
+            self.task.send_key_down(self.get_liberation_key())
+            try:
+                self.task.in_liberation = True
+                if wait_down:
+                    time_out = 0.2
+                    self.task.wait_until(lambda: not self.task.in_team()[0] or not self.flying(), time_out=2)
+                self.task.wait_until(lambda: not self.task.in_team()[0], time_out=time_out)
+                start = time.time()
+            finally:
+                self.task.send_key_up(self.get_liberation_key())
+            if self.task.in_team()[0]:
+                self.logger.debug('Augusta performs majesty failed: not in animation')
+                self.task.in_liberation = False
+                return False
+            self.task.wait_until(lambda: self.task.in_team()[0], post_action=self.click, time_out=10)
+            self.add_freeze_duration(start, time.time() - start)
+            self.logger.info(f'click_liberation end {time.time() - start}')
+    
+            return True
+        finally:
+            self.task.in_liberation = previous_liberation
 
     def check_ascendancy(self):
         return False
@@ -107,7 +115,7 @@ class Augusta(BaseChar):
     def shorekeeper_auto_dodge(self):
         from src.char.ShoreKeeper import ShoreKeeper
         for i, char in enumerate(self.task.chars):
-            if isinstance(char, ShoreKeeper):
+            if char.is_character(ShoreKeeper):
                 return char.auto_dodge(condition=self.flying)
 
     def on_combat_end(self, chars):

@@ -1,5 +1,6 @@
 import unittest
-from unittest.mock import patch
+from types import SimpleNamespace
+from unittest.mock import Mock, patch
 
 import src.task.MultiAccountDailyTask as multi_account_module
 from ok.task.exceptions import WaitFailedException
@@ -23,7 +24,7 @@ class FakeComboTask:
     _select_account_by_combo = MultiAccountDailyTask._select_account_by_combo
 
     def __init__(self, done=()):
-        self.done_set = {normalize_account_name(name) for name in done}
+        self.done_set = set(done)
         self.all_accounts = set()
 
     def _login_combo(self):
@@ -81,8 +82,8 @@ class TestMultiAccountDailyTask(unittest.TestCase):
         class FakeTask:
             def __init__(self):
                 self.done_set = {
-                    normalize_account_name("aa****01@example.com"),
-                    normalize_account_name("bb****02@example.com"),
+                    "aa****01@example.com",
+                    "bb****02@example.com",
                 }
                 self.all_accounts = set()
                 self.clicked = []
@@ -127,7 +128,7 @@ class TestMultiAccountDailyTask(unittest.TestCase):
 
         self.assertEqual(account, "Display Name")
         self.assertEqual(selected, [1])
-        self.assertEqual(task.all_accounts, {normalize_account_name(name) for name in items})
+        self.assertEqual(task.all_accounts, set(items))
 
     def test_combo_selection_returns_none_when_every_account_is_done(self):
         items = ["aa****01@example.com", "Display Name"]
@@ -156,10 +157,6 @@ class TestMultiAccountDailyTask(unittest.TestCase):
         self.assertEqual(account, "Display Name")
 
 
-if __name__ == "__main__":
-    unittest.main()
-
-
     def test_selection_ends_the_sweep_once_every_detected_account_is_done(self):
         class AccountBox:
             def __init__(self, name):
@@ -173,13 +170,14 @@ if __name__ == "__main__":
             executor = FakeExecutor()
 
             def __init__(self):
-                self.done_set = {normalize_account_name("aa****01@example.com")}
+                self.done_set = {"aa****01@example.com"}
                 self.all_accounts = set()
                 self.clicked = []
                 self.logs = []
 
             _is_done = MultiAccountDailyTask._is_done
             _click_account_in_list = MultiAccountDailyTask._click_account_in_list
+            _login_combo = staticmethod(lambda: None)
 
             def ocr(self, match=None):
                 return [AccountBox("aa****01@example.com")]
@@ -200,7 +198,7 @@ if __name__ == "__main__":
                 pass
 
             def find_account_drop_down(self):
-                return object()
+                return None
 
             def do_find_account_drop_down(self):
                 return None
@@ -231,6 +229,7 @@ if __name__ == "__main__":
 
             _is_done = MultiAccountDailyTask._is_done
             _click_account_in_list = MultiAccountDailyTask._click_account_in_list
+            _login_combo = staticmethod(lambda: None)
 
             def ocr(self, match=None):
                 return []
@@ -251,7 +250,7 @@ if __name__ == "__main__":
                 pass
 
             def find_account_drop_down(self):
-                return object()
+                return None
 
             def do_find_account_drop_down(self):
                 return None
@@ -264,3 +263,102 @@ if __name__ == "__main__":
 
         with self.assertRaises(WaitFailedException):
             MultiAccountDailyTask._select_and_login_account(FakeTask())
+
+    def test_native_accounts_with_colliding_ocr_spellings_all_run(self):
+        items = ['a0@example.com', 'ao@example.com', 'ao@example.con', 'AO@example.com']
+        task = FakeComboTask()
+        selected = []
+        with patch.object(multi_account_module, 'combo_items', return_value=items), \
+                patch.object(multi_account_module, 'select_combo_item', return_value=True):
+            while account := task._select_account_by_combo(1):
+                selected.append(account)
+                MultiAccountDailyTask._mark_done(task, account)
+        self.assertEqual(selected, items)
+        self.assertEqual(task.done_set, set(items))
+        self.assertEqual(task.all_accounts, set(items))
+
+    def test_ocr_confirmation_tolerates_only_unambiguous_variants(self):
+        task = FakeComboTask()
+        left, right = 'a0@example.com', 'ao@example.con'
+        task.all_accounts = {left}
+        self.assertTrue(MultiAccountDailyTask._same_account(task, left, right))
+        task.all_accounts.add('ao@example.com')
+        self.assertFalse(MultiAccountDailyTask._same_account(task, left, right))
+        self.assertFalse(MultiAccountDailyTask._same_account(task, left, 'ao@example.com'))
+        self.assertFalse(MultiAccountDailyTask._same_account(task, None, None))
+        self.assertTrue(MultiAccountDailyTask._same_account(task, left, left))
+
+    def make_login_task(self):
+        class LoginTask:
+            _select_and_login_account = MultiAccountDailyTask._select_and_login_account
+            _same_account = MultiAccountDailyTask._same_account
+            _is_done = MultiAccountDailyTask._is_done
+            _click_account_in_list = MultiAccountDailyTask._click_account_in_list
+
+        task = LoginTask()
+        task.done_set = set()
+        task.all_accounts = set()
+        mouse = Mock(enabled=True)
+        task.executor = SimpleNamespace(get_task_by_class=lambda cls: mouse)
+        for name in ('sleep', 'click', 'click_relative', 'ensure_main', 'info_set',
+                     'log_info', 'log_error', 'screenshot'):
+            setattr(task, name, Mock())
+        task.tr = str
+        task._login_combo = Mock(return_value=None)
+        task.find_account_drop_down = Mock(return_value=object())
+        task.do_find_account_drop_down = Mock(return_value=None)
+        task.ocr = Mock(return_value=[])
+        task.find_boxes = Mock(return_value=[])
+        task.box_of_screen = Mock()
+        task.wait_until = lambda condition, **kwargs: condition()
+        return task, mouse
+
+    def test_five_unopened_dropdowns_raise_without_login_and_restore_mouse_task(self):
+        task, mouse = self.make_login_task()
+        task.do_find_account_drop_down.return_value = object()
+        with self.assertRaises(WaitFailedException):
+            task._select_and_login_account()
+        self.assertEqual(task.find_account_drop_down.call_count, 5)
+        task.ocr.assert_not_called()
+        task.ensure_main.assert_not_called()
+        task.click_relative.assert_not_called()
+        mouse.disable.assert_called_once_with()
+        mouse.enable.assert_called_once_with()
+
+    def test_confirmed_ocr_variant_returns_selected_identity(self):
+        task, mouse = self.make_login_task()
+        selected = 'a0****@example.com'
+        task.all_accounts = {selected}
+        task._click_account_in_list = Mock(return_value=selected)
+        task._detect_current_account_from_login = Mock(return_value='ao****@example.con')
+        self.assertEqual(task._select_and_login_account(), selected)
+        task.ensure_main.assert_called_once_with(time_out=180)
+        mouse.enable.assert_called_once_with()
+
+    def test_ambiguous_ocr_account_never_logs_in(self):
+        task, mouse = self.make_login_task()
+        task.all_accounts = {'a0****@example.com', 'ao****@example.com'}
+        task._click_account_in_list = Mock(return_value='a0****@example.com')
+        task._detect_current_account_from_login = Mock(return_value='ao****@example.com')
+        with self.assertRaises(Exception):
+            task._select_and_login_account()
+        task.ensure_main.assert_not_called()
+        task.click_relative.assert_not_called()
+        mouse.enable.assert_called_once_with()
+
+    def test_cancelled_account_selection_restores_mouse_task_without_login(self):
+        from ok import TaskDisabledException
+
+        task, mouse = self.make_login_task()
+        cancelled = TaskDisabledException()
+        task.find_account_drop_down.side_effect = cancelled
+        with self.assertRaises(TaskDisabledException) as raised:
+            task._select_and_login_account()
+        self.assertIs(raised.exception, cancelled)
+        task.ensure_main.assert_not_called()
+        task.click_relative.assert_not_called()
+        mouse.enable.assert_called_once_with()
+
+
+if __name__ == '__main__':
+    unittest.main()

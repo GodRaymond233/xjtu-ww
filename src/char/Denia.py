@@ -67,7 +67,7 @@ class Denia(BaseChar):
             from src.char.Aemeath import Aemeath
             from src.char.Qingxiao import Qingxiao
 
-            if isinstance(current_char, (Aemeath, Qingxiao)) and not self.has_buff():
+            if current_char and current_char.is_character((Aemeath, Qingxiao)) and not self.has_buff():
                 return SwitchPriority.NORMAL
             return SwitchPriority.NO + 1
         elif self.has_buff():

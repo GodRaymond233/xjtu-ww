@@ -9,12 +9,15 @@ class Galbrena(BaseChar):
         if self.has_intro:
             self.logger.debug('has_intro wait and heavy attack for 86F and dodge')
             self.task.mouse_down()
-            self.sleep(1)
-            if self.need_fast_perform():
+            try:
+                self.sleep(1)
+                fast = self.need_fast_perform()
+                if not fast:
+                    self.sleep(0.44)
+            finally:
                 self.task.mouse_up()
+            if fast:
                 return self.switch_next_char()
-            self.sleep(0.44)
-            self.task.mouse_up()
             self.continues_right_click(0.6)
         elif self.flying():
             self.wait_down()
@@ -48,5 +51,5 @@ class Galbrena(BaseChar):
     def shorekeeper_auto_dodge(self):
         from src.char.ShoreKeeper import ShoreKeeper
         for i, char in enumerate(self.task.chars):
-            if isinstance(char, ShoreKeeper):
+            if char.is_character(ShoreKeeper):
                 return char.auto_dodge(condition = self.flying)   

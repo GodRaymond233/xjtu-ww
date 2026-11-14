@@ -100,8 +100,10 @@ class Aemeath(BaseChar):
 
     def heavy_wait_highlight_down(self):
         self.task.mouse_down()
-        ret = self.task.wait_until(lambda: not self.has_long_action(), time_out=1.2)
-        self.task.mouse_up()
+        try:
+            ret = self.task.wait_until(lambda: not self.has_long_action(), time_out=1.2)
+        finally:
+            self.task.mouse_up()
         self.sleep(0.01)
         return ret
 

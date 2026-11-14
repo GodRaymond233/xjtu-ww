@@ -103,15 +103,22 @@ class MultiAccountDailyTask(WWOneTimeTask, BaseCombatTask):
         self.support_schedule_task = True
 
     def _mark_done(self, account):
-        normalized = normalize_account_name(account)
-        if normalized:
-            self.done_set.add(normalized)
+        if account:
+            self.done_set.add(account)
 
     def _is_done(self, account):
-        return normalize_account_name(account) in self.done_set
+        return account in self.done_set
 
     def _same_account(self, left, right):
-        return normalize_account_name(left) == normalize_account_name(right)
+        if not left or not right:
+            return False
+        if left == right:
+            return True
+        # OCR tolerance confirms a selection; it must never merge account identities.
+        normalized = normalize_account_name(left)
+        candidates = {name for name in self.all_accounts | {left}
+                      if normalize_account_name(name) == normalized}
+        return normalize_account_name(right) == normalized and len(candidates) == 1
 
     def run(self):
         if self.config.get(PER_ACCOUNT_CONFIGURATION, False):
@@ -171,7 +178,7 @@ class MultiAccountDailyTask(WWOneTimeTask, BaseCombatTask):
     def _select_account_by_combo(self, combo):
         accounts = combo_items(combo)
         for name in accounts:
-            self.all_accounts.add(normalize_account_name(name))
+            self.all_accounts.add(name)
         self.info_set('All Accounts', self.all_accounts)
         for index, name in enumerate(accounts):
             if self._is_done(name):
@@ -197,9 +204,9 @@ class MultiAccountDailyTask(WWOneTimeTask, BaseCombatTask):
         accounts = self.ocr(match=account_pattern)
         next_account = None
         # self.screenshot('_click_account_in_list')
+        self.all_accounts.update(account.name for account in accounts)
+        self.info_set('All Accounts', self.all_accounts)
         for account in accounts:
-            self.all_accounts.add(normalize_account_name(account.name))
-            self.info_set('All Accounts', self.all_accounts)
             if next_account is None and not self._is_done(account.name):
                 next_account = account.name
                 self.click(account, after_sleep=2)
@@ -222,6 +229,7 @@ class MultiAccountDailyTask(WWOneTimeTask, BaseCombatTask):
             # 找不到原生 ComboBox 时（如其他登录界面）走原有的 OCR + 点击流程
             max_retries = 0 if combo else 5
             for attempt in range(1, max_retries + 1):
+                current_account = None
                 # self.ensure_in_front()
                 # self.update_capture({
                 #     'windows': {
@@ -257,6 +265,7 @@ class MultiAccountDailyTask(WWOneTimeTask, BaseCombatTask):
                     selected=account, displayed=current_account))
                 if self._same_account(account, current_account):
                     self.log_info(self.tr('Confirmed selected account: {account}').format(account=account))
+                    current_account = account
                     break
                 if attempt < max_retries:
                     self.log_info(self.tr('Account display does not match, retrying ({attempt}/{max_retries})').format(
@@ -266,6 +275,8 @@ class MultiAccountDailyTask(WWOneTimeTask, BaseCombatTask):
                         'Account selection failed after {max_retries} retries; {account} is still not displayed. Continuing login attempt'
                     ).format(max_retries=max_retries, account=account))
                     raise Exception(self.tr('Failed to switch account'))
+            if not current_account:
+                raise WaitFailedException()
             self.sleep(4)
             texts = self.ocr()
             login_btn = self.find_boxes(texts, boundary=self.box_of_screen(0.3, 0.3, 0.7, 0.8),

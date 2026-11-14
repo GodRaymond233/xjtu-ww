@@ -49,6 +49,9 @@ jobs:
       - name: Install build toolchain
         run: python -m pip install "cython>=3" setuptools
 
+      - name: Generate character source snapshots
+        run: python .github/scripts/build_char_sources.py
+
       - name: Compile sources to native extensions
         shell: pwsh
         run: python setup.py build_ext --inplace --force
@@ -163,7 +166,7 @@ jobs:
           generate_release_notes: true
           body: |
             解压 Windows 便携包后运行 `xjtu-ww.exe`，直接进入本体主界面。游戏操作需要管理员权限时，请以管理员身份运行。
-            包内已包含 Python、依赖、OCR 模型及工坊入口。更新时解压到新目录，再复制旧目录的 `configs`、`xjtu_scripts` 和 `xjtu_import`（如有）。
+            包内已包含 Python、依赖、OCR 模型及工坊入口。更新时解压到新目录，再复制旧目录的 `configs`、`ok_tasks` 和 `ok_import`（如有）。旧版 `xjtu_scripts`、`xjtu_import` 也应复制，首次启动会迁移到对应的 `ok_*` 目录，同名不同内容不会覆盖。
           prerelease: ${{ needs.build.outputs.prerelease == 'true' }}
           fail_on_unmatched_files: true
           files: |

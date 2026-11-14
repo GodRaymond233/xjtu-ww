@@ -1,5 +1,6 @@
 import unittest
 from unittest.mock import Mock, call, patch
+from ok import TaskDisabledException
 
 from src.task.FarmEchoTask import FarmEchoTask
 from src.task.WWOneTimeTask import WWOneTimeTask
@@ -97,6 +98,72 @@ class TestFarmEchoTeleport(unittest.TestCase):
             task.run()
 
         self.assertEqual(2, task.do_run.call_count)
+
+    def test_cancelled_run_is_propagated_without_claim_recovery(self):
+        task = make_task({}, is_team=True)
+        cancelled = TaskDisabledException()
+        task.do_run = Mock(side_effect=cancelled)
+        task.handle_claim_button = Mock()
+        task.handle_monthly_card = Mock()
+        with patch.object(WWOneTimeTask, 'run'), self.assertRaises(TaskDisabledException) as raised:
+            task.run()
+        self.assertIs(raised.exception, cancelled)
+        task.handle_claim_button.assert_not_called()
+        task.handle_monthly_card.assert_not_called()
+
+    def test_teleport_and_walk_cancellation_are_not_wrapped(self):
+        for stage in ('teleport_to_configured_boss', 'walk_after_boss_teleport'):
+            with self.subTest(stage=stage):
+                task = make_task({}, is_team=False)
+                task.teleport_to_configured_boss = Mock(return_value=False)
+                task.walk_after_boss_teleport = Mock(return_value='combat')
+                cancelled = TaskDisabledException()
+                getattr(task, stage).side_effect = cancelled
+                with self.assertRaises(TaskDisabledException) as raised:
+                    task.teleport_to_configured_boss_and_prepare()
+                self.assertIs(raised.exception, cancelled)
+
+    def test_regular_teleport_failure_still_has_context(self):
+        task = make_task({}, is_team=False)
+        failure = ValueError('unreadable destination')
+        task.teleport_to_configured_boss = Mock(side_effect=failure)
+        task.tr = str
+        with self.assertRaises(RuntimeError) as raised:
+            task.teleport_to_configured_boss_and_prepare()
+        self.assertIs(raised.exception.__cause__, failure)
+
+    def test_boss_identity_is_fresh_per_run_but_preserved_for_claim_retry(self):
+        task = make_task({}, is_team=True)
+        task.aim_boss = 'previous account boss'
+        seen = []
+
+        def farm():
+            seen.append(task.aim_boss)
+            task.aim_boss = 'current boss'
+            if len(seen) == 1:
+                raise RuntimeError('claim popup')
+
+        task.do_run = Mock(side_effect=farm)
+        task.handle_claim_button = Mock(return_value=True)
+        task.handle_monthly_card = Mock(return_value=False)
+        with patch.object(WWOneTimeTask, 'run'):
+            task.run()
+            task.run()
+        self.assertEqual(seen, [None, 'current boss', None])
+
+    def test_walk_cancellation_releases_both_inputs(self):
+        task = make_task({}, is_team=False)
+        task.wait_until = Mock(return_value=False)
+        task.middle_click = Mock()
+        task.send_key_down = Mock()
+        task.send_key_up = Mock()
+        task.mouse_down = Mock()
+        task.mouse_up = Mock()
+        task.in_combat = Mock(side_effect=TaskDisabledException())
+        with self.assertRaises(TaskDisabledException):
+            task.walk_until_f_or_combat()
+        task.send_key_up.assert_called_once_with('w')
+        task.mouse_up.assert_called_once_with(key='right')
 
 
 if __name__ == '__main__':

@@ -585,6 +585,14 @@ def import_custom_team(archive_info):
         (temp_folder / TEAM_MANIFEST_FILE).write_text(
             json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8"
         )
+        # Validate without populating the live team cache: these modules carry
+        # temporary __file__ paths and must never become runtime classes.
+        char_classes = _team_char_classes(class_names)
+        for class_name in class_names:
+            _load_class_from_file(
+                char_classes[class_name], temp_folder / f"{class_name}.py",
+                f"xjtu_import_validation_{temp_folder.name}_{class_name}",
+            )
         backup = folder.with_name(folder.name + ".backup")
         if backup.exists():
             shutil.rmtree(backup)
@@ -774,7 +782,7 @@ def _load_class_from_file(char_cls, path, module_name):
         raise RuntimeError(f"Cannot load custom char module: {path}")
 
     module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
+    exec(compile(path.read_bytes(), str(path), "exec"), module.__dict__)
     custom_cls = getattr(module, char_cls.__name__, None)
     if custom_cls is None:
         raise RuntimeError(f"Custom code must define class {char_cls.__name__}")

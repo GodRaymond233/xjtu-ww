@@ -85,6 +85,72 @@ class TestCharacterCodeTab(unittest.TestCase):
         finally:
             about.deleteLater()
 
+    def test_cancel_unsaved_creation_does_not_create_or_reselect_team(self):
+        team = (Mortefi, Chixia, Verina)
+        new_team = (Baizhi, Chixia, Verina)
+        create_custom_team(team)
+        tab = CharacterCodeTab()
+        try:
+            tab.member_combo.setCurrentIndex(1)
+            member = tab.current_char_cls
+            edited = tab.editor.toPlainText() + "\n# unsaved creation\n"
+            tab.editor.setPlainText(edited)
+            with (patch.object(TeamSelectionDialog, "exec", return_value=True),
+                  patch.object(TeamSelectionDialog, "selected_names", return_value=new_team),
+                  patch.object(tab, "_confirm_discard_changes", return_value=False)):
+                tab._create_team()
+            self.assertFalse(get_custom_team_folder(new_team).exists())
+            self.assertEqual(tab.team_list.count(), 1)
+            self.assertEqual(tab.current_team, normalize_team(team))
+            self.assertEqual(tuple(tab.team_list.currentItem().data(Qt.UserRole)), normalize_team(team))
+            self.assertIs(tab.current_char_cls, member)
+            self.assertEqual(tab.editor.toPlainText(), edited)
+        finally:
+            tab.deleteLater()
+
+    def test_cancel_selection_restores_team_key_after_row_order_changes(self):
+        team = (Mortefi, Chixia, Verina)
+        other = (Baizhi, Chixia, Verina)
+        create_custom_team(team)
+        create_custom_team(other)
+        tab = CharacterCodeTab()
+        try:
+            row, _item = self._row(tab, team)
+            tab.team_list.setCurrentRow(row)
+            edited = tab.editor.toPlainText() + "\n# unsaved selection\n"
+            tab.editor.setPlainText(edited)
+            tab.team_list.blockSignals(True)
+            item = tab.team_list.takeItem(row)
+            new_row = 1 - row
+            tab.team_list.insertItem(new_row, item)
+            tab.team_list.setCurrentRow(new_row)
+            tab.team_list.blockSignals(False)
+            with patch.object(tab, "_confirm_discard_changes", return_value=False):
+                tab.team_list.setCurrentRow(row)
+            self.assertEqual(tab.current_team, normalize_team(team))
+            self.assertEqual(tuple(tab.team_list.currentItem().data(Qt.UserRole)), normalize_team(team))
+            self.assertEqual(tab.editor.toPlainText(), edited)
+        finally:
+            tab.deleteLater()
+
+    def test_cancel_list_refresh_preserves_unsaved_editor_and_selection(self):
+        team = (Mortefi, Chixia, Verina)
+        create_custom_team(team)
+        tab = CharacterCodeTab()
+        try:
+            edited = tab.editor.toPlainText() + "\n# unsaved refresh\n"
+            tab.editor.setPlainText(edited)
+            other = (Baizhi, Chixia, Verina)
+            create_custom_team(other)
+            with patch.object(tab, "_confirm_discard_changes", return_value=False):
+                tab._refresh_team_list(other)
+            self.assertEqual(tab.team_list.count(), 1)
+            self.assertEqual(tab.current_team, normalize_team(team))
+            self.assertEqual(tuple(tab.team_list.currentItem().data(Qt.UserRole)), normalize_team(team))
+            self.assertEqual(tab.editor.toPlainText(), edited)
+        finally:
+            tab.deleteLater()
+
     def test_create_team_defaults_to_detected_team(self):
         tab = CharacterCodeTab()
         try:

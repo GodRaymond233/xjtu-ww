@@ -109,12 +109,12 @@ class Ciaccona(BaseChar):
         from src.char.Cartethyia import Cartethyia
         for i, char in enumerate(self.task.chars):
             self.logger.debug(f'ciaccona teammate char: {char.char_name}')
-            if isinstance(char, (Cartethyia)):
+            if char.is_character(Cartethyia):
                 self.logger.debug('ciaccona set attribute: wind dot')
                 self.cartethyia = char
                 self.attribute = 3
                 return
-            if isinstance(char, (Phoebe, Zani)):
+            if char.is_character((Phoebe, Zani)):
                 self.logger.debug('ciaccona set attribute: light dot')
                 self.attribute = 2
                 return
@@ -167,6 +167,8 @@ class Ciaccona(BaseChar):
         return super().switch_next_char(*args, **kwargs)
 
     def send_liberation_key(self, *args, **kwargs):
+        if not self.task.use_liberation:
+            return False
         # click_liberation 可能因动画检测超时返回 False 但大招已放出, 所以按键即标记
         self.recital_on_field = True
         super().send_liberation_key(*args, **kwargs)
@@ -187,8 +189,8 @@ class Ciaccona(BaseChar):
         
     def need_fast_perform(self):
         from src.char.Cartethyia import Cartethyia
-        if self.task.has_char(Cartethyia) and hasattr(Cartethyia, 'is_cartethyia'):
-            return Cartethyia.is_cartethyia
+        if char := self.task.has_char(Cartethyia):
+            return char.is_cartethyia
         return False
 
 

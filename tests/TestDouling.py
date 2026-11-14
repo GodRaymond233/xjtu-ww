@@ -78,6 +78,14 @@ class TestDoulingHeavyHold(unittest.TestCase):
         char._heavy_attack_hold(0.05)
         self.assertEqual(['down', 'up'], events)
 
+    def test_cancelled_frame_releases_heavy(self):
+        from unittest.mock import Mock
+        char, events, _ = self.make(["GZZZ"])
+        char.task.next_frame = Mock(side_effect=InterruptedError)
+        with self.assertRaises(InterruptedError):
+            char._heavy_attack_hold(2.5)
+        self.assertEqual(events, ["down", "up"])
+
 
 if __name__ == '__main__':
     unittest.main()

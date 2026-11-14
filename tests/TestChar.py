@@ -2168,5 +2168,192 @@ class TestChar(TaskTestCase):
         self.assertTrue(has_cd)
 
 
+class TestCharacterSafety(unittest.TestCase):
+    def make_char(self, cls=BaseChar, **kwargs):
+        from unittest.mock import Mock
+        task = Mock(use_liberation=True, in_liberation=False)
+        char = cls(task, 0, **kwargs)
+        char.check_combat = Mock()
+        char.sleep = Mock()
+        return char, task
+
+    def test_carlotta_forward_hold_releases_on_liberation_failure(self):
+        from unittest.mock import Mock
+        from src.char.Carlotta import Carlotta
+        char, task = self.make_char(Carlotta)
+        char.press_w = 1
+        char.click_liberation = Mock(side_effect=InterruptedError)
+        with self.assertRaises(InterruptedError):
+            char.click_liberation_1()
+        task.send_key_up.assert_called_once_with(key='w')
+
+    def test_augusta_key_and_animation_flag_release_on_cancellation(self):
+        from src.char.Augusta import Augusta
+        char, task = self.make_char(Augusta)
+        task.get_liberation_key.return_value = 'r'
+        task.wait_until.side_effect = InterruptedError
+        with self.assertRaises(InterruptedError):
+            char.perform_majesty()
+        task.send_key_up.assert_called_once_with('r')
+        self.assertFalse(task.in_liberation)
+
+    def test_galbrena_early_switch_happens_after_release(self):
+        from unittest.mock import Mock
+        from src.char.Galbrena import Galbrena
+        char, task = self.make_char(Galbrena)
+        char.has_intro = True
+        char.need_fast_perform = Mock(return_value=True)
+        events = []
+        task.mouse_down.side_effect = lambda: events.append('down')
+        task.mouse_up.side_effect = lambda: events.append('up')
+        char.switch_next_char = lambda: events.append('switch')
+        char.do_perform()
+        self.assertEqual(events, ['down', 'up', 'switch'])
+
+
+    def test_heavy_inputs_release_on_cancellation(self):
+        from unittest.mock import Mock
+        for cls, method in ((BaseChar, 'heavy_attack'), (BaseChar, 'heavy_click_forte'),
+                            (Aemeath, 'heavy_wait_highlight_down')):
+            with self.subTest(character=cls.__name__, method=method):
+                char, task = self.make_char(cls)
+                char.is_forte_full = Mock(return_value=True)
+                char.sleep.side_effect = InterruptedError
+                task.wait_until.side_effect = InterruptedError
+                with self.assertRaises(InterruptedError):
+                    getattr(char, method)()
+                task.mouse_down.assert_called_once()
+                task.mouse_up.assert_called_once()
+
+    def test_direction_hold_releases_when_frame_capture_is_cancelled(self):
+        char, task = self.make_char()
+        task.next_frame.side_effect = InterruptedError
+        with self.assertRaises(InterruptedError):
+            char.continues_right_click(1, direction_key='w')
+        task.send_key_up.assert_called_once_with('w')
+
+    def test_zani_early_forte_return_releases_mouse(self):
+        from unittest.mock import Mock
+        from src.char.Zani import Zani, State
+        char, task = self.make_char(Zani)
+        char.chair_time = -1
+        char.dodge_time = 0
+        char.standard_defense_protocol_combo = Mock(return_value=State.FAILED)
+        char.wait_forte_full = Mock(side_effect=[State.DONE, State.FORTE_FULL])
+        self.assertEqual(char.basic_attack_breakthrough(), State.FORTE_FULL)
+        task.mouse_down.assert_called_once()
+        task.mouse_up.assert_called_once()
+
+    def test_zani_zero_resonance_cannot_reset_total_timeout(self):
+        from unittest.mock import Mock
+        from src.char.Zani import Zani
+        char, task = self.make_char(Zani)
+        now = [10.0]
+        task.find_one.return_value = None
+        task.next_frame.side_effect = lambda: now.__setitem__(0, now[0] + 1)
+        char.current_resonance = Mock(return_value=0)
+        char.check_liber = Mock(return_value=False)
+        char.update_blazes = Mock()
+        with patch('src.char.Zani.time.time', side_effect=lambda: now[0]):
+            char.click_liber2()
+        self.assertLessEqual(task.next_frame.call_count, 7)
+        char.update_blazes.assert_called_once()
+        self.assertFalse(task.in_liberation)
+
+    def test_zani_cancel_restores_liberation_flag(self):
+        from src.char.Zani import Zani
+        char, task = self.make_char(Zani)
+        task.find_one.side_effect = InterruptedError
+        with self.assertRaises(InterruptedError):
+            char.click_liber2()
+        self.assertFalse(task.in_liberation)
+
+    def test_suisui_successful_early_resonance_switches_once(self):
+        from unittest.mock import Mock
+        char, task = self.make_char(Suisui)
+        char.time_elapsed_accounting_for_freeze = Mock(return_value=0)
+        char.forte3_available = Mock(return_value=False)
+        char.forte2_available = Mock(return_value=False)
+        char.try_e = Mock(return_value=True)
+        char.cycle_start = Mock()
+        char.switch_next_char = Mock()
+        char.do_perform()
+        char.switch_next_char.assert_called_once()
+
+    def test_shorekeeper_failed_resonance_tuple_uses_heavy(self):
+        from unittest.mock import Mock
+        for clicked in (False, True):
+            with self.subTest(clicked=clicked):
+                char, task = self.make_char(ShoreKeeper)
+                char.click_echo = Mock()
+                char.click_liberation = Mock()
+                char.click_resonance = Mock(return_value=(clicked, 0, False))
+                char.heavy_click_forte = Mock()
+                char.switch_next_char = Mock()
+                char.do_perform()
+                self.assertEqual(char.heavy_click_forte.call_count, int(not clicked))
+                char.switch_next_char.assert_called_once()
+
+    def test_disabled_custom_liberation_entries_do_nothing(self):
+        from src.char.Augusta import Augusta
+        from src.char.Carlotta import Carlotta
+        from src.char.Changli import Changli
+        from src.char.Hiyuki import Hiyuki
+        from src.char.Zani import Zani
+        entries = ((BaseChar, 'send_liberation_key'), (Carlotta, 'click_liberation'),
+                   (Carlotta, 'click_liberation_1'), (Changli, 'liberation_and_heavy'),
+                   (Augusta, 'perform_majesty'), (Rebecca, 'perform_hmg_mode'),
+                   (Lucilla, 'perform_liberation'), (Lucilla, 'try_liberation'),
+                   (Lucy, 'perform_liberation'), (Hiyuki, 'hold_liberation'),
+                   (Zani, 'click_liber2'), (Ciaccona, 'send_liberation_key'))
+        for cls, method in entries:
+            with self.subTest(character=cls.__name__, method=method):
+                char, task = self.make_char(cls)
+                task.use_liberation = False
+                previous = char.last_liberation
+                task.reset_mock()
+                getattr(char, method)()
+                self.assertEqual(task.mock_calls, [])
+                char.sleep.assert_not_called()
+                self.assertEqual(char.last_liberation, previous)
+
+    def test_ciaccona_reads_current_teammate_form(self):
+        from src.char.Cartethyia import Cartethyia
+        char, task = self.make_char(Ciaccona)
+        teammate = Cartethyia.__new__(Cartethyia)
+        BaseChar.__init__(teammate, task, 1)
+        task.has_char.return_value = teammate
+        for small in (True, False, True):
+            teammate.is_cartethyia = small
+            self.assertEqual(char.need_fast_perform(), small)
+        task.has_char.return_value = None
+        self.assertFalse(char.need_fast_perform())
+
+    def test_complete_custom_source_keeps_teammate_identity_and_factory_reuse(self):
+        import tempfile
+        from pathlib import Path
+        from unittest.mock import Mock
+        from src.char.CustomCharLoader import _load_class_from_file
+        from src.char.Augusta import Augusta
+        source = Path(__file__).resolve().parents[1] / 'src' / 'char' / 'ShoreKeeper.py'
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / 'ShoreKeeper.py'
+            path.write_text(source.read_text(encoding='utf-8'), encoding='utf-8')
+            custom_cls = _load_class_from_file(ShoreKeeper, path, 'test_complete_shorekeeper')
+        char, task = self.make_char(custom_cls, char_name=Labels.char_shorekeeper)
+        self.assertNotIsInstance(char, ShoreKeeper)
+        combat = BaseCombatTask.__new__(BaseCombatTask)
+        combat.chars = [None, char]
+        self.assertIs(combat.has_char(ShoreKeeper), char)
+        task.chars = [char]
+        char.auto_dodge = Mock(return_value=True)
+        self.assertTrue(Augusta(task, 1).shorekeeper_auto_dodge())
+        task.find_one.return_value = Mock(confidence=1)
+        self.assertIs(get_char_by_pos(task, None, 0, char), char)
+        self.assertTrue(ShoreKeeper(None, 0).is_character(ShoreKeeper))
+        unknown = BaseChar(None, 0, char_name='unknown')
+        self.assertFalse(unknown.is_character(ShoreKeeper))
+
+
 if __name__ == '__main__':
     unittest.main()

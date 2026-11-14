@@ -49,20 +49,22 @@ class Zhezhi(BaseChar):
             self.task.next_frame()
         jump_intval = time.time() + 0.4
         self.task.mouse_down()
-        while self.resonance_available() and self.resonance_blue():
-            self.send_resonance_key()
-            if self.need_fast_perform() and time.time() - start > 1.1:
-                break
-            if self.is_con_full() and (self.char_carlotta is None or self.con_lock()):
-                break
-            if time.time() - start > 4:
-                break
-            if time.time() > jump_intval:
-                self.task.jump(after_sleep=0.01)
-                jump_intval += 0.4
-            self.check_combat()
-            self.task.next_frame()
-        self.task.mouse_up()
+        try:
+            while self.resonance_available() and self.resonance_blue():
+                self.send_resonance_key()
+                if self.need_fast_perform() and time.time() - start > 1.1:
+                    break
+                if self.is_con_full() and (self.char_carlotta is None or self.con_lock()):
+                    break
+                if time.time() - start > 4:
+                    break
+                if time.time() > jump_intval:
+                    self.task.jump(after_sleep=0.01)
+                    jump_intval += 0.4
+                self.check_combat()
+                self.task.next_frame()
+        finally:
+            self.task.mouse_up()
 
     def con_lock(self):
         return self.char_carlotta.get_ready() or self.get_current_con() < 0.6 or (

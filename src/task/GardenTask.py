@@ -100,7 +100,12 @@ class GardenTask(WWOneTimeTask, BaseWWTask):
 
     def is_garden_done(self, texts):
         text = " ".join(str(getattr(box, "name", box)) for box in texts)
-        return text.count(self.GARDEN_TARGET_POINTS.pattern) != 1
+        # A missing score is unknown, not evidence that the weekly cap was reached.
+        scores = re.findall(r'(?<!\d)(\d+)\s*[/／]\s*6000(?!\d)', text)
+        if scores:
+            return any(int(score) >= 6000 for score in scores)
+        # OCR can split the current and maximum scores into separate boxes.
+        return len(re.findall(r'(?<!\d)6000(?!\d)', text)) >= 2
 
     def find_best_garden_feature(self):
         matches = []

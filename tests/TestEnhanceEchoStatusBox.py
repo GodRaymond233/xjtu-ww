@@ -1,4 +1,5 @@
 import unittest
+from unittest.mock import Mock, patch
 
 from ok.feature.Box import Box
 from src.task.EnhanceEchoTask import EnhanceEchoTask
@@ -134,6 +135,71 @@ class TestEnhanceEchoStatusBox(unittest.TestCase):
         self.assertFalse(EnhanceEchoTask.select_0_level_echo(task))
 
         self.assertEqual(['first card', 'sort order', 'sort order', 'first card'], task.clicks)
+
+
+class TestEnhanceEchoRecognition(unittest.TestCase):
+    def make_task(self):
+        task = EnhanceEchoTask.__new__(EnhanceEchoTask)
+        task.config = {'有效词条': ['暴击', '暴击伤害', '攻击百分比'],
+                       '首条双爆>=': 6.9, '双爆总计>=': 13.8, '有效词条>=': 3,
+                       '第一条必须为有效词条': True, '必须有双爆': True,
+                       '双爆出现之前必须全有效词条': True}
+        task.tr = str
+        for name in ('log_info', 'log_debug', 'info_set', 'sleep', 'next_frame', 'click',
+                     'trash_and_esc', 'lock_and_esc'):
+            setattr(task, name, Mock())
+        return task
+
+    def boxes(self, names, offset=0):
+        return [Box(100 + offset, 100 + index * 30, 60, 20, name=name)
+                for index, name in enumerate(names)]
+
+    def test_valid_stats_pair_by_row_not_ocr_order(self):
+        task = self.make_task()
+        properties = self.boxes(['暴击', '暴击伤害', '攻击'])
+        values = self.boxes(['6.9%', '13.8％', '8.6%'], offset=150)
+        self.assertTrue(task.check_echo_stats(properties, list(reversed(values))))
+
+    def test_recognized_low_roll_is_rejected_normally(self):
+        task = self.make_task()
+        self.assertFalse(task.check_echo_stats(self.boxes(['暴击']), self.boxes(['6.3%'])))
+
+    def test_crit_damage_is_not_crit_rate(self):
+        task = self.make_task()
+        task.config['有效词条'] = ['暴击']
+        self.assertFalse(task.check_echo_stats(self.boxes(['暴击伤害']), self.boxes(['21%'])))
+
+    def test_incomplete_ambiguous_or_unparseable_stats_stop_before_discard(self):
+        cases = [([], []), (['暴击'], []), (['暴击'], ['6.9%', '8.6%']),
+                 (['暴击'], ['6..9%']), (['暴击'], ['%']), (['暴击'], ['NaN']),
+                 (['未知词条'], ['6.9%']), (['防御', '暴击'], ['40', 'bad'])]
+        for property_names, value_names in cases:
+            with self.subTest(properties=property_names, values=value_names):
+                task = self.make_task()
+                with self.assertRaises(ValueError):
+                    task.check_echo_stats(self.boxes(property_names), self.boxes(value_names))
+                task.trash_and_esc.assert_not_called()
+        for value_y in (150, 100):
+            task = self.make_task()
+            properties = self.boxes(['暴击', '暴击伤害'])
+            values = self.boxes(['6.9%', '13.8%'])
+            values[1].y = value_y
+            with self.assertRaises(ValueError):
+                task.check_echo_stats(properties, values)
+
+    def test_run_does_not_trash_or_lock_echo_with_missing_value(self):
+        task = self.make_task()
+        task.find_echo_enhance = Mock(side_effect=[object(), None])
+        task.select_0_level_echo = Mock(return_value=True)
+        task.find_add_mat = Mock(side_effect=[object(), None])
+        task.wait_click_ocr = Mock(return_value=True)
+        task.wait_ocr = Mock(return_value=[])
+        task.ocr = Mock(return_value=self.boxes(['暴击']))
+        task.find_boxes = lambda texts, match: [box for box in texts if match.search(box.name)]
+        with patch('src.task.EnhanceEchoTask.clear_folder'), self.assertRaises(ValueError):
+            task.run()
+        task.trash_and_esc.assert_not_called()
+        task.lock_and_esc.assert_not_called()
 
 
 if __name__ == '__main__':

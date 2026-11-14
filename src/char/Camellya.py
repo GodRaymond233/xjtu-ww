@@ -56,46 +56,49 @@ class Camellya(BaseChar):
         freeze_forte_check = False
         freeze_forte_time = 0
         self.last_forte = 0
-        while time.time() - budding_start_time < loop_time or self.task.find_one('camellya_budding', threshold=0.7):
-            if not budding:
-                if self.ephemeral_ready() and self.is_con_full():
-                    self.ephemeral_cast()
-                    budding = True
-                else:
-                    self.click(interval=0.1)
-                    current_con = self.get_current_con()
-                    if current_con < 0.82:
-                        if not self.is_con_full():
-                            self.click_echo()
-                            return self.switch_next_char()
-                        elif loop_time < 3.1:
-                            loop_time += 1
+        try:
+            while time.time() - budding_start_time < loop_time or self.task.find_one('camellya_budding', threshold=0.7):
+                if not budding:
+                    if self.ephemeral_ready() and self.is_con_full():
+                        self.ephemeral_cast()
+                        budding = True
+                    else:
+                        self.click(interval=0.1)
+                        current_con = self.get_current_con()
+                        if current_con < 0.82:
+                            if not self.is_con_full():
+                                self.click_echo()
+                                return self.switch_next_char()
+                            elif loop_time < 3.1:
+                                loop_time += 1
+                    if budding:
+                        self.logger.info(f'start budding')
+                        self.check_target()
+                        budding_start_time = time.time()
+                        loop_time = 5.1
                 if budding:
-                    self.logger.info(f'start budding')
-                    self.check_target()
-                    budding_start_time = time.time()
-                    loop_time = 5.1
-            if budding:
-                if not heavy_att:
-                    heavy_att = True
-                    self.task.mouse_down()
-                if time.time() - budding_start_time < 1.5 and self.liberation_available():
-                    if self.click_liberation() and heavy_att:
-                        self.logger.info(f'liberation retry heavy att')
-                        self.task.mouse_up()
-                        self.sleep(0.2, False)
+                    if not heavy_att:
+                        heavy_att = True
                         self.task.mouse_down()
-            self.check_target(heavy_att)
-            self.task.next_frame()
-            if freeze_forte_check and time.time() - freeze_forte_time >= 0.2:
-                freeze_forte_check = False
-            if not freeze_forte_check and heavy_att:
-                if self.should_retry_heavy_attack(budding) < 0:
-                    freeze_forte_check = True
-                    freeze_forte_time = time.time()
-        self.waiting_for_forte_drop = False
+                    if time.time() - budding_start_time < 1.5 and self.liberation_available():
+                        if self.click_liberation() and heavy_att:
+                            self.logger.info(f'liberation retry heavy att')
+                            self.task.mouse_up()
+                            self.sleep(0.2, False)
+                            self.task.mouse_down()
+                self.check_target(heavy_att)
+                self.task.next_frame()
+                if freeze_forte_check and time.time() - freeze_forte_time >= 0.2:
+                    freeze_forte_check = False
+                if not freeze_forte_check and heavy_att:
+                    if self.should_retry_heavy_attack(budding) < 0:
+                        freeze_forte_check = True
+                        freeze_forte_time = time.time()
+        finally:
+            self.waiting_for_forte_drop = False
+            if heavy_att:
+                self.task.mouse_up()
         if heavy_att:
-            self.task.mouse_up()
             self.sleep(0.1)
         if budding:
             self.click_resonance()
@@ -285,22 +288,24 @@ class Camellya(BaseChar):
         self.last_forte = 0
         freeze_forte_check = False
         freeze_forte_time = 0
-        self.task.mouse_down()
-        start = time.time()
-        while time.time() - start < duration:
-            if until_con_full and self.is_con_full() or 0 <= self.get_forte() <= 0.01:
-                break
-            if check_combat:
-                self.check_target(True)
-            self.task.next_frame()
-            if freeze_forte_check and time.time() - freeze_forte_time >= 0.2:
-                freeze_forte_check = False
-            if not freeze_forte_check:
-                if self.should_retry_heavy_attack() < 0:
-                    freeze_forte_check = True
-                    freeze_forte_time = time.time()
-        self.sleep(0.1, False)
-        self.task.mouse_up()
+        try:
+            self.task.mouse_down()
+            start = time.time()
+            while time.time() - start < duration:
+                if until_con_full and self.is_con_full() or 0 <= self.get_forte() <= 0.01:
+                    break
+                if check_combat:
+                    self.check_target(True)
+                self.task.next_frame()
+                if freeze_forte_check and time.time() - freeze_forte_time >= 0.2:
+                    freeze_forte_check = False
+                if not freeze_forte_check:
+                    if self.should_retry_heavy_attack() < 0:
+                        freeze_forte_check = True
+                        freeze_forte_time = time.time()
+            self.sleep(0.1, False)
+        finally:
+            self.task.mouse_up()
         self.waiting_for_forte_drop = False
 
     def should_retry_heavy_attack(self, budding=False):

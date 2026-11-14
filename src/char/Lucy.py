@@ -50,6 +50,8 @@ class Lucy(BaseChar):
 
     def perform_liberation(self):
         """大招释放及后续连击流程"""
+        if not self.task.use_liberation:
+            return False
         if self.resonance_available():
             self.click_resonance()
         self.f_break()
@@ -69,15 +71,17 @@ class Lucy(BaseChar):
 
         if self.is_mouse_forte_full():
             self.task.mouse_down()
-            press_start = time.time()
-            while time.time() - press_start < 2.5:
-                time.sleep(0.05)
-                if hasattr(self.task, 'next_frame'):
-                    try:
-                        self.task.next_frame()
-                    except Exception:
-                        pass
-            self.task.mouse_up()
+            try:
+                press_start = time.time()
+                while time.time() - press_start < 2.5:
+                    time.sleep(0.05)
+                    if hasattr(self.task, 'next_frame'):
+                        try:
+                            self.task.next_frame()
+                        except Exception:
+                            pass
+            finally:
+                self.task.mouse_up()
             self.sleep(0.1)
             # 等黄条变红（最多2s）
             wait_liber_start = time.time()

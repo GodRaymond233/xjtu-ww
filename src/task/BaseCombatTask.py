@@ -810,7 +810,7 @@ class BaseCombatTask(CombatCheck):
         last_click = 0
         start = time.time()
         while True:
-            if not (isinstance(switch_to, ShoreKeeper) and has_intro):
+            if not (switch_to.is_character(ShoreKeeper) and has_intro):
                 self.check_combat()
             now = time.time()
             _, current_index, _ = self.in_team()
@@ -1027,7 +1027,7 @@ class BaseCombatTask(CombatCheck):
 
     def has_char(self, char_cls):
         for char in self.chars:
-            if isinstance(char, char_cls):
+            if char is not None and char.is_character(char_cls):
                 return char
 
     def load_chars(self):

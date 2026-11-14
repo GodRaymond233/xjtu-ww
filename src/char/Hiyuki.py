@@ -163,13 +163,15 @@ class Hiyuki(BaseChar):
         last_click = 0
         self.logger.debug('hold_liberation start')
         start = time.time()
-        while self.task.in_team()[0] and (self.liberation_available() or self.task.get_cd('liberation') <= self.HOLD_LIB_CD_WAIT) and time.time() - start < self.HOLD_LIB_TIME_OUT:
-            if time.time() - start > last_click:
-                self.task.send_key_down(self.get_liberation_key())
-                last_click += 0.2
-            self.sleep(0.05)
-        self.task.in_liberation = True
-        self.task.send_key_up(self.get_liberation_key())
+        try:
+            while self.task.in_team()[0] and (self.liberation_available() or self.task.get_cd('liberation') <= self.HOLD_LIB_CD_WAIT) and time.time() - start < self.HOLD_LIB_TIME_OUT:
+                if time.time() - start > last_click:
+                    self.task.send_key_down(self.get_liberation_key())
+                    last_click += 0.2
+                self.sleep(0.05)
+            self.task.in_liberation = True
+        finally:
+            self.task.send_key_up(self.get_liberation_key())
         self.task.wait_until(lambda: self.task.in_team()[0], time_out=3)
         self.task.in_liberation = False
         self.add_freeze_duration(start, time.time() - start)

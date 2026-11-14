@@ -48,7 +48,7 @@ class Suisui(BaseChar):
             self.cycle_start()
             if not self.has_intro:
                 if self.try_e():
-                    return self.switch_next_char()
+                    return
             self.click()
             self.cycle_sleep(self.ATTACK_INTERVAL)
         else:

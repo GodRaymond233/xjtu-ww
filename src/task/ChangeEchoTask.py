@@ -53,7 +53,7 @@ class ChangeEchoTask(BaseWWTask, FindFeature):
                 raise Exception(self.tr("Start after filtering Echoes on the bag's Echo screen!"))
             current_level = self.is_0_level()
             if not current_level:
-                total = self.info_get('成功声骸数量') + self.info_get('失败声骸数量')
+                total = self.info_get('成功声骸数量')
                 if self.debug:
                     self.screenshot('无可强化声骸')
                 self.log_info(self.tr('No more Echoes to modify. Finished! Enhanced: {total}, matching: {matching}').format(total=total, matching=self.info_get('成功声骸数量')),
@@ -72,19 +72,22 @@ class ChangeEchoTask(BaseWWTask, FindFeature):
                 if not enhance:
                     break
             target_main = self.config.get('目标属性')
+            target_pattern = re.compile(
+                r'^\s*(?:主\s*(?:音\s*)?属\s*性\s*[:：]?\s*)?'
+                + r'\s*'.join(re.escape(char) for char in target_main) + r'\s*$')
 
             self.wait_ocr(match='声骸强化', raise_if_not_found=True)
             self.sleep(0.5)
             current_main = self.wait_ocr(0.09, 0.20, 0.15, 0.26)
             if not current_main:
                 raise Exception(self.tr('Cannot find the current main stat!'))
-            if target_main in current_main[0].name:
+            if target_pattern.fullmatch(current_main[0].name):
                 raise Exception(self.tr('The target stat matches the current stat. Change the Echo filter!'))
             self.click(0.04, 0.41)
             self.wait_ocr(match='主音属性', raise_if_not_found=True)
             self.sleep(0.8)
             self.click(0.52, 0.71)
-            target = self.wait_ocr(match=re.compile(target_main), raise_if_not_found=True)
+            target = self.wait_ocr(match=target_pattern, raise_if_not_found=True)
             self.sleep(0.1)
             self.click(target, after_sleep=0.5)
             self.wait_click_ocr(match='确认', after_sleep=2)

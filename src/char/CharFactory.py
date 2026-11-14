@@ -202,7 +202,7 @@ def get_char_by_pos(task, box, index, old_char):
         char = _find_registered_char(task, box, info)
         if char:
             cls = info.get('cls')
-            if not isinstance(old_char, cls):
+            if not old_char.is_character(cls):
                 return _apply_char_config(task, cls(task, index, char_name=info['canonical_name'],
                                                     confidence=char.confidence,
                                                     ring_index=info.get('ring_index', -1),
