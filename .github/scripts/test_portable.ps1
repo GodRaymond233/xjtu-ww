@@ -20,9 +20,17 @@ try {
                             'src/char/BaseChar.cp312-win_amd64.pyd', 'workshop_bundle/teams.json',
                             'char_sources/BaseChar.py', 'char_sources/Lily.py',
                             'char_sources/Zani.py',
-                            'onnxocr/models/ppocrv5/det/det.onnx')) {
+                            'onnxocr/models/ppocrv6/small/det/det.onnx',
+                            'onnxocr/models/ppocrv6/small/rec/rec.onnx', 'playwright/driver/node.exe',
+                            'src/task/GalGameTask.cp312-win_amd64.pyd', 'src/task/RahaiBlocksTask.cp312-win_amd64.pyd',
+                            'src/task/rahai_blocks.cp312-win_amd64.pyd')) {
         if (-not (Test-Path -LiteralPath (Join-Path $smokeDirectory $required))) {
             throw "Missing portable runtime file: $required"
+        }
+    }
+    foreach ($source in @('GalGameTask', 'RahaiBlocksTask', 'rahai_blocks')) {
+        if (Test-Path -LiteralPath (Join-Path $smokeDirectory "src/task/$source.py")) {
+            throw "Unexpected plaintext task source: $source.py"
         }
     }
     $executable = Join-Path $smokeDirectory 'xjtu-ww.exe'

@@ -129,7 +129,8 @@ class FarmEchoTask(WWOneTimeTask, BaseCombatTask):
                 raise
             except Exception as e:
                 logger.error('farm 4c error, try handle monthly card', e)
-                if attempt >= retries or not (self.handle_claim_button() or self.handle_monthly_card()):
+                if attempt >= retries or not (self.handle_claim_button() or self.handle_monthly_card()
+                                              or self.handle_cloud_disconnect()):
                     raise
 
     def do_run(self, max_recovery_retries=3):
