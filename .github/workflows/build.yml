@@ -1,5 +1,5 @@
 name: Windows Portable
-run-name: Windows portable · ${{ github.ref_name }}
+run-name: Windows portable · ${{ inputs.preview_version || github.ref_name }}
 
 on:
   push:
@@ -9,6 +9,10 @@ on:
     inputs:
       mirror_tag:
         description: 'Existing stable GitHub tag to copy to CNB (blank builds a preview ZIP)'
+        type: string
+        required: false
+      preview_version:
+        description: 'Optional vX.Y.Z version to embed in a build-only preview'
         type: string
         required: false
 
@@ -74,12 +78,19 @@ jobs:
       - name: Set package version
         id: version
         shell: pwsh
+        env:
+          PREVIEW_VERSION: ${{ inputs.preview_version }}
         run: |
           $version = if ($env:GITHUB_REF_TYPE -eq 'tag') {
             if ($env:GITHUB_REF_NAME -notmatch '^v\d+\.\d+\.\d+(-(alpha|beta|rc)\.\d+)?$') {
               throw "Unsupported release tag: $env:GITHUB_REF_NAME"
             }
             $env:GITHUB_REF_NAME
+          } elseif ($env:PREVIEW_VERSION) {
+            if ($env:PREVIEW_VERSION -notmatch '^v\d+\.\d+\.\d+$') {
+              throw "Unsupported preview version: $env:PREVIEW_VERSION"
+            }
+            $env:PREVIEW_VERSION
           } else {
             "dev-$($env:GITHUB_SHA.Substring(0, 7))"
           }
