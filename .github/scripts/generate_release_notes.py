@@ -84,7 +84,8 @@ def build_release_notes(
 
     sections.append(INSTALL_FROM_SOURCE_SECTION)
     sections.append("解压 Windows 便携包后运行 `xjtu-ww.exe`，需要管理员权限时请以管理员身份运行。"
-                    "更新时解压到新目录，再复制旧目录的 `configs`、`ok_tasks` 和 `ok_import`（如有）。"
+                    "支持内置更新的版本可在程序内确认安装更新。"
+                    "从旧版手动迁移时，请解压到新目录，再复制旧目录的 `configs`、`ok_tasks` 和 `ok_import`（如有）。"
                     "旧版 `xjtu_scripts`、`xjtu_import` 也应复制，首次启动会迁移，同名不同内容不会覆盖。")
     return "\n\n".join(sections) + "\n"
 

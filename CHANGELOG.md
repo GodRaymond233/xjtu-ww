@@ -2,6 +2,13 @@
 
 Release history starts at v3.0.0.
 
+## v1.4.0 (2026-11-23)
+
+- XJTU-WW checks for updates in the app. Confirm the download to install it in the same folder and keep your settings and custom tasks. Downloads prefer CNB and can resume from GitHub.
+- Added Cultivation Resource Farm. It follows the Guidebook's cultivation target for ascension materials, skill materials and Echo sets. It can also run as part of Daily Task. Requires the Simplified Chinese game UI at 16:9.
+- Daily Task is back at the top of the task list. Rahai Blocks handles four piece trays, shifted board borders and mechanic guides, and continues when special blocks clear more cells than predicted.
+- The Log tab can export logs. If a task stops with an error, the app saves a screenshot under `screenshots/error/`, including errors that happen right after a wait.
+
 ## v1.3.0 (2026-11-21)
 
 - The offline workshop now includes 82 rotations for 54 teams. All 69 previous configurations remain available; new additions include Hsin/Lily/Suoming 1.0.1 and Buling/Phrolova/Verina 1.2.0.
@@ -14,6 +21,32 @@ Release history starts at v3.0.0.
 - Stop safely on unreadable Echo stats; correct main-stat matching, completion counts and Garden completion detection.
 - Correct Suisui, Shorekeeper and Ciaccona rotation branches and honor disabled Liberation in custom rotations.
 - Generate portable character sources from the current build, including Lily. Use canonical `ok_tasks` / `ok_import` folders and migrate legacy `xjtu_*` folders without overwriting conflicts.
+
+## v3.8.14 (2026-11-23)
+
+- When a task stops with an error, the screenshot is now saved even if the error came right after a wait, and goes to `screenshots/error/` named like `error_DailyTask_CannotFindException` (ok-script 3.0.11).
+- “3.8 拉海洛方块·逆转” no longer saves a screenshot every time a placement preview misses; it still retries and logs a warning.
+
+## v3.8.13 (2026-11-23)
+
+- “3.8 拉海洛方块·逆转”: no longer crashes when a stage clears more blocks than predicted (explosive and faulty blocks).
+- “3.8 拉海洛方块·逆转”: closes the mechanic manuals that appear over the board in the new stages, and recognizes boards with four piece trays.
+- “3.8 拉海洛方块·逆转”: recognizes the board even when its top border sits a few pixels higher or lower.
+
+## v3.8.12 (2026-11-22)
+
+- Moved Daily Task back to the top of the task list.
+- The command-line docs now start tasks by class name (for example `-t DailyTask -e`) instead of list position, and list the common task class names.
+
+## v3.8.11 (2026-11-22)
+
+- Publishes the v3.8.10 changes listed below; the v3.8.10 build was not released. No additional user-facing changes.
+
+## v3.8.10 (2026-11-22)
+
+- Added the manual task “Cultivation Resource Farm”, which follows the Guidebook cultivation target: it clears the echo set Nightmare Nest (no Waveplates), farms Resonator Ascension and Skill Materials first (respecting the 3 weekly Skill Material claims), then spends the remaining Waveplates on the echo set Tacet Suppression. Supports the Simplified Chinese game UI at 16:9 only.
+- Added “Cultivation Target” to the Daily Task “Which to Farm” option; it farms with the Cultivation Resource Farm task settings.
+- Added an Export Logs button to the Log tab (ok-script 3.0.10).
 
 ## v3.8.9 (2026-11-20)
 

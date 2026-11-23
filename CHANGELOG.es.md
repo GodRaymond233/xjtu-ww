@@ -2,10 +2,43 @@
 
 El historial comienza en v3.0.0.
 
+## v1.4.0 (2026-11-23)
+
+- XJTU-WW busca actualizaciones en la aplicación. Al confirmar la descarga, la actualización se instala en la misma carpeta y conserva la configuración y las tareas personalizadas. Se usa CNB como origen principal y se puede reanudar la descarga desde GitHub.
+- Se añadió el farmeo de recursos de desarrollo. Sigue el objetivo de desarrollo de la guía para conseguir materiales de ascensión, materiales de habilidades y conjuntos de Ecos. También puede ejecutarse en la tarea diaria. Requiere la interfaz del juego en chino simplificado y una relación de aspecto de 16:9.
+- La tarea diaria vuelve al primer lugar de la lista. Los bloques de Rahai admiten cuatro bandejas de piezas, bordes desplazados y guías de mecánicas. El juego continúa si las piezas especiales eliminan más casillas de lo previsto.
+- La pestaña de registro permite exportar los registros. Si una tarea se detiene por un error, se guarda una captura en `screenshots/error/`, incluso si el error ocurre justo después de una espera.
+
 ## v1.3.0 (2026-11-21)
 
 - El taller sin conexión incorpora 13 configuraciones: ahora hay 82 para 54 equipos, incluidas las 69 anteriores.
 - Integradas las novedades de ok-ww hasta v3.8.9: PP-OCRv6, entrada Pynput opcional, juego en la nube a 1080p y eventos del cliente chino. Se corrigen las tareas diarias y el teletransporte tras revivir.
+
+## v3.8.14 (2026-11-23)
+
+- Cuando una tarea se detiene por un error, la captura se guarda aunque el error ocurra justo después de una espera, en `screenshots/error/` con un nombre como `error_DailyTask_CannotFindException` (ok-script 3.0.11).
+- «3.8 拉海洛方块·逆转» ya no guarda una captura cada vez que falla la vista previa de colocación; sigue reintentando y registra una advertencia.
+
+## v3.8.13 (2026-11-23)
+
+- «3.8 拉海洛方块·逆转»: ya no se detiene cuando una fase elimina más bloques de los previstos (bloques explosivos y averiados).
+- «3.8 拉海洛方块·逆转»: cierra las explicaciones de mecánicas que aparecen sobre el tablero en las nuevas fases y reconoce tableros con cuatro bandejas de piezas.
+- «3.8 拉海洛方块·逆转»: reconoce el tablero aunque su borde superior esté unos píxeles más arriba o más abajo.
+
+## v3.8.12 (2026-11-22)
+
+- La tarea diaria vuelve a estar al principio de la lista de tareas.
+- La documentación de la línea de comandos ahora inicia las tareas por nombre de clase (por ejemplo, `-t DailyTask -e`) en lugar de por posición en la lista, e incluye los nombres de clase de las tareas habituales.
+
+## v3.8.11 (2026-11-22)
+
+- Publica los cambios de v3.8.10 indicados abajo; la compilación v3.8.10 no se publicó. Sin otros cambios visibles para el usuario.
+
+## v3.8.10 (2026-11-22)
+
+- Se añadió la tarea manual “Farmeo de recursos de mejora”, que sigue el objetivo de mejora de la Guía: limpia el Nido de Pesadilla del set de ecos (sin gastar Ondaplacas), farmea primero los materiales de ascensión y de habilidad del resonador (respetando los 3 cobros semanales de materiales de habilidad) y luego gasta las Ondaplacas restantes en la Supresión Tacet del set de ecos. Solo admite la interfaz del juego en chino simplificado a 16:9.
+- Se añadió “Objetivo de mejora” a la opción “Qué farmear” de “📅 Tarea diaria”; farmea con los ajustes de la tarea Farmeo de recursos de mejora.
+- Se añadió un botón Exportar registros a la pestaña de registro (ok-script 3.0.10).
 
 ## v3.8.9 (2026-11-20)
 
