@@ -10,6 +10,7 @@ from PyInstaller.utils.win32.versioninfo import (
 root = Path(SPECPATH)
 datas = [(str(root / name), name) for name in ('assets', 'icons', 'i18n', 'workshop_bundle')]
 datas += [(str(root / name), '.') for name in ('LICENSE.txt', 'README.md')]
+datas.append((str(root / 'src' / 'install_update.ps1'), 'src'))
 char_sources = root / 'build' / 'char_sources'
 if not (char_sources / 'BaseChar.py').is_file():
     raise RuntimeError('Run .github/scripts/build_char_sources.py before compiling and stripping sources.')

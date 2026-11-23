@@ -69,8 +69,16 @@ gh run list --repo GodRaymond233/xjtu-ww --workflow build.yml --limit 5
 
 从对应运行页面的 Artifacts 下载 `windows-portable`。测试包版本包含提交短哈希；
 包内 `build-info.json` 记录完整提交、构建运行地址和依赖清单哈希。
-手动运行（包括选中标签的手动运行）仅上传产物。正式发布需明确创建并推送版本标签；
+手动预览构建仅上传产物。正式发布需明确创建并推送版本标签；
 稳定版使用 `vX.Y.Z`，预发布使用 `vX.Y.Z-alpha.N`、`vX.Y.Z-beta.N` 或 `vX.Y.Z-rc.N`。
+
+### 启用国内更新镜像
+
+1. 在 CNB 创建公开仓库 `GodRaymond233/xjtu-ww-update`，用 README 初始化 `main` 分支。该仓库用于发布 ZIP 和 `latest.json`。
+2. 创建可推送该仓库并管理 Release 附件的 CNB 访问令牌。在 GitHub 的 XJTU-WW 仓库进入 **Settings → Secrets and variables → Actions**，新增仓库 Secret `CNB_GH`。
+3. 工作流上线后，在 **Actions → Windows Portable → Run workflow** 的 `mirror_tag` 填 `v1.3.0`，可用已发布的真实 ZIP 验证镜像。留空时会照常构建预览包。
+
+正式版会在 GitHub 发布后镜像到 CNB。工作流匿名下载并校验 CNB 上的 ZIP 后，才提交 `latest.json`。内置更新先读这份清单并尝试 CNB，必要时切到 GitHub。可用 `mirror_tag` 重跑某个已发布版本的镜像，已有更新版本时清单会保留较高版本。
 
 CI 和打包共用依赖安装与测试脚本，同时解析 `requirements.txt` 和项目 extras，
 保持运行依赖版本固定。首次安装使用 pip 缓存，失败重试时绕过缓存。

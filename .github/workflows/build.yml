@@ -6,6 +6,11 @@ on:
     tags:
       - 'v*'
   workflow_dispatch:
+    inputs:
+      mirror_tag:
+        description: 'Existing stable GitHub tag to copy to CNB (blank builds a preview ZIP)'
+        type: string
+        required: false
 
 concurrency:
   group: windows-portable-${{ github.ref }}
@@ -22,6 +27,7 @@ env:
 jobs:
   build:
     name: Test and build portable app
+    if: github.event_name != 'workflow_dispatch' || inputs.mirror_tag == ''
     runs-on: windows-2025
     timeout-minutes: 35
     outputs:
@@ -97,20 +103,29 @@ jobs:
 
       - name: Build portable app
         run: python -m PyInstaller --noconfirm xjtu-ww.spec
-      - name: Verify portable startup
-        run: ./.github/scripts/test_portable.ps1
-
-      - name: Package portable app
+      - name: Write portable package metadata
         shell: pwsh
         run: |
+          $packageRoot = (Resolve-Path 'dist/xjtu-ww').Path
+          $packageFiles = @(Get-ChildItem -LiteralPath $packageRoot -Recurse -File -Force | ForEach-Object {
+            [IO.Path]::GetRelativePath($packageRoot, $_.FullName).Replace('\', '/')
+          })
           $metadata = [ordered]@{
             version = $env:APP_VERSION
             commit = $env:GITHUB_SHA
             run_url = "$env:GITHUB_SERVER_URL/$env:GITHUB_REPOSITORY/actions/runs/$env:GITHUB_RUN_ID"
             python = (python --version)
             requirements_sha256 = (Get-FileHash requirements.txt -Algorithm SHA256).Hash.ToLowerInvariant()
+            package_files = @('build-info.json') + $packageFiles
           }
           $metadata | ConvertTo-Json | Set-Content 'dist/xjtu-ww/build-info.json' -Encoding utf8
+
+      - name: Verify portable startup
+        run: ./.github/scripts/test_portable.ps1
+
+      - name: Package portable app
+        shell: pwsh
+        run: |
           $archive = "dist/xjtu-ww-$env:APP_VERSION-windows-x64.zip"
           python -m zipfile -c $archive dist/xjtu-ww
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
@@ -178,3 +193,46 @@ jobs:
           files: |
             dist/*.zip
             dist/*.sha256
+
+      - name: Publish stable ZIP and version manifest to CNB
+        if: ${{ needs.build.outputs.prerelease == 'false' && env.CNB_GH != '' }}
+        env:
+          CNB_GH: ${{ secrets.CNB_GH }}
+        run: python3 .github/scripts/publish_cnb_release.py --tag "$GITHUB_REF_NAME" "dist/xjtu-ww-$GITHUB_REF_NAME-windows-x64.zip"
+
+  mirror-existing:
+    name: Mirror an existing GitHub release to CNB
+    if: github.event_name == 'workflow_dispatch' && inputs.mirror_tag != ''
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Download and verify the published Windows ZIP
+        env:
+          GH_TOKEN: ${{ github.token }}
+          MIRROR_TAG: ${{ inputs.mirror_tag }}
+        run: |
+          set -euo pipefail
+          if [[ ! "$MIRROR_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo 'Enter a stable release tag such as v1.3.0.' >&2
+            exit 1
+          fi
+          gh release view "$MIRROR_TAG" --repo "$GITHUB_REPOSITORY" --json isDraft,isPrerelease \
+            --jq '.isDraft == false and .isPrerelease == false' | grep -qx true
+          archive="xjtu-ww-$MIRROR_TAG-windows-x64.zip"
+          gh release download "$MIRROR_TAG" --repo "$GITHUB_REPOSITORY" --dir dist \
+            --pattern "$archive" --pattern "$archive.sha256"
+          (cd dist && sha256sum --check -- "$archive.sha256")
+
+      - name: Publish stable ZIP and version manifest to CNB
+        env:
+          CNB_GH: ${{ secrets.CNB_GH }}
+          MIRROR_TAG: ${{ inputs.mirror_tag }}
+        run: |
+          if [[ -z "$CNB_GH" ]]; then
+            echo 'Configure the CNB_GH repository secret first.' >&2
+            exit 1
+          fi
+          python3 .github/scripts/publish_cnb_release.py --tag "$MIRROR_TAG" "dist/xjtu-ww-$MIRROR_TAG-windows-x64.zip"

@@ -1,4 +1,5 @@
 import os.path
+import sys
 
 import cv2
 
@@ -13,6 +14,7 @@ class Globals:
         self._yolo_model = None
         self.mini_map_arrow = None
         self.logged_in = False
+        self.portable_update = None
 
     def on_show_main_window(self, window):
         from ok.ui.qt.about.AboutTab import ProjectCard
@@ -23,6 +25,19 @@ class Globals:
                 about.vBoxLayout.removeWidget(section)
                 about.sections.remove(section)
                 section.deleteLater()
+
+        if getattr(sys, 'frozen', False):
+            from pathlib import Path
+
+            from src.portable_update import installed_version
+
+            root = Path(sys.executable).resolve().parent
+            if version := installed_version(root):
+                from src.gui.PortableUpdate import PortableUpdate
+
+                if self.portable_update is None:
+                    self.portable_update = PortableUpdate(root, version)
+                self.portable_update.attach(window)
 
     @property
     def yolo_model(self):
