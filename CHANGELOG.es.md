@@ -2,6 +2,11 @@
 
 El historial comienza en v3.0.0.
 
+## v1.4.1 (2026-11-24)
+
+- El juego en la nube captura el vídeo mediante WebRTC y sigue capturándolo al minimizar el navegador.
+- Si el navegador del juego en la nube no se abre, puedes volver a intentarlo desde XJTU-WW.
+
 ## v1.4.0 (2026-11-23)
 
 - XJTU-WW busca actualizaciones en la aplicación. Al confirmar la descarga, la actualización se instala en la misma carpeta y conserva la configuración y las tareas personalizadas. Se usa CNB como origen principal y se puede reanudar la descarga desde GitHub.

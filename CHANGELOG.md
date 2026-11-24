@@ -2,6 +2,11 @@
 
 Release history starts at v3.0.0.
 
+## v1.4.1 (2026-11-24)
+
+- Cloud play now captures the WebRTC video stream, so capture continues when you minimize the browser.
+- If the cloud browser fails to open, you can retry from XJTU-WW.
+
 ## v1.4.0 (2026-11-23)
 
 - XJTU-WW checks for updates in the app. Confirm the download to install it in the same folder and keep your settings and custom tasks. Downloads prefer CNB and can resume from GitHub.
