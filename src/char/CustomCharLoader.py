@@ -8,7 +8,6 @@ import re
 import shutil
 import tempfile
 import zipfile
-from functools import wraps
 from pathlib import Path
 from threading import RLock
 
@@ -45,12 +44,21 @@ _builtin_code_cache = {}
 team_code_lock = RLock()
 
 
-def _team_code_transaction(function):
-    @wraps(function)
-    def locked(*args, **kwargs):
+class _TeamCodeTransaction:
+    def __init__(self, function):
+        self._function = function
+        self.__wrapped__ = function
+        self.__name__ = getattr(function, '__name__', '')
+        self.__qualname__ = getattr(function, '__qualname__', self.__name__)
+        self.__doc__ = getattr(function, '__doc__', None)
+
+    def __call__(self, *args, **kwargs):
         with team_code_lock:
-            return function(*args, **kwargs)
-    return locked
+            return self._function(*args, **kwargs)
+
+
+def _team_code_transaction(function):
+    return _TeamCodeTransaction(function)
 
 
 def _code_sha256(code):
