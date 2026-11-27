@@ -38,7 +38,7 @@ extensions = collect_python_extensions("src")
 
 setuptools.setup(
     name="xjtuww",
-    version="1.4.1",
+    version="1.5.0",
     author="xjtu-ww maintainers",
     author_email="",
     description="XJTU-WW automation runtime",

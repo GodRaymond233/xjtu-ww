@@ -2,7 +2,7 @@
 
 Release history starts at v3.0.0.
 
-## Unreleased
+## v1.5.0 (2026-11-27)
 
 - Synced combat, domain retry and login fixes from ok-ww v3.8.15. Concerto recognition also supports lower capture resolutions, and Traditional Chinese OCR includes OpenCC.
 - Workshop teams keep their constructor settings when loaded and can request urgent healer switches. Built in mode follows updated character code; team code loads together and active combat picks up edits on its next team load.
