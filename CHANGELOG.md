@@ -6,6 +6,7 @@ Release history starts at v3.0.0.
 
 - Synced combat, domain retry and login fixes from ok-ww v3.8.15. Concerto recognition also supports lower capture resolutions, and Traditional Chinese OCR includes OpenCC.
 - Workshop teams keep their constructor settings when loaded and can request urgent healer switches. Built in mode follows updated character code; team code loads together and active combat picks up edits on its next team load.
+- Updated the offline workshop bundle to 56 teams / 85 rotations: upgraded Aemeath/Lynae/Mornye to 3.2.0 and Hsin/Lily/Suoming to 1.0.3, and added Carlotta/Shorekeeper/Zhezhi 1.0.1, Changli/Hiyuki/Jinhsi 1.3.2, and Hiyuki/Lucilla/Suisui 1.0.4.
 - Multi-account tasks record an account login timeout and continue with the remaining accounts once the login screen is available.
 
 ## v1.4.1 (2026-11-24)

@@ -2,8 +2,8 @@
   "repository": "GodRaymond233/ok-ww-char-code",
   "pageUrl": "https://s2a.godraymond.com/workshop",
   "jsonUrl": "https://s2a.godraymond.com/workshop/teams.json",
-  "totalTeams": 54,
-  "totalCodes": 82,
+  "totalTeams": 56,
+  "totalCodes": 85,
   "teams": [
     {
       "team": "Baizhi, Phrolova, Verina",
@@ -33,8 +33,8 @@
           ],
           "size": 4121,
           "sizeFormatted": "4.02 KB",
-          "timestamp": 1791477164,
-          "modifiedAt": "2026-10-08T16:32:44.000Z"
+          "timestamp": 1795763136,
+          "modifiedAt": "2026-11-27T07:05:36.000Z"
         },
         {
           "filename": "速刷4C_奉眠_1.0.1.zip",
@@ -355,24 +355,24 @@
           "modifiedAt": "2026-10-11T23:51:34.000Z"
         },
         {
-          "filename": "Aemeath_Lynae_Mornye_楽山_3.1.0.zip",
-          "downloadUrl": "https://s2a.godraymond.com/workshop/codes/Aemeath_Lynae_Mornye_%E6%A5%BD%E5%B1%B1_3.1.0.zip",
-          "rawUrl": "https://s2a.godraymond.com/workshop/codes/Aemeath_Lynae_Mornye_%E6%A5%BD%E5%B1%B1_3.1.0.zip",
-          "sha256": "02ce24165db35b138e5deac0590f8c7dcdf70a54a0ee646f0018a838414bb318",
+          "filename": "Aemeath_Lynae_Mornye_楽山_3.2.0.zip",
+          "downloadUrl": "https://s2a.godraymond.com/workshop/codes/Aemeath_Lynae_Mornye_%E6%A5%BD%E5%B1%B1_3.2.0.zip",
+          "rawUrl": "https://s2a.godraymond.com/workshop/codes/Aemeath_Lynae_Mornye_%E6%A5%BD%E5%B1%B1_3.2.0.zip",
+          "sha256": "7e7a710169676cec23f0b98dba121a81e4113aed08e87a993ad1b0dfaac6f6de",
           "name": "Aemeath_Lynae_Mornye",
-          "description": "爱琳莫进阶轮椅轴优化版\n样本：61爱00琳11莫\n共效：爱弥斯125 琳奈140 莫宁260\n位置：一号位爱弥斯/莫宁 二号位琳奈 三号位莫宁/爱弥斯\n定位：【矩阵/深塔/莫宁起手时可以打海墟上半】\n实机已跑通，在原有作者的基础上进行了识别和操作上的优化，复现难度低，矩阵深塔最好小爱起手，海墟上半莫宁起手应该也是可以打的。\n修复了莫宁可能R的CD未好，导致流程错误的问题",
+          "description": "爱琳莫进阶轮椅轴优化版\n样本：61爱00琳11莫\n共效：爱弥斯125 琳奈140 莫宁260\n位置：一号位爱弥斯/莫宁 二号位琳奈 三号位莫宁/爱弥斯\n定位：【矩阵/深塔/莫宁起手时可以打海墟上半】\n实机已跑通，在原有作者的基础上进行了识别和操作上的优化，复现难度低，矩阵深塔最好小爱起手，海墟上半莫宁起手应该也是可以打的。实测一圈约48~52秒。\nv3.1.0：修复了莫宁可能R的CD未好，导致流程错误的问题\nv3.2.0：莫宁R没好不再原地等，直接空中A，途中R好了再插进去放\n提醒：画面16:9、默认键位、HUD不缩放",
           "author": "楽山",
-          "version": "3.1.0",
+          "version": "3.2.0",
           "team": "Aemeath, Lynae, Mornye",
           "members": [
             "Aemeath",
             "Lynae",
             "Mornye"
           ],
-          "size": 10944,
-          "sizeFormatted": "10.69 KB",
-          "timestamp": 1793211040,
-          "modifiedAt": "2026-10-28T18:10:40.000Z"
+          "size": 11366,
+          "sizeFormatted": "11.1 KB",
+          "timestamp": 1795765942,
+          "modifiedAt": "2026-11-27T07:52:22.000Z"
         }
       ]
     },
@@ -1005,6 +1005,39 @@
       ]
     },
     {
+      "team": "Changli, Hiyuki, Jinhsi",
+      "slug": "Changli_Hiyuki_Jinhsi",
+      "members": [
+        "Changli",
+        "Hiyuki",
+        "Jinhsi"
+      ],
+      "totalCodes": 1,
+      "jsonUrl": "https://s2a.godraymond.com/workshop/teams/Changli_Hiyuki_Jinhsi.json",
+      "codes": [
+        {
+          "filename": "Changli_Hiyuki_Jinhsi_楽山_1.3.2.zip",
+          "downloadUrl": "https://s2a.godraymond.com/workshop/codes/Changli_Hiyuki_Jinhsi_%E6%A5%BD%E5%B1%B1_1.3.2.zip",
+          "rawUrl": "https://s2a.godraymond.com/workshop/codes/Changli_Hiyuki_Jinhsi_%E6%A5%BD%E5%B1%B1_1.3.2.zip",
+          "sha256": "f5d6959255115599068ea703876ad09418e920ffd2e2862fec3c44e267c52fb4",
+          "name": "Changli, Hiyuki, Jinhsi",
+          "description": "龙凤雪·今汐长离绯雪（视频：ImmortalRover「龙凤雪慢放招式配文字轴」+ 正常速度版「三个主c开始合轴」及其完整文字轴）\n持宏：长离。开局（或按 F 重开）先跑启动 40 格，之后按文字轴打 循环1 → 循环2 → 循环3（每段以绯雪归刃收尾，打完没脱战再从循环1 转），脱战才停\n编队建议 1今汐 2长离 3绯雪（宏按角色找人，不强制）\n处决：轴上有 F 提示才按；不想让宏按就把 Changli.py 里 USE_AUTO_F_BREAK 改成 False",
+          "author": "楽山",
+          "version": "1.3.2",
+          "team": "Changli, Hiyuki, Jinhsi",
+          "members": [
+            "Changli",
+            "Hiyuki",
+            "Jinhsi"
+          ],
+          "size": 72674,
+          "sizeFormatted": "70.97 KB",
+          "timestamp": 1795765961,
+          "modifiedAt": "2026-11-27T07:52:41.000Z"
+        }
+      ]
+    },
+    {
       "team": "Changli, Jinhsi, Verina",
       "slug": "Changli_Jinhsi_Verina",
       "members": [
@@ -1183,9 +1216,9 @@
             "Verina"
           ],
           "size": 4408,
-          "sizeFormatted": "4.30 KB",
-          "timestamp": 1792320479,
-          "modifiedAt": "2026-10-18T10:47:59.000Z"
+          "sizeFormatted": "4.3 KB",
+          "timestamp": 1795763136,
+          "modifiedAt": "2026-11-27T07:05:36.000Z"
         }
       ]
     },
@@ -1217,8 +1250,8 @@
           ],
           "size": 3491,
           "sizeFormatted": "3.41 KB",
-          "timestamp": 1789630460,
-          "modifiedAt": "2026-09-17T07:34:20.000Z"
+          "timestamp": 1795763136,
+          "modifiedAt": "2026-11-27T07:05:36.000Z"
         },
         {
           "filename": "Denia_Mornye_Qingxiao_伊织x_1.0.0.zip",
@@ -1356,7 +1389,7 @@
         "Lucilla",
         "Suisui"
       ],
-      "totalCodes": 5,
+      "totalCodes": 6,
       "jsonUrl": "https://s2a.godraymond.com/workshop/teams/Hiyuki_Lucilla_Suisui.json",
       "codes": [
         {
@@ -1458,6 +1491,26 @@
           "sizeFormatted": "21.11 KB",
           "timestamp": 1787153724,
           "modifiedAt": "2026-08-19T15:35:24.000Z"
+        },
+        {
+          "filename": "绯洛穗_0链绯雪_长按封顶优化_笑嘻Biss_1.0.4.zip",
+          "downloadUrl": "https://s2a.godraymond.com/workshop/codes/%E7%BB%AF%E6%B4%9B%E7%A9%97_0%E9%93%BE%E7%BB%AF%E9%9B%AA_%E9%95%BF%E6%8C%89%E5%B0%81%E9%A1%B6%E4%BC%98%E5%8C%96_%E7%AC%91%E5%98%BBBiss_1.0.4.zip",
+          "rawUrl": "https://s2a.godraymond.com/workshop/codes/%E7%BB%AF%E6%B4%9B%E7%A9%97_0%E9%93%BE%E7%BB%AF%E9%9B%AA_%E9%95%BF%E6%8C%89%E5%B0%81%E9%A1%B6%E4%BC%98%E5%8C%96_%E7%AC%91%E5%98%BBBiss_1.0.4.zip",
+          "sha256": "54a8ff61bd40258cb9f2916c257b3f1a72dea2d158af3808f6ceb33682319d99",
+          "name": "绯洛穗 0链绯雪 长按封顶优化",
+          "description": "【说明】\n1. 基于 1.0.3 继续修「R1 前重击后多打普攻」：回退 v2/v3 的检测改动（判断前抓帧、盯回路图标、pre_lib_heavy_done），改成减少单次长按时间。\n2. 做法：hold_attack_until_lib 单次按住封顶 HEAVY_HOLD_MAX=2.8 秒 → 松手 → 只轮询 R、不按任何键（wait_lib_quiet，上限 2.5 秒）→ 等不到 R 再按下一轮。\n3. 松手落在重击起手后、重击结束前约 1.8 秒，重击后摇结束时手上没有攻击输入，不会接普攻；R 亮起再按 R1。\n4. 参数敏感：重击后仍多 A 就把 HEAVY_HOLD_MAX 调到 2.6/2.4；R1 变慢或重击打不出就调到 3.0 以上。空手入场（无心念）会多按 1–2 轮，属预期。\n5. 保留 0 链 4 刀路线（启动轴 + 循环轴）；Lucilla.py / Suisui.py 未改。",
+          "author": "笑嘻Biss",
+          "version": "1.0.4",
+          "team": "Hiyuki, Lucilla, Suisui",
+          "members": [
+            "Hiyuki",
+            "Lucilla",
+            "Suisui"
+          ],
+          "size": 38885,
+          "sizeFormatted": "37.97 KB",
+          "timestamp": 1795765947,
+          "modifiedAt": "2026-11-27T07:52:27.000Z"
         }
       ]
     },
@@ -1625,24 +1678,24 @@
       "jsonUrl": "https://s2a.godraymond.com/workshop/teams/Hsin_Lily_Suoming.json",
       "codes": [
         {
-          "filename": "Hsin_Lily_Suoming_楽山_1.0.1.zip",
-          "downloadUrl": "https://s2a.godraymond.com/workshop/codes/Hsin_Lily_Suoming_%E6%A5%BD%E5%B1%B1_1.0.1.zip",
-          "rawUrl": "https://s2a.godraymond.com/workshop/codes/Hsin_Lily_Suoming_%E6%A5%BD%E5%B1%B1_1.0.1.zip",
-          "sha256": "b8c0156e76d1017060873aeb186fd38c1c7db2a4667b17d691f29e2499b1fffb",
+          "filename": "Hsin_Lily_Suoming_楽山_1.0.3.zip",
+          "downloadUrl": "https://s2a.godraymond.com/workshop/codes/Hsin_Lily_Suoming_%E6%A5%BD%E5%B1%B1_1.0.3.zip",
+          "rawUrl": "https://s2a.godraymond.com/workshop/codes/Hsin_Lily_Suoming_%E6%A5%BD%E5%B1%B1_1.0.3.zip",
+          "sha256": "10b673c85d61a9ad5e918b11d496340c7cb1922d4f9c06fde8491731d514310f",
           "name": "Hsin_Lily_Suoming",
-          "description": "心锁莉轮椅轴\n样本：61心 01锁 00莉\n共效：心125 锁130 莉莉260\n位置：一号位莉莉 二号位锁瞑 三号位心\n场景：【矩阵/深塔】\n容错率高，没什么好说的，基础队伍 比较稳定",
+          "description": "心锁莉轮椅轴\n样本：61心 01锁 00莉\n共效：心125 锁130 莉莉260\n位置：一号位莉莉 二号位锁瞑 三号位心\n场景：【矩阵/深塔】\n容错率高，没什么好说的，基础队伍 比较稳定\n\n1.0.3 更新：\n· 莉莉、锁瞑放完 Q 马上接下一招（修 1080p 下莉莉终章后 R 偶尔晚 1 秒）\n\n1.0.2 更新：\n· 兼容原版 OKWW（修原版里心 R1 后不切锁暝）\n· 心插段改回 2A+E，应世心没满就多补一下 A 再 E\n· 循环轴心闪避改成 W+A 斜前闪\n· 莉莉 R 好了直接放，不等图标亮",
           "author": "楽山",
-          "version": "1.0.1",
+          "version": "1.0.3",
           "team": "Hsin, Lily, Suoming",
           "members": [
             "Hsin",
             "Lily",
             "Suoming"
           ],
-          "size": 47558,
-          "sizeFormatted": "46.44 KB",
-          "timestamp": 1795191009,
-          "modifiedAt": "2026-11-20T16:10:09.000Z"
+          "size": 49815,
+          "sizeFormatted": "48.65 KB",
+          "timestamp": 1795765945,
+          "modifiedAt": "2026-11-27T07:52:25.000Z"
         }
       ]
     },
@@ -1674,8 +1727,8 @@
           ],
           "size": 82114,
           "sizeFormatted": "80.19 KB",
-          "timestamp": 1795191009,
-          "modifiedAt": "2026-11-20T16:10:09.000Z"
+          "timestamp": 1795763136,
+          "modifiedAt": "2026-11-27T07:05:36.000Z"
         },
         {
           "filename": "Hsin_Rover_Suisui_楽山_1.1.0.zip",
@@ -2311,6 +2364,39 @@
           "sizeFormatted": "11.46 KB",
           "timestamp": 1792911093,
           "modifiedAt": "2026-10-25T06:51:33.000Z"
+        }
+      ]
+    },
+    {
+      "team": "Carlotta, Shorekeeper, Zhezhi",
+      "slug": "Carlotta_Shorekeeper_Zhezhi",
+      "members": [
+        "Carlotta",
+        "Shorekeeper",
+        "Zhezhi"
+      ],
+      "totalCodes": 1,
+      "jsonUrl": "https://s2a.godraymond.com/workshop/teams/Carlotta_Shorekeeper_Zhezhi.json",
+      "codes": [
+        {
+          "filename": "珂折守_矩阵低充轴_笑嘻Biss_1.0.1.zip",
+          "downloadUrl": "https://s2a.godraymond.com/workshop/codes/%E7%8F%82%E6%8A%98%E5%AE%88_%E7%9F%A9%E9%98%B5%E4%BD%8E%E5%85%85%E8%BD%B4_%E7%AC%91%E5%98%BBBiss_1.0.1.zip",
+          "rawUrl": "https://s2a.godraymond.com/workshop/codes/%E7%8F%82%E6%8A%98%E5%AE%88_%E7%9F%A9%E9%98%B5%E4%BD%8E%E5%85%85%E8%BD%B4_%E7%AC%91%E5%98%BBBiss_1.0.1.zip",
+          "sha256": "8254047de41b493bb7a1e40ed9e51928568a3c6bdf2f98d5ca160145a70eb91a",
+          "name": "珂折守 矩阵低充轴",
+          "description": "【说明】\n1. 珂折守（珂莱塔 / 折枝 / 守岸人）矩阵低充无缝轴，一号位折枝开局；首轮与循环按交场链执行，唯一 f→s 边是珂 f3 → 折 s1。\n2. 折枝测试使用脱手声骸（赫卡忒或梦魇冰蚊子），暗鸟未测试（大概率不适配）。\n3. 低充能需求：珂 107%+、折 127%+；0+1 队伍，编队 1 折 / 2 守 / 3 珂。\n4. 适用深塔与矩阵。\n5. 调参入口：3a 后窗口不够（I42）加到 0.55；3 鹤 2.7 窗口少段回 3.0（I43）。",
+          "author": "笑嘻Biss",
+          "version": "1.0.1",
+          "team": "Carlotta, Shorekeeper, Zhezhi",
+          "members": [
+            "Carlotta",
+            "Shorekeeper",
+            "Zhezhi"
+          ],
+          "size": 33061,
+          "sizeFormatted": "32.29 KB",
+          "timestamp": 1795765950,
+          "modifiedAt": "2026-11-27T07:52:30.000Z"
         }
       ]
     },

@@ -927,6 +927,30 @@ class TestChar(TaskTestCase):
         healer.last_full_con_switch_time = time.time()
         self.assertEqual(task._effective_switch_priority(healer, current, False), SwitchPriority.NO)
 
+        class BrokenBase(BaseChar):
+            def get_switch_priority(self, **kwargs):
+                raise AttributeError('missing_private_attr')
+
+        broken_custom = type('BrokenCustomHealer', (BrokenBase,), {
+            '__module__': 'xjtu_team_test',
+            'get_switch_priority': lambda self, **kwargs: SwitchPriority.MUST,
+        })
+        broken_healer = broken_custom(task, 1, char_type=CharType.HEALER)
+        broken_healer.last_full_con_switch_time = time.time()
+        self.assertEqual(task._effective_switch_priority(broken_healer, current, False), SwitchPriority.NO)
+
+        mock_task = unittest.mock.Mock()
+        mock_current = BaseChar(mock_task, 0, char_type=CharType.MAIN_DPS)
+        mock_target = BaseChar(mock_task, 1, char_type=CharType.HEALER)
+        mock_target.get_switch_priority = lambda **kwargs: SwitchPriority.MUST
+        mock_target.last_full_con_switch_time = -1
+        mock_task.chars = [mock_current, mock_target]
+        mock_task.get_current_char.return_value = mock_current
+        self.assertTrue(mock_current.need_fast_perform())
+        mock_target.last_full_con_switch_time = time.time()
+        mock_task.time_elapsed_accounting_for_freeze.return_value = 1.0
+        self.assertFalse(mock_current.need_fast_perform())
+
     def test_farm_echo_healer_returns_to_main_dps(self):
         class Task:
             def time_elapsed_accounting_for_freeze(self, start, intro_motion_freeze=False):

@@ -2,6 +2,7 @@ import ast
 import hashlib
 import json
 import tempfile
+import time
 import unittest
 from itertools import permutations
 from pathlib import Path
@@ -55,8 +56,14 @@ class TestWorkshopBundle(TaskTestCase):
                         char.reset_state()
                     for current, target in permutations(self.task.chars, 2):
                         for has_intro in (False, True):
+                            target.last_full_con_switch_time = -1
                             priority = self.task._effective_switch_priority(target, current, has_intro)
                             self.assertIsInstance(priority, (int, float))
+                            if target.is_healer:
+                                target.last_full_con_switch_time = time.time()
+                                locked_priority = self.task._effective_switch_priority(target, current, has_intro)
+                                self.assertIsInstance(locked_priority, (int, float))
+                                target.last_full_con_switch_time = -1
         clear_team_char_cache()
         self.task.__dict__.clear()
         self.task.__dict__.update(initial)

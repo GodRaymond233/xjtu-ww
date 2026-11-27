@@ -748,7 +748,12 @@ class BaseCombatTask(CombatCheck):
                     break
             if threshold is not None and priority >= threshold:
                 builtin = next(cls for cls in mro if not is_custom(cls) and 'get_switch_priority' in cls.__dict__)
-                if priority != builtin.get_switch_priority(char, **kwargs):
+                try:
+                    builtin_priority = builtin.get_switch_priority(char, **kwargs)
+                except Exception as error:
+                    logger.debug(f'builtin switch priority probe failed for {char}: {error!r}')
+                    return SwitchPriority.NO
+                if priority != builtin_priority:
                     logger.debug(f'healer_lockout_bypassed_by_custom_priority char={char} priority={priority}')
                     return priority
         return SwitchPriority.NO

@@ -865,10 +865,17 @@ class BaseChar:
     def need_fast_perform(self):
         current_char = self.task.get_current_char(raise_exception=False) if hasattr(self.task,
                                                                                     'get_current_char') else self
+        effective = getattr(type(self.task), '_effective_switch_priority', None)
         for char in getattr(self.task, 'chars', []):
             if char is None or char == current_char:
                 continue
-            if self.task._effective_switch_priority(char, current_char, False) >= SwitchPriority.MUST:
+            if effective is not None:
+                priority = effective(self.task, char, current_char, False)
+            else:
+                priority = char.get_switch_priority(current_char=current_char, has_intro=False, target_low_con=False)
+                if char.healer_full_con_switch_locked():
+                    priority = SwitchPriority.NO
+            if priority >= SwitchPriority.MUST:
                 self.logger.info(f'In lock with {char}')
                 return True
         return False
