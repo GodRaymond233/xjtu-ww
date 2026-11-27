@@ -11,7 +11,7 @@ from ok.task.exceptions import WaitFailedException
 from src.task.DailyTask import DailyTask
 from src.task.WWOneTimeTask import WWOneTimeTask
 from src.task.BaseCombatTask import BaseCombatTask
-from src.task.BaseWWTask import LOGIN_TEXTS
+from src.task.BaseWWTask import LOGIN_TEXTS, GameLoginTimeout
 from src.task.MouseResetTask import MouseResetTask
 from src.task.task_icons import task_icon
 
@@ -78,6 +78,7 @@ def select_combo_item(combo, index):
 
 
 class MultiAccountDailyTask(WWOneTimeTask, BaseCombatTask):
+    continue_on_login_timeout = True
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -100,6 +101,7 @@ class MultiAccountDailyTask(WWOneTimeTask, BaseCombatTask):
         })
         self.done_set = set()
         self.all_accounts = set()
+        self.failed_accounts = set()
         self.support_schedule_task = True
 
     def _mark_done(self, account):
@@ -107,7 +109,7 @@ class MultiAccountDailyTask(WWOneTimeTask, BaseCombatTask):
             self.done_set.add(account)
 
     def _is_done(self, account):
-        return account in self.done_set
+        return account in self.done_set or account in getattr(self, 'failed_accounts', set())
 
     def _same_account(self, left, right):
         if not left or not right:
@@ -128,21 +130,49 @@ class MultiAccountDailyTask(WWOneTimeTask, BaseCombatTask):
         WWOneTimeTask.run(self)
         self.done_set.clear()
         self.all_accounts.clear()
-
-        self.run_task_by_class(DailyTask)
-        self.ensure_main(time_out=100)
-        self._switch_to_login()
+        self.failed_accounts = set()
+        try:
+            self.run_task_by_class(DailyTask)
+            self.ensure_main(time_out=100)
+            self._switch_to_login()
+        except GameLoginTimeout as error:
+            self._recover_account_login()
+            self._record_login_timeout(self._detect_current_account_from_login(), error)
         detected = self._detect_current_account_from_login()
-        self._mark_done(detected)
+        if detected not in self.failed_accounts:
+            self._mark_done(detected)
 
         self.info_set('Completed', self.done_set)
 
-        while next_account := self._select_and_login_account():
-            self.info_set('Completed', self.done_set)
-            self.run_task_by_class(DailyTask)
-            self._mark_done(next_account)
-            self.ensure_main(time_out=100)
+        while True:
+            next_account = None
+            try:
+                next_account = self._select_and_login_account()
+                if not next_account:
+                    break
+                self.info_set('Completed', self.done_set)
+                self.run_task_by_class(DailyTask)
+                self.ensure_main(time_out=100)
+                self._switch_to_login()
+                self._mark_done(next_account)
+            except GameLoginTimeout as error:
+                self._recover_account_login()
+                self._record_login_timeout(next_account or self._login_attempt_account, error)
+
+    def _record_login_timeout(self, account, error):
+        if not account:
+            raise error
+        self.failed_accounts.add(account)
+        self.info_set('Failed', self.failed_accounts.copy())
+        self.log_warning(f'Account login timed out: {account}: {error}')
+
+    def _recover_account_login(self):
+        if self.in_team_and_world():
             self._switch_to_login()
+        else:
+            self.wait_until(lambda: self._login_combo() or self.do_find_account_drop_down(),
+                            time_out=60, settle_time=2, raise_if_not_found=True)
+        self.logged_in = False
 
     def configure_accounts(self):
         # Config button callbacks run on the Qt thread; game work stays in run().
@@ -215,6 +245,7 @@ class MultiAccountDailyTask(WWOneTimeTask, BaseCombatTask):
 
     def _select_and_login_account(self):
         current_account = None
+        self._login_attempt_account = None
         mouse_reset_task = self.executor.get_task_by_class(MouseResetTask)
         mouse_reset_was_enabled = mouse_reset_task.enabled if mouse_reset_task else False
         if mouse_reset_was_enabled:
@@ -277,6 +308,7 @@ class MultiAccountDailyTask(WWOneTimeTask, BaseCombatTask):
                     raise Exception(self.tr('Failed to switch account'))
             if not current_account:
                 raise WaitFailedException()
+            self._login_attempt_account = current_account
             self.sleep(4)
             texts = self.ocr()
             login_btn = self.find_boxes(texts, boundary=self.box_of_screen(0.3, 0.3, 0.7, 0.8),

@@ -1615,10 +1615,14 @@ class CharacterCodeTab(CustomTab):
     def _reload_live_team_code(self, team):
         if self.executor is None:
             return 0
+        if getattr(self.executor, 'current_task', None) is not None:
+            return 0
         reloaded = 0
         expected_team = normalize_team(team)
         tasks = list(getattr(self.executor, "onetime_tasks", [])) + list(getattr(self.executor, "trigger_tasks", []))
         for task in tasks:
+            if getattr(task, 'enabled', False):
+                continue
             chars = getattr(task, "chars", None)
             if not chars or len(chars) != 3 or any(char is None for char in chars):
                 continue

@@ -1,6 +1,10 @@
 import unittest
+
+import cv2
+
 from config import config
 from ok.test.TaskTestCase import TaskTestCase
+from src.char.BaseChar import Elements
 from src.task.AutoCombatTask import AutoCombatTask
 
 config['debug'] = True
@@ -16,6 +20,9 @@ class TestCon(TaskTestCase):
         self.task.load_chars()
         con_full = self.task.get_current_char().is_con_full()
         self.assertTrue(con_full)
+
+        ring = str(self.task._ensure_ring_index())
+        self.assertGreater(self.task.con_full_size[ring], 0)
 
     def test_con_full2(self):
         self.task.do_reset_to_false()
@@ -48,6 +55,35 @@ class TestCon(TaskTestCase):
         self.task.log_info(f'{self.task.get_current_char()} con = {con}')
         con_full = self.task.get_current_char().is_con_full()
         self.assertFalse(con_full)
+
+    def test_con_arc_from_live_1080p_crops(self):
+        # Crops of the con box captured live; expected fill judged from the image.
+        cases = [
+            ('con_arc_spectro_full', Elements.SPECTRO, 1, 1),
+            ('con_arc_spectro_96', Elements.SPECTRO, 0.9, 0.99),  # small gap at 3 o'clock: not full
+            ('con_arc_spectro_85', Elements.SPECTRO, 0.78, 0.9),  # used to read as full
+            ('con_arc_wind_80', Elements.WIND, 0.72, 0.88),  # used to read 0.99
+            ('con_arc_wind_25', Elements.WIND, 0.18, 0.32),
+            ('con_arc_wind_18', Elements.WIND, 0.1, 0.25),  # short arc used to read 0
+            ('con_arc_wind_empty', Elements.WIND, 0, 0),
+        ]
+        for name, element, low, high in cases:
+            with self.subTest(name):
+                image = cv2.imread(f'tests/images/{name}.png')
+                con = self.task.measure_con_arc(image, element)
+                self.assertGreaterEqual(con, low)
+                self.assertLessEqual(con, high)
+
+    def test_con_arc_scales_with_capture_resolution(self):
+        for name, element, is_full in (
+                ('con_arc_spectro_full', Elements.SPECTRO, True),
+                ('con_arc_spectro_96', Elements.SPECTRO, False),
+                ('con_arc_wind_empty', Elements.WIND, False)):
+            image = cv2.imread(f'tests/images/{name}.png')
+            for scale in (0.5, 2 / 3, 1, 4 / 3, 2):
+                with self.subTest(name=name, scale=scale):
+                    scaled = cv2.resize(image, None, fx=scale, fy=scale)
+                    self.assertEqual(self.task.measure_con_arc(scaled, element) == 1, is_full)
 
     def test_con_full6(self):
         self.task.do_reset_to_false()

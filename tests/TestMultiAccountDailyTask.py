@@ -48,6 +48,26 @@ class FakeComboTask:
 
 class TestMultiAccountDailyTask(unittest.TestCase):
 
+    def test_login_timeout_skips_failed_account_and_continues_sweep(self):
+        from src.task.BaseWWTask import GameLoginTimeout
+        from src.task.WWOneTimeTask import WWOneTimeTask
+        task = SimpleNamespace(
+            config={}, done_set=set(), all_accounts=set(), info_set=Mock(),
+            run_task_by_class=Mock(), ensure_main=Mock(), _switch_to_login=Mock(),
+            _detect_current_account_from_login=Mock(return_value='first'),
+            _recover_account_login=Mock(), log_warning=Mock(),
+            _login_attempt_account='failed',
+        )
+        task._mark_done = lambda account: MultiAccountDailyTask._mark_done(task, account)
+        task._record_login_timeout = lambda account, error: MultiAccountDailyTask._record_login_timeout(task, account, error)
+        task._select_and_login_account = Mock(side_effect=[GameLoginTimeout('timeout'), 'third', None])
+        with patch.object(WWOneTimeTask, 'run'):
+            MultiAccountDailyTask.run(task)
+        self.assertEqual(task.done_set, {'first', 'third'})
+        self.assertEqual(task.failed_accounts, {'failed'})
+        self.assertTrue(MultiAccountDailyTask._is_done(task, 'failed'))
+        self.assertEqual(task.run_task_by_class.call_count, 2)
+
     def test_account_dropdown_accepts_multiple_login_text_matches(self):
         account_box = object()
 

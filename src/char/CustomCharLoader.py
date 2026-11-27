@@ -1,12 +1,16 @@
 import ast
 import importlib.util
 import inspect
+import hashlib
 import json
+import os
 import re
 import shutil
 import tempfile
 import zipfile
+from functools import wraps
 from pathlib import Path
+from threading import RLock
 
 from ok import Logger
 from ok.util.config import Config
@@ -29,7 +33,6 @@ CHARACTER_DISPLAY_NAMES = {
     "Luhesi": "Luuk Herssen",
     "Xiangliyao": "Xiangli Yao",
     "ShoreKeeper": "Shorekeeper",
-    "HavocRover": "Rover",
     "YangYangSp": "Yangyang: Xuanling",
 }
 
@@ -39,6 +42,36 @@ _team_class_cache = {}
 # them once per member per team, which turns a scan over every team into a hundred
 # file reads. Cache the result and keep the existing clear hooks pointed at it.
 _builtin_code_cache = {}
+team_code_lock = RLock()
+
+
+def _team_code_transaction(function):
+    @wraps(function)
+    def locked(*args, **kwargs):
+        with team_code_lock:
+            return function(*args, **kwargs)
+    return locked
+
+
+def _code_sha256(code):
+    return hashlib.sha256(code.encode('utf-8')).hexdigest()
+
+
+def _atomic_write_text(path, text):
+    path = Path(path)
+    with tempfile.NamedTemporaryFile(mode='w', encoding='utf-8', newline='\n',
+                                     dir=path.parent, delete=False) as output:
+        temporary = Path(output.name)
+        try:
+            output.write(text)
+        except BaseException:
+            output.close()
+            temporary.unlink(missing_ok=True)
+            raise
+    try:
+        os.replace(temporary, path)
+    finally:
+        temporary.unlink(missing_ok=True)
 
 
 def get_english_char_name(char_cls_or_name):
@@ -89,6 +122,7 @@ def _default_team_manifest(team):
     }
 
 
+@_team_code_transaction
 def create_custom_team(team):
     class_names = normalize_team(team)
     folder = get_custom_team_folder(class_names)
@@ -104,9 +138,10 @@ def create_custom_team(team):
             (folder / f"{class_name}.py").write_text(
                 read_builtin_char_code(classes[class_name]), encoding="utf-8"
             )
-        (folder / TEAM_MANIFEST_FILE).write_text(
-            json.dumps(_default_team_manifest(class_names), ensure_ascii=False, indent=2), encoding="utf-8"
-        )
+        manifest = _default_team_manifest(class_names)
+        manifest['builtin_sha256'] = {name: _code_sha256(read_builtin_char_code(classes[name]))
+                                      for name in class_names}
+        write_team_manifest(class_names, manifest)
     except Exception:
         shutil.rmtree(folder, ignore_errors=True)
         raise
@@ -114,6 +149,7 @@ def create_custom_team(team):
     return folder
 
 
+@_team_code_transaction
 def delete_custom_team(team):
     class_names = normalize_team(team)
     folder = get_custom_team_folder(class_names)
@@ -152,10 +188,16 @@ def list_custom_teams():
 def read_team_char_code(team, char_cls):
     path = get_team_char_file(team, char_cls)
     if path.exists():
-        return path.read_text(encoding="utf-8")
+        code = path.read_text(encoding="utf-8")
+        manifest = read_team_manifest(team)
+        if (manifest.get('code_mode') != TEAM_CODE_MODE_IMPORT
+                and manifest.get('builtin_sha256', {}).get(_get_class_name(char_cls)) == _code_sha256(code)):
+            return read_builtin_char_code(char_cls)
+        return code
     return read_builtin_char_code(char_cls)
 
 
+@_team_code_transaction
 def save_team_char_code(team, char_cls, code):
     class_names = normalize_team(team)
     class_name = _get_class_name(char_cls)
@@ -165,14 +207,14 @@ def save_team_char_code(team, char_cls, code):
     _validate_character_code(code, class_name, path)
     old_code = path.read_text(encoding="utf-8") if path.exists() else None
     try:
-        path.write_text(code, encoding="utf-8")
+        _atomic_write_text(path, code)
         clear_team_char_cache(class_names, class_name)
         _load_team_char_class_from_file(char_cls, class_names, path)
     except Exception:
         if old_code is None:
             path.unlink(missing_ok=True)
         else:
-            path.write_text(old_code, encoding="utf-8")
+            _atomic_write_text(path, old_code)
         clear_team_char_cache(class_names, class_name)
         raise
     return path
@@ -198,10 +240,11 @@ def read_team_manifest(team):
     return manifest
 
 
+@_team_code_transaction
 def write_team_manifest(team, manifest):
     path = get_custom_team_folder(team) / TEAM_MANIFEST_FILE
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8")
+    _atomic_write_text(path, json.dumps(manifest, ensure_ascii=False, indent=2))
     return path
 
 
@@ -210,6 +253,7 @@ def get_team_code_mode(team):
     return TEAM_CODE_MODE_IMPORT if mode == TEAM_CODE_MODE_IMPORT else TEAM_CODE_MODE_BUILTIN
 
 
+@_team_code_transaction
 def set_team_code_mode(team, mode):
     class_names = normalize_team(team)
     manifest = read_team_manifest(class_names)
@@ -230,6 +274,7 @@ def read_team_import_code(team, char_cls):
     return path.read_text(encoding="utf-8")
 
 
+@_team_code_transaction
 def save_team_import_code(team, char_cls, code):
     class_names = normalize_team(team)
     class_name = _get_class_name(char_cls)
@@ -237,7 +282,7 @@ def save_team_import_code(team, char_cls, code):
         raise ValueError(f"{class_name} is not in {class_names}")
     path = get_team_import_file(class_names, class_name)
     _validate_character_code(code, class_name, path)
-    path.write_text(code, encoding="utf-8")
+    _atomic_write_text(path, code)
     return path
 
 
@@ -397,6 +442,7 @@ def _team_char_classes(class_names):
     return {name: char_classes[name] for name in class_names}
 
 
+@_team_code_transaction
 def _write_team_code(team, codes, import_codes=None, mode=None):
     """Write the code of a whole team as one unit.
 
@@ -421,19 +467,23 @@ def _write_team_code(team, codes, import_codes=None, mode=None):
     backups = {path: path.read_text(encoding="utf-8") if path.is_file() else None for path in touched}
     try:
         for path, code in writes.items():
-            path.write_text(code, encoding="utf-8")
+            _atomic_write_text(path, code)
         clear_team_char_cache(class_names)
         for class_name in codes:
             _load_team_char_class_from_file(
                 char_classes[class_name], class_names, get_team_char_file(class_names, class_name))
         if mode is not None:
             set_team_code_mode(class_names, mode)
+            if mode == TEAM_CODE_MODE_BUILTIN:
+                manifest = read_team_manifest(class_names)
+                manifest['builtin_sha256'] = {name: _code_sha256(code) for name, code in codes.items()}
+                write_team_manifest(class_names, manifest)
     except Exception:
         for path, old in backups.items():
             if old is None:
                 path.unlink(missing_ok=True)
             else:
-                path.write_text(old, encoding="utf-8")
+                _atomic_write_text(path, old)
         clear_team_char_cache(class_names)
         raise
 
@@ -452,20 +502,31 @@ def clear_team_char_cache(team=None, char_cls_or_name=None):
     clear_builtin_code_cache()
 
 
-def load_team_char_class(char_cls, team):
+@_team_code_transaction
+def load_team_char_class(char_cls, team, strict=False):
     class_names = normalize_team(team)
     if char_cls.__name__ not in class_names:
         return char_cls
     path = get_custom_team_folder(class_names) / f"{char_cls.__name__}.py"
+    manifest = read_team_manifest(class_names)
+    if manifest.get('code_mode') == TEAM_CODE_MODE_BUILTIN:
+        return char_cls
     if not path.exists():
+        if strict and get_custom_team_folder(class_names).is_dir():
+            raise RuntimeError(f'Missing team character: {path.name}')
         return char_cls
     try:
-        if path.read_text(encoding="utf-8") == read_builtin_char_code(char_cls):
-            return char_cls
+        if manifest.get('code_mode') != TEAM_CODE_MODE_IMPORT:
+            code = path.read_text(encoding='utf-8')
+            if (_code_sha256(code) == manifest.get('builtin_sha256', {}).get(char_cls.__name__)
+                    or code == read_builtin_char_code(char_cls)):
+                return char_cls
         return _load_team_char_class_from_file(char_cls, class_names, path)
     except Exception as e:
         logger.error(f"load team character class failed for {char_cls.__name__}: {e}")
         clear_team_char_cache(class_names, char_cls)
+        if strict:
+            raise
         return char_cls
 
 
@@ -568,6 +629,7 @@ def inspect_team_archive(archive_path):
     return {"manifest": manifest, "team": class_names, "codes": codes}
 
 
+@_team_code_transaction
 def import_custom_team(archive_info):
     class_names = normalize_team(archive_info["team"])
     codes = archive_info["codes"]

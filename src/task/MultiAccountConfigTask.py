@@ -3,7 +3,7 @@ import win32api
 from ok import PostMessageInteraction
 from ok.task.exceptions import TaskDisabledException, WaitFailedException
 
-from src.task.BaseWWTask import LOGIN_TEXTS
+from src.task.BaseWWTask import LOGIN_TEXTS, GameLoginTimeout
 from src.task.MouseResetTask import MouseResetTask
 from src.task.MultiAccountDailyTask import (
     MultiAccountDailyTask, combo_items, combo_selected_item, select_combo_item,
@@ -68,6 +68,7 @@ class MultiAccountConfigTask(MultiAccountDailyTask):
             except (OSError, ValueError) as error:
                 self.log_warning(self.tr('Failed to save account run history: {error}').format(error=error))
         completed = []
+        failed = []
         self.info_set('状态', '执行中')
         self.info_set('已完成', completed.copy())
         try:
@@ -95,13 +96,20 @@ class MultiAccountConfigTask(MultiAccountDailyTask):
                 except TaskDisabledException:
                     record_result(account, 'cancelled', '任务已停止')
                     raise
+                except GameLoginTimeout as error:
+                    record_result(account, 'failed', str(error))
+                    failed.append(display_account(account['account_key']))
+                    self.info_set('Failed', failed.copy())
+                    self.log_warning(str(error))
+                    self._recover_account_login()
+                    continue
                 except Exception as error:
                     record_result(account, 'failed', str(error))
                     raise
                 record_result(account, 'success')
                 completed.append(display_account(account['account_key']))
                 self.info_set('已完成', completed.copy())
-            self.info_set('状态', '全部完成')
+            self.info_set('状态', '部分失败' if failed else '全部完成')
         except TaskDisabledException:
             self.info_set('状态', '已停止')
             raise

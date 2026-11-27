@@ -46,6 +46,23 @@ from src.char.CustomCharLoader import normalize_team
 
 
 class TestCharacterCodeTab(unittest.TestCase):
+
+    def test_live_reload_waits_for_running_or_enabled_tasks(self):
+        team = (Chixia, Mortefi, Verina)
+        task = SimpleNamespace(chars=[cls(None, index, char_name=label) for index, (cls, label) in enumerate(zip(
+            team, (Labels.char_chixia, Labels.char_mortefi, Labels.char_verina)))])
+        executor = SimpleNamespace(current_task=task, onetime_tasks=[task], trigger_tasks=[])
+        tab = SimpleNamespace(executor=executor)
+        with patch('src.gui.CharacterCodeTab.apply_team_char_classes') as apply:
+            CharacterCodeTab._reload_live_team_code(tab, team)
+            apply.assert_not_called()
+            executor.current_task = None
+            task.enabled = True
+            CharacterCodeTab._reload_live_team_code(tab, team)
+            apply.assert_not_called()
+            task.enabled = False
+            CharacterCodeTab._reload_live_team_code(tab, team)
+            apply.assert_called_once()
     @classmethod
     def setUpClass(cls):
         cls.app = QApplication.instance() or QApplication([])

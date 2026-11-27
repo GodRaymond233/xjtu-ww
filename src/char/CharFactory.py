@@ -58,7 +58,7 @@ from src.char.Youhu import Youhu
 from src.char.Yuanwu import Yuanwu
 from src.char.Zani import Zani
 from src.char.Zhezhi import Zhezhi
-from src.char.CustomCharLoader import load_team_char_class, normalize_team
+from src.char.CustomCharLoader import load_team_char_class, normalize_team, team_code_lock
 
 _char_dict_raw = {
     Labels.char_aalto: {'cls': Aalto, 'char_type': CharType.SUB_DPS,
@@ -179,8 +179,6 @@ def _get_buff_time(task, info):
 def _apply_char_config(task, char, info):
     if char and info:
         char.char_name = info['canonical_name']
-        char.set_char_type(_get_char_type(task, info))
-        char.set_buff_time(_get_buff_time(task, info))
         char.target_box_short_combat_check = info.get('target_box_short_combat_check', False)
     return char
 
@@ -208,7 +206,7 @@ def get_char_by_pos(task, box, index, old_char):
                                                     ring_index=info.get('ring_index', -1),
                                                     char_type=_get_char_type(task, info),
                                                     buff_time=_get_buff_time(task, info)), info)
-            _apply_char_config(task, old_char, info)
+            old_char.char_name = info['canonical_name']
             return old_char
     if not char:
         char = task.find_best_match_in_box(box, char_names, threshold=0.6)
@@ -241,21 +239,30 @@ def apply_team_char_classes(task, chars):
         team = normalize_team(builtin_classes)
     except ValueError:
         return chars
-    for index, (char, builtin_cls) in enumerate(zip(chars, builtin_classes)):
-        desired_cls = load_team_char_class(builtin_cls, team)
-        if type(char) is desired_cls:
-            continue
-        replacement = desired_cls(
-            task,
-            char.index,
-            char_name=char.char_name,
-            confidence=char.confidence,
-            ring_index=char.ring_index,
-            char_type=char.char_type,
-            buff_time=char.buff_time,
-        )
-        replacement.__dict__.update(char.__dict__)
-        chars[index] = replacement
+    def build(classes):
+        replacements = []
+        for char, desired_cls, info in zip(chars, classes, infos):
+            if type(char) is desired_cls:
+                replacements.append(char)
+                continue
+            replacement = desired_cls(
+                task, char.index, char_name=char.char_name, confidence=char.confidence,
+                ring_index=info.get('ring_index', -1), char_type=_get_char_type(task, info),
+                buff_time=_get_buff_time(task, info),
+            )
+            replacement.target_box_short_combat_check = info.get('target_box_short_combat_check', False)
+            replacement.adopt_runtime_state(char)
+            replacements.append(replacement)
+        return replacements
+
+    with team_code_lock:
+        try:
+            replacements = build([load_team_char_class(cls, team, strict=True) for cls in builtin_classes])
+        except Exception as error:
+            from ok import Logger
+            Logger.get_logger(__name__).error(f'load whole workshop team failed for {team}: {error}')
+            replacements = build(builtin_classes)
+        chars[:] = replacements
     return chars
 
 

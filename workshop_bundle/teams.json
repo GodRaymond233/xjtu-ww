@@ -20,7 +20,7 @@
           "filename": "2弗维速刷boss_琉璃_1.0.0.zip",
           "downloadUrl": "https://s2a.godraymond.com/workshop/codes/2%E5%BC%97%E7%BB%B4%E9%80%9F%E5%88%B7boss_%E7%90%89%E7%92%83_1.0.0.zip",
           "rawUrl": "https://s2a.godraymond.com/workshop/codes/2%E5%BC%97%E7%BB%B4%E9%80%9F%E5%88%B7boss_%E7%90%89%E7%92%83_1.0.0.zip",
-          "sha256": "b075006c6c323c281b77c29e155328c4ce723bf628153ee5b34f06c83974ae09",
+          "sha256": "56eaea58a2077a352a373ee5fa1c50a72162b2c113d75d1a448db64da9ee7b08",
           "name": "2弗维速刷boss",
           "description": "1.刚需2弗2维5奇幻，维带无归，白芷带乌龟\n2.无大招不需共鸣效率\n3.谁进场都可以\n4.开启自动切换治疗位，大招不开\n5.弗需提前攒好重击再开始\n6.轴为维打满协奏切弗aaqz，重击直接打死的话一般115左右每小时",
           "author": "琉璃",
@@ -31,8 +31,8 @@
             "Phrolova",
             "Verina"
           ],
-          "size": 4124,
-          "sizeFormatted": "4.03 KB",
+          "size": 4121,
+          "sizeFormatted": "4.02 KB",
           "timestamp": 1791477164,
           "modifiedAt": "2026-10-08T16:32:44.000Z"
         },
@@ -1171,7 +1171,7 @@
           "filename": "Chixia_Phrolova_Verina_琉璃_1.0.1.zip",
           "downloadUrl": "https://s2a.godraymond.com/workshop/codes/Chixia_Phrolova_Verina_%E7%90%89%E7%92%83_1.0.1.zip",
           "rawUrl": "https://s2a.godraymond.com/workshop/codes/Chixia_Phrolova_Verina_%E7%90%89%E7%92%83_1.0.1.zip",
-          "sha256": "c5f8a2120468967ad798baaa5a94207973a0cb9f23c6e873fa8b294ca60f1198",
+          "sha256": "158242dd0dade8a8060e56bfa69496da15827be5345a1ffb2691ffe689d6a9dd",
           "name": "Chixia_Phrolova_Verina",
           "description": "弗维刷4c，内置 不同连招模板！！！\n可在角色代码处改弗和维的，适配0-6弗和0-6维\n不过0弗的话，除非你没其他高链角色和角色池少的话，不然应该是没其他配队快的，不过也可以试试\n更改连招可自行尝试不同连招，弗维各3套，不同boss不同连招会有不同速度\n1.全适配共鸣链\n2.无共鸣效率需求\n3.谁进场都可以，弗最好先存6个音符，不存也可以就是第一次打boss会慢\n4.开启自动切换治疗位，关闭开启大招\n5.维4c带无归最好，炽霞无需练度带个乌龟即可，伤害够或者懒也可不换\n6.速刷4c队\n7.部分boss没有自动重开，例如梦魇光鸟，我2弗在100掉率次数没用的情况下可达到170+每小时，自行尝试，梦魇光鸟还是不太合适毕竟85级而且血少，不过懒的测更多了",
           "author": "琉璃",
@@ -1182,8 +1182,8 @@
             "Phrolova",
             "Verina"
           ],
-          "size": 4509,
-          "sizeFormatted": "4.4 KB",
+          "size": 4408,
+          "sizeFormatted": "4.30 KB",
           "timestamp": 1792320479,
           "modifiedAt": "2026-10-18T10:47:59.000Z"
         }
@@ -1204,7 +1204,7 @@
           "filename": "Denia_Mornye_Qingxiao_Kexeyna_1.0.2.zip",
           "downloadUrl": "https://s2a.godraymond.com/workshop/codes/Denia_Mornye_Qingxiao_Kexeyna_1.0.2.zip",
           "rawUrl": "https://s2a.godraymond.com/workshop/codes/Denia_Mornye_Qingxiao_Kexeyna_1.0.2.zip",
-          "sha256": "79cded47855d2bc59f49b70770435c6ec3851a6391ecc3b4f52cf177087b9b77",
+          "sha256": "bc7b000473948902e575f2c04bf5ae395c12f26fa7f4675a5177877d035224ec",
           "name": "Denia_Mornye_Qingxiao",
           "description": "清达莫轮切轴优化\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\n基于官方代码优化，释放声骸及其一些小改动 \n清宵：143.2% 0+专武 \n达妮娅：120.4% 0+漪澜浮录 \n莫宁：274.2% 0+异响空灵\n仅在这两种环境测试过，其余环境没试过，充能大于以下即可，更低值未测试过\n莫宁：0+0《异响空灵》，共鸣效率 260.8% \n达妮娅：0+0《漪澜浮录》，共鸣效率 120.4% \n清宵：0+1，共鸣效率 106.8%",
           "author": "Kexeyna",
@@ -1215,8 +1215,8 @@
             "Mornye",
             "Qingxiao"
           ],
-          "size": 3482,
-          "sizeFormatted": "3.4 KB",
+          "size": 3491,
+          "sizeFormatted": "3.41 KB",
           "timestamp": 1789630460,
           "modifiedAt": "2026-09-17T07:34:20.000Z"
         },
@@ -1661,7 +1661,7 @@
           "filename": "Hsin_Rover_Suisui_心雷穗标准轴_Alchemisttt_1.0.0.zip",
           "downloadUrl": "https://s2a.godraymond.com/workshop/codes/Hsin_Rover_Suisui_%E5%BF%83%E9%9B%B7%E7%A9%97%E6%A0%87%E5%87%86%E8%BD%B4_Alchemisttt_1.0.0.zip",
           "rawUrl": "https://s2a.godraymond.com/workshop/codes/Hsin_Rover_Suisui_%E5%BF%83%E9%9B%B7%E7%A9%97%E6%A0%87%E5%87%86%E8%BD%B4_Alchemisttt_1.0.0.zip",
-          "sha256": "ffa636a9b5e03f1fa8e8fcc61f9e75b2c78c80804b65b86a633290ce52334daf",
+          "sha256": "8e50194eda49e368a7e637b6619e43f71f922e6595d219c23c54cd85575ea35e",
           "name": "Hsin_Rover_Suisui_心雷穗标准轴",
           "description": "心雷穗 25 秒标准轴（简单合轴 9.2 万 DPS）。来源：B站 猫眼石攻略组《心雷穗25秒标准轴教学》。队伍：1=心月狐 / 2=雷主(漂泊者·导电) / 3=穗穗；开局必须由穗穗首发（代码会自己快速交棒到 3 号位）。【配置·共鸣链/武器】心月狐 01 ／ 雷主 00 ／ 穗穗 2。【共效】心月狐 ≥125% ／ 雷主 ≥135% ／ 穗穗 ≥260%（低于这个值会出现「协奏顶不满 → 下一棒吃不到变奏」）。【启动轴】穗a123Ea → 雷aa → 穗a12[合轴] → 雷a123[合轴] → 穗a12EQR[变奏] → 雷aE(补Q) → 心a12[合轴] → 雷aaERa[变奏] → 心aZQRea12Ea1234ZR → 变奏穗。【循环轴】穗[变]a → 雷aa → 穗a12 → 雷a123 → 穗a12E(a34)QR → 雷[变]aE(补Q) → 心a12 → 雷aERa → 心[变]aZQRea12Ea1234ZR → 变奏穗。【实现要点】合轴（穗↔雷、心→雷）用「数连段 + 提前按数字键 + 窗口内狂按 + 队伍UI确认」实现，不识别画面动作相位；窗口内没切过去就走保守分支（作者说两套耗时几乎一样）。心月狐的【终结重击·临寰宇】用「长按左键直到队伍 HUD 连续消失 3 帧」确认，没确认就补一段普攻再按（最多 2 轮）；【二段大·万阙垂天】只在确认临寰宇出手后才按 R（否则会放出【借相·应世】把心切回应世相）。雷主**先打出强化E(超负荷) 再放大招**。【环境】1920×1080 全屏窗口；已在「残响之塔·第1层」实测跑通启动轴 + 循环轴，循环轴的长时稳定性仍在观察；时间常数已按本机实机录像校准，换机器/帧率可能需要微调。",
           "author": "Alchemisttt",
@@ -1672,8 +1672,8 @@
             "Rover",
             "Suisui"
           ],
-          "size": 84861,
-          "sizeFormatted": "82.87 KB",
+          "size": 82114,
+          "sizeFormatted": "80.19 KB",
           "timestamp": 1795191009,
           "modifiedAt": "2026-11-20T16:10:09.000Z"
         },

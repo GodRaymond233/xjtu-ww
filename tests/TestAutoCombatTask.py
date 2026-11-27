@@ -54,7 +54,7 @@ class TestAutoCombatTask(unittest.TestCase):
 
         old_char.perform.assert_called_once()
         self.assert_combat_cleared()
-        self.task.combat_end.assert_not_called()
+        self.task.combat_end.assert_called_once()
         self.task.switch_healer.assert_called_once()
 
     def test_disable_inside_combat_check_cleans_up_and_propagates(self):
@@ -70,7 +70,7 @@ class TestAutoCombatTask(unittest.TestCase):
 
         self.assert_combat_cleared()
         old_char.perform.assert_not_called()
-        self.task.combat_end.assert_not_called()
+        self.task.combat_end.assert_called_once()
         self.task.switch_healer.assert_not_called()
 
     def test_disable_between_runs_invalidates_chars_before_reentry(self):

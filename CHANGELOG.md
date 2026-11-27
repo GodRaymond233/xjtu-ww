@@ -2,6 +2,12 @@
 
 Release history starts at v3.0.0.
 
+## Unreleased
+
+- Synced combat, domain retry and login fixes from ok-ww v3.8.15. Concerto recognition also supports lower capture resolutions, and Traditional Chinese OCR includes OpenCC.
+- Workshop teams keep their constructor settings when loaded and can request urgent healer switches. Built in mode follows updated character code; team code loads together and active combat picks up edits on its next team load.
+- Multi-account tasks record an account login timeout and continue with the remaining accounts once the login screen is available.
+
 ## v1.4.1 (2026-11-24)
 
 - Cloud play now captures the WebRTC video stream, so capture continues when you minimize the browser.

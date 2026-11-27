@@ -43,9 +43,13 @@ class AutoCombatTask(BaseCombatTask, TriggerTask):
 
     def reset_auto_combat(self, reason):
         self._reset_combat_on_run = False
-        self.reset_to_false(reason)
-        self.chars = [None, None, None]
-        self.freeze_durations = []
+        try:
+            if any(self.chars):
+                self.combat_end()
+        finally:
+            self.reset_to_false(reason)
+            self.chars = [None, None, None]
+            self.freeze_durations = []
 
     def warm_up_char_features(self):
         if self.char_features_warmed_up:

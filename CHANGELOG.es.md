@@ -2,6 +2,12 @@
 
 El historial comienza en v3.0.0.
 
+## Unreleased
+
+- Se integraron las correcciones de combate, reintento de dominios e inicio de sesión de ok-ww v3.8.15. La lectura de Concierto admite resoluciones menores y el OCR en chino tradicional incluye OpenCC.
+- Los equipos del Taller conservan la configuración de sus personajes y pueden solicitar cambios urgentes al sanador. El modo integrado sigue las actualizaciones de código; el equipo se carga como una unidad y las ediciones durante el combate se aplican en la siguiente carga.
+- Las tareas multicuenta registran el tiempo de espera de una cuenta y continúan con las restantes cuando se recupera la pantalla de selección.
+
 ## v1.4.1 (2026-11-24)
 
 - El juego en la nube captura el vídeo mediante WebRTC y sigue capturándolo al minimizar el navegador.

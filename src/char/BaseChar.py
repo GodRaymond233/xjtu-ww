@@ -9,6 +9,7 @@ from ok import Config, Logger  # noqa
 from src import text_white_color  # noqa
 
 SKILL_TIME_OUT = 15
+RESONANCE_STILL_READY_TIME_OUT = 2  # stop pressing E once it has stayed ready this long after the first press
 
 
 class CharType(StrEnum):
@@ -64,6 +65,21 @@ class BaseChar:
     """
 
     HEALER_FULL_CON_SWITCH_LOCKOUT = 16.0
+    HEALER_LOCKOUT_BYPASS_PRIORITY = None
+    RUNTIME_STATE_FIELDS = (
+        'is_current_char', 'has_intro', 'has_sub_dps_intro', 'current_con',
+        'last_switch_time', 'last_switch_in_time', 'last_full_con_switch_time',
+        'last_res', 'last_echo', 'last_liberation', 'last_perform', 'last_outro_time',
+        'last_buff_time', '_liberation_available', '_resonance_available',
+        '_echo_available', 'has_tool_box',
+    )
+
+    def adopt_runtime_state(self, old):
+        for name in self.RUNTIME_STATE_FIELDS:
+            if hasattr(old, name):
+                setattr(self, name, getattr(old, name))
+        if self.ring_index < 0 and old.ring_index >= 0:
+            self.ring_index = old.ring_index
 
     def __init__(self, task, index, char_name=None, confidence=1, ring_index=-1, char_type=CharType.MAIN_DPS,
                  buff_time=None):
@@ -441,6 +457,14 @@ class BaseChar:
             if not self.resonance_available() and (
                     not has_animation or now - start > animation_min_duration):
                 self.logger.debug(f'click_resonance not available break')
+                break
+            if (time_out == 0 and not has_animation and resonance_click_time != 0
+                    and now - resonance_click_time > RESONANCE_STILL_READY_TIME_OUT):
+                # The icon still reads as ready after pressing (a skill with charges, a
+                # follow-up form, or a press the game ignored). Waiting out
+                # SKILL_TIME_OUT here kept characters on field for 15s+.
+                self.logger.info(f'click_resonance still available '
+                                 f'{now - resonance_click_time:.1f}s after first press, stop')
                 break
             self.logger.debug(f'click_resonance resonance_available click')
 
@@ -844,8 +868,7 @@ class BaseChar:
         for char in getattr(self.task, 'chars', []):
             if char is None or char == current_char:
                 continue
-            if char.get_switch_priority(current_char=current_char, has_intro=False,
-                                        target_low_con=False) >= SwitchPriority.MUST:
+            if self.task._effective_switch_priority(char, current_char, False) >= SwitchPriority.MUST:
                 self.logger.info(f'In lock with {char}')
                 return True
         return False

@@ -596,6 +596,91 @@ class TestChar(TaskTestCase):
         self.assertGreaterEqual(f_times[0] - task.animation_start, 0.2)
         self.assertTrue(all(later - earlier >= 0.1 for earlier, later in zip(f_times, f_times[1:])))
 
+    def test_click_resonance_stops_when_still_ready_after_press(self):
+        class Task:
+            in_liberation = False
+            skip_combat_check = False
+
+            def in_team(self):
+                return True, 0, 3
+
+            def next_frame(self):
+                time.sleep(0.01)
+
+            def click(self, *args, **kwargs):
+                pass
+
+            def sleep(self, *args, **kwargs):
+                pass
+
+        class StuckResonanceChar(BaseChar):
+            presses = 0
+
+            def check_combat(self):
+                pass
+
+            def resonance_available(self):
+                return True
+
+            def record_resonance_use(self):
+                pass
+
+            def send_resonance_key(self, *args, **kwargs):
+                self.presses += 1
+
+        char = StuckResonanceChar(Task(), 0)
+        with patch.dict(BaseChar.click_resonance.__globals__, {'RESONANCE_STILL_READY_TIME_OUT': 0.2}):
+            start = time.time()
+            clicked, _, _ = char.click_resonance()
+        self.assertTrue(clicked)
+        self.assertGreater(char.presses, 0)
+        self.assertLess(time.time() - start, 2)
+
+    def test_suisui_switches_once_after_resonance(self):
+        suisui = Suisui.__new__(Suisui)
+        suisui.should_heavy = False
+        suisui.has_intro = False
+        switches = []
+        suisui.switch_next_char = lambda *args, **kwargs: switches.append(1)
+        suisui.forte3_available = lambda: False
+        suisui.forte2_available = lambda: False
+        suisui.cycle_start = lambda: None
+        suisui.try_e = lambda: True
+        suisui.time_elapsed_accounting_for_freeze = lambda start, *args, **kwargs: 0
+
+        suisui.do_perform()
+
+        self.assertEqual(switches, [1])
+
+    def test_support_chain_without_intro_returns_to_main_dps(self):
+        class Task:
+            def time_elapsed_accounting_for_freeze(self, start, intro_motion_freeze=False):
+                if start < 0:
+                    return 10000
+                return time.time() - start
+
+        task = Task()
+        combat = AutoCombatTask.__new__(AutoCombatTask)
+        main_dps = BaseChar(task, 0, char_type=CharType.MAIN_DPS)
+        healer = BaseChar(task, 1, char_type=CharType.HEALER)
+        other_healer = BaseChar(task, 2, char_type=CharType.HEALER)
+        combat.chars = [main_dps, healer, other_healer]
+
+        # First hand-off between unbuffed supports is still allowed.
+        self.assertEqual(combat._choose_switch_target(healer, False), other_healer)
+        combat._record_switch_chain(healer, other_healer, False)
+        # The second one in a row goes back to the main DPS.
+        self.assertEqual(combat._choose_switch_target(other_healer, False), main_dps)
+        # An intro still hands over to the unbuffed support.
+        self.assertEqual(combat._choose_switch_target(other_healer, True), healer)
+
+        combat._record_switch_chain(other_healer, main_dps, False)
+        self.assertEqual(combat._choose_switch_target(healer, False), other_healer)
+        combat._record_switch_chain(main_dps, healer, False)
+        self.assertEqual(combat.support_chain_without_intro, 0)
+        combat._record_switch_chain(healer, other_healer, True)
+        self.assertEqual(combat.support_chain_without_intro, 0)
+
     def test_click_resonance_click_f_can_be_disabled(self):
         class Task:
             in_liberation = False
@@ -740,6 +825,8 @@ class TestChar(TaskTestCase):
 
     def test_switch_priority_rules(self):
         class Task:
+            _effective_switch_priority = BaseCombatTask._effective_switch_priority
+
             def time_elapsed_accounting_for_freeze(self, start, intro_motion_freeze=False):
                 if start < 0:
                     return 10000
@@ -813,6 +900,32 @@ class TestChar(TaskTestCase):
         combat._apply_intro_flags(healer, current, True)
         self.assertTrue(current.has_intro)
         self.assertFalse(current.has_sub_dps_intro)
+
+    def test_workshop_explicit_healer_priority_and_fast_perform_share_lockout(self):
+        task = self.task
+        current = BaseChar(task, 0, char_type=CharType.HEALER)
+        for priority in (SwitchPriority.NORMAL, SwitchPriority.HIGH, SwitchPriority.MUST):
+            custom = type('CustomHealer', (BaseChar,), {
+                '__module__': 'xjtu_team_test',
+                'get_switch_priority': lambda self, **kwargs: priority,
+            })
+            healer = custom(task, 1, char_type=CharType.HEALER)
+            healer.last_full_con_switch_time = time.time()
+            task.chars = [current, healer]
+            with self.subTest(priority=priority):
+                expected = current if priority == SwitchPriority.NORMAL else healer
+                self.assertIs(task._choose_switch_target(current, False), expected)
+                self.assertEqual(current.need_fast_perform(), priority == SwitchPriority.MUST)
+                custom.HEALER_LOCKOUT_BYPASS_PRIORITY = None
+                self.assertEqual(task._effective_switch_priority(healer, current, False), SwitchPriority.NO)
+
+        passthrough = type('PassthroughHealer', (ForcedChar,), {
+            '__module__': 'xjtu_team_test',
+            'get_switch_priority': lambda self, **kwargs: ForcedChar.get_switch_priority(self, **kwargs),
+        })
+        healer = passthrough(task, 1, char_type=CharType.HEALER)
+        healer.last_full_con_switch_time = time.time()
+        self.assertEqual(task._effective_switch_priority(healer, current, False), SwitchPriority.NO)
 
     def test_farm_echo_healer_returns_to_main_dps(self):
         class Task:
@@ -2349,7 +2462,13 @@ class TestCharacterSafety(unittest.TestCase):
         char.auto_dodge = Mock(return_value=True)
         self.assertTrue(Augusta(task, 1).shorekeeper_auto_dodge())
         task.find_one.return_value = Mock(confidence=1)
+        char.set_char_type(CharType.SUB_DPS)
+        char.set_buff_time(7.5)
+        char.target_box_short_combat_check = True
         self.assertIs(get_char_by_pos(task, None, 0, char), char)
+        self.assertEqual(char.char_type, CharType.SUB_DPS)
+        self.assertEqual(char.buff_time, 7.5)
+        self.assertTrue(char.target_box_short_combat_check)
         self.assertTrue(ShoreKeeper(None, 0).is_character(ShoreKeeper))
         unknown = BaseChar(None, 0, char_name='unknown')
         self.assertFalse(unknown.is_character(ShoreKeeper))

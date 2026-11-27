@@ -26,7 +26,7 @@ if (root / 'config.cp312-win_amd64.pyd').is_file():
     datas.append((str(root / 'config.cp312-win_amd64.pyd'), '.'))
 hiddenimports = collect_submodules('src')
 binaries = collect_dynamic_libs('openvino')
-for package in ('ok', 'onnxocr'):
+for package in ('ok', 'onnxocr', 'opencc'):
     package_data, package_binaries, package_imports = collect_all(package)
     datas += package_data
     binaries += package_binaries

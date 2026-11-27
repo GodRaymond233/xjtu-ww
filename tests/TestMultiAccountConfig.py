@@ -424,6 +424,23 @@ class TestMultiAccountConfig(unittest.TestCase):
             for path, content in files.items():
                 self.assertEqual(path.read_bytes(), content)
 
+    def test_login_timeout_records_failure_and_continues_to_next_account(self):
+        from src.task.BaseWWTask import GameLoginTimeout
+        with tempfile.TemporaryDirectory() as folder:
+            store = MultiAccountConfigStore(folder)
+            store.save([account(), account('2342345')])
+            runner = self.make_runner(executor_for([], folder))
+            runner.log_warning = Mock()
+            runner._recover_account_login = Mock()
+            runner._login_target_account.side_effect = [GameLoginTimeout('login timed out'), None]
+            with patch.object(WWOneTimeTask, 'run'):
+                MultiAccountConfigTask.run(runner)
+            self.assertEqual(runner._login_target_account.call_count, 2)
+            runner._recover_account_login.assert_called_once()
+            self.assertEqual(runner.info['状态'], '部分失败')
+            self.assertEqual(len(runner.info['已完成']), 1)
+            self.assertEqual(len(store.load_results()), 2)
+
     def test_consecutive_runs_recover_login_state_and_return_to_login(self):
         for initial_screen in ('world', 'login'):
             with self.subTest(initial_screen=initial_screen), tempfile.TemporaryDirectory() as folder:

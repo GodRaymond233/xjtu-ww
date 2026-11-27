@@ -247,6 +247,90 @@ class Mortefi(BuiltinMortefi):
         self.assertEqual(task.chars[0].last_res, 123.0)
         self.assertEqual(read_team_char_code(team, Mortefi), baseline)
 
+    def test_replacement_preserves_runtime_and_custom_constructor_settings(self):
+        from types import SimpleNamespace
+        from src.char.BaseChar import CharType, Elements
+        team = (Mortefi, Chixia, Verina)
+        create_custom_team(team)
+        save_team_char_code(team, Mortefi, self._team_code('configured') + '''
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.check_f_on_switch = False
+        self.ring_index = 3
+        self.custom_state = 'fresh'
+''')
+        task = SimpleNamespace()
+        task.chars = self._chars(task, Verina)
+        old = task.chars[0]
+        old.last_res, old.current_con, old.is_current_char = 123, 0.75, True
+        old.custom_state = 'stale'
+        old.set_char_type(CharType.MAIN_DPS)
+        apply_team_char_classes(task, task.chars)
+        char = task.chars[0]
+        self.assertEqual((char.last_res, char.current_con, char.is_current_char), (123, 0.75, True))
+        self.assertFalse(char.check_f_on_switch)
+        self.assertEqual(char.ring_index, Elements.ICE)
+        self.assertEqual(char.custom_state, 'fresh')
+        self.assertEqual(char.char_type, CharType.SUB_DPS)
+
+        from src.char.Rover import Rover
+        from src.char.Chisa import Chisa
+        team = (Rover, Chisa, Mortefi)
+        self._import_team(team)
+        task.char_config = {'Chisa DPS': True}
+        task.chars = [
+            Rover(task, 0, char_name=Labels.char_rover),
+            Chisa(task, 1, char_name=Labels.char_chisa, char_type=CharType.HEALER, buff_time=20),
+            Mortefi(task, 2, char_name=Labels.char_mortefi),
+        ]
+        apply_team_char_classes(task, task.chars)
+        task.chars[0].ring_index = Elements.SPECTRO
+        task.char_config['Chisa DPS'] = False
+        self.assertEqual(task.chars[0].char_type, CharType.MAIN_DPS)
+        self.assertEqual(task.chars[1].char_type, CharType.HEALER)
+        self.assertEqual(task.chars[1].buff_time, 20)
+
+    def test_failed_member_load_or_constructor_falls_back_as_a_whole_team(self):
+        from types import SimpleNamespace
+        team = (Mortefi, Chixia, Verina)
+        self._import_team(team)
+        original = read_team_char_code(team, Verina)
+        for broken in ('this is invalid python!', self._char_code(Verina, 'broken') + '''
+    def __init__(self, *args, **kwargs):
+        raise RuntimeError('broken constructor')
+'''):
+            with self.subTest(code=broken):
+                task = SimpleNamespace()
+                task.chars = self._chars(task, Verina)
+                apply_team_char_classes(task, task.chars)
+                get_team_char_file(team, Verina).write_text(broken, encoding='utf-8')
+                clear_team_char_cache(team)
+                apply_team_char_classes(task, task.chars)
+                self.assertEqual([type(char) for char in task.chars], list(team))
+                get_team_char_file(team, Verina).write_text(original, encoding='utf-8')
+                clear_team_char_cache(team)
+
+    def test_built_in_mode_and_untouched_new_teams_follow_source_upgrades(self):
+        team = (Mortefi, Chixia, Verina)
+        create_custom_team(team)
+        updated = read_builtin_char_code(Mortefi) + '\n# newer built in source\n'
+        with patch('src.char.CustomCharLoader.read_builtin_char_code', return_value=updated):
+            self.assertIs(load_team_char_class(Mortefi, team), Mortefi)
+            self.assertEqual(read_team_char_code(team, Mortefi), updated)
+        self._import_team(team)
+        set_team_code_mode(team, TEAM_CODE_MODE_BUILTIN)
+        self.assertIs(load_team_char_class(Mortefi, team), Mortefi)
+
+    def test_atomic_save_keeps_previous_code_if_replacement_fails(self):
+        team = (Mortefi, Chixia, Verina)
+        create_custom_team(team)
+        folder = get_custom_team_folder(team)
+        before = {p.name: p.read_bytes() for p in folder.iterdir()}
+        with patch('src.char.CustomCharLoader.os.replace', side_effect=OSError('disk write failed')):
+            with self.assertRaises(OSError):
+                save_team_char_code(team, Mortefi, self._team_code('new'))
+        self.assertEqual({p.name: p.read_bytes() for p in folder.iterdir()}, before)
+
     def test_same_character_can_have_different_code_in_two_teams(self):
         first_team = (Mortefi, Chixia, Verina)
         second_team = (Mortefi, Chixia, Baizhi)
