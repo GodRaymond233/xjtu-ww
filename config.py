@@ -7,6 +7,7 @@ import pyappify
 from ok import Box, ConfigOption, Icon
 from ok.util.GlobalConfig import create_basic_options
 from src.game_launcher import get_game_launch_arguments
+from src.telemetry import TELEMETRY_OPTION
 from src.task.process_feature import process_feature
 from src.task.task_icons import task_icon
 
@@ -132,6 +133,11 @@ def blur_area(width, height):
 
 basic_config_option = create_basic_options(enable_blur=True)
 basic_config_option.default_config.pop('Kill Launcher After Start', None)
+basic_config_option.default_config[TELEMETRY_OPTION] = True
+basic_config_option.config_type[TELEMETRY_OPTION] = {'group': 'Application'}
+basic_config_option.config_description[TELEMETRY_OPTION] = (
+    'Share a random client ID, versions, update method and Windows version on startup. '
+    '匿名启动统计，仅发送随机标识、版本、更新方式和 Windows 大版本，可随时关闭。')
 
 key_config_option = ConfigOption('Game Hotkey', {
     'Echo Key': 'q',

@@ -276,4 +276,6 @@ def apply():
     _patch_notifications()
     _patch_log_page()
     _export_ok_globals()
+    from src.windows_runtime import apply as apply_windows_runtime
+    apply_windows_runtime()
     return True

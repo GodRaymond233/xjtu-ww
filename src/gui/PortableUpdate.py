@@ -129,8 +129,8 @@ class PortableUpdate(QObject):
         version = release.version
         question = self._text(
             f'Download and install {version}? XJTU-WW will close when the update is ready. '
-            'Then open the same executable again.',
-            f'下载并安装 {version}？更新准备好后，XJTU-WW 将自动退出。安装完成后请双击原来的程序。',
+            'The updated app will reopen automatically.',
+            f'下载并安装 {version}？更新准备好后，XJTU-WW 将自动退出，并在安装完成后重新打开。',
         )
         yes, no = QMessageBox.StandardButton.Yes, QMessageBox.StandardButton.No
         if QMessageBox.question(self.window, 'XJTU-WW', question, yes | no, no) != yes:

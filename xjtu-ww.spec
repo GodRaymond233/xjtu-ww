@@ -10,7 +10,6 @@ from PyInstaller.utils.win32.versioninfo import (
 root = Path(SPECPATH)
 datas = [(str(root / name), name) for name in ('assets', 'icons', 'i18n', 'workshop_bundle')]
 datas += [(str(root / name), '.') for name in ('LICENSE.txt', 'README.md')]
-datas.append((str(root / 'src' / 'install_update.ps1'), 'src'))
 char_sources = root / 'build' / 'char_sources'
 if not (char_sources / 'BaseChar.py').is_file():
     raise RuntimeError('Run .github/scripts/build_char_sources.py before compiling and stripping sources.')
@@ -25,6 +24,9 @@ for module in compiled:
 if (root / 'config.cp312-win_amd64.pyd').is_file():
     datas.append((str(root / 'config.cp312-win_amd64.pyd'), '.'))
 hiddenimports = collect_submodules('src')
+# Imports inside compiled runtime modules are invisible to PyInstaller's Python analysis.
+hiddenimports += ['pythoncom', 'win32event', 'win32file', 'win32security',
+                  'win32com.shell.shell', 'win32com.shell.shellcon']
 binaries = collect_dynamic_libs('openvino')
 for package in ('ok', 'onnxocr', 'opencc'):
     package_data, package_binaries, package_imports = collect_all(package)
@@ -76,6 +78,8 @@ exe = EXE(
     exclude_binaries=True,
     name='xjtu-ww',
     console=False,
+    uac_admin=True,
+    upx=False,
     icon=str(root / 'icons' / 'icon.png'),
     version=version_info,
     contents_directory='.',
@@ -85,4 +89,5 @@ coll = COLLECT(
     analysis.binaries,
     analysis.datas,
     name='xjtu-ww',
+    upx=False,
 )

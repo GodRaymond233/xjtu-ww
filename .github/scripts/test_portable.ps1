@@ -7,7 +7,7 @@ New-Item -ItemType Directory -Path $buildRoot -Force | Out-Null
 $smokeDirectory = Join-Path $buildRoot "portable-smoke-$([guid]::NewGuid().ToString('N'))"
 $stdout = Join-Path $buildRoot 'portable-smoke.stdout.log'
 $stderr = Join-Path $buildRoot 'portable-smoke.stderr.log'
-$environmentNames = @('PATH', 'QT_QPA_PLATFORM', 'ONEDNN_MAX_CPU_ISA')
+$environmentNames = @('PATH', 'QT_QPA_PLATFORM', 'ONEDNN_MAX_CPU_ISA', 'XJTU_WW_TELEMETRY_DISABLED')
 $oldEnvironment = @{}
 foreach ($name in $environmentNames) {
     $oldEnvironment[$name] = [Environment]::GetEnvironmentVariable($name, 'Process')
@@ -45,6 +45,7 @@ try {
     # Exclude developer-installed DLLs from the portable runtime's search path.
     $env:PATH = "$env:SystemRoot\System32;$env:SystemRoot"
     $env:QT_QPA_PLATFORM = 'offscreen'
+    $env:XJTU_WW_TELEMETRY_DISABLED = '1'
     $env:ONEDNN_MAX_CPU_ISA = 'AVX2'
     $process = Start-Process -FilePath $executable `
         -WorkingDirectory $buildRoot -WindowStyle Hidden -PassThru `

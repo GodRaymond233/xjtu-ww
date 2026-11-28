@@ -1,0 +1,14 @@
+name = "xjtu-ww-telemetry"
+main = "src/index.js"
+compatibility_date = "2026-01-01"
+workers_dev = false
+preview_urls = false
+routes = [{ pattern = "ww-stats.godraymond.com", custom_domain = true }]
+
+[observability]
+enabled = false
+
+[[d1_databases]]
+binding = "DB"
+database_name = "xjtu-ww-telemetry"
+database_id = "f078c377-e3c5-4356-98bd-b9e32a7ba3fb"
