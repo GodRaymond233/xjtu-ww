@@ -40,7 +40,8 @@ class TestWindowsRuntime(unittest.TestCase):
             shortcut = root / '自定义快捷方式.lnk'
             self.assertTrue(runtime.write_shortcut(shortcut, str(target), '--custom "a b"', str(root), 'Custom', '', True))
             before, timestamp = shortcut.read_bytes(), shortcut.stat().st_mtime_ns
-            self.assertFalse(runtime.write_shortcut(shortcut, str(target), '', str(root), 'XJTU-WW', '', False))
+            alias = root / '..' / root.name / target.name
+            self.assertFalse(runtime.write_shortcut(shortcut, str(alias), '', str(root), 'XJTU-WW', '', False))
             self.assertEqual(shortcut.read_bytes(), before)
             self.assertEqual(shortcut.stat().st_mtime_ns, timestamp)
             self.assertTrue(runtime._link_flags(shortcut) & runtime.RUNAS_USER)
@@ -55,7 +56,7 @@ class TestWindowsRuntime(unittest.TestCase):
                 link = pythoncom.CoCreateInstance(shell.CLSID_ShellLink, None, pythoncom.CLSCTX_INPROC_SERVER,
                                                   shell.IID_IShellLink)
                 link.QueryInterface(pythoncom.IID_IPersistFile).Load(str(shortcut))
-                self.assertEqual(Path(link.GetPath(shell.SLGP_RAWPATH)[0]), target)
+                self.assertEqual(Path(link.GetPath(shell.SLGP_RAWPATH)[0]).resolve(), target.resolve())
                 self.assertEqual(link.GetArguments(), '--custom "a b"')
             finally:
                 pythoncom.CoUninitialize()

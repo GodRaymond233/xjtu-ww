@@ -57,10 +57,12 @@ def write_shortcut(path, target, arguments, working_dir, name, icon, run_as_admi
         if exists:
             persist.Load(str(path))
         old_target = link.GetPath(shell.SLGP_RAWPATH)[0] if exists else ''
-        changed = not exists or os.path.normcase(old_target) != os.path.normcase(target)
+        # Explorer may expand an 8.3 component even when the original link is correct.
+        target = Path(target).resolve()
+        changed = not old_target or Path(os.path.expandvars(old_target)).resolve() != target
         if changed:
             link.SetPath(str(target))
-            link.SetWorkingDirectory(str(working_dir))
+            link.SetWorkingDirectory(str(Path(working_dir).resolve()))
             if not exists:
                 link.SetArguments(arguments or '')
                 link.SetDescription(name)
@@ -100,11 +102,15 @@ def repair_shortcuts(root, directories=None):
                     link = pythoncom.CoCreateInstance(shell.CLSID_ShellLink, None, pythoncom.CLSCTX_INPROC_SERVER,
                                                       shell.IID_IShellLink)
                     link.QueryInterface(pythoncom.IID_IPersistFile).Load(str(path))
-                    old = Path(link.GetPath(shell.SLGP_RAWPATH)[0])
+                    raw = link.GetPath(shell.SLGP_RAWPATH)[0]
+                    if not raw:
+                        continue
+                    old = Path(os.path.expandvars(raw)).resolve()
                     legacy = (old.name.casefold() == target.name and old.parent.name == 'previous'
                               and old.parent.parent.name.startswith('.xjtu-ww-update-')
                               and old.parent.parent.parent == root.parent
-                              and Path(link.GetWorkingDirectory()) == root)
+                              and link.GetWorkingDirectory()
+                              and Path(link.GetWorkingDirectory()).resolve() == root)
                     if old == target or legacy:
                         if write_shortcut(path, str(target), '', str(root), 'XJTU-WW', str(target), False):
                             changed.append(str(path))
