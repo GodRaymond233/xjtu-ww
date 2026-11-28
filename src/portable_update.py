@@ -72,13 +72,15 @@ def _stage_parent(root, create=False):
     parent = _safe_path(_cache_root(create), key)
     if create:
         parent.mkdir(exist_ok=True)
-    return parent
+    return parent.resolve()
 
 
 def _check_stage(root, staging):
-    if (not staging.is_absolute() or staging.parent != _stage_parent(root) or _is_link(staging)
+    expected = _stage_parent(root) / staging.name
+    if (not staging.is_absolute() or staging.resolve() != expected or _is_link(staging)
             or not re.fullmatch(r'\.xjtu-ww-update-[a-z0-9_]+', staging.name)):
         raise ValueError('Invalid or untrusted update directory.')
+    return expected
 
 
 @dataclass(frozen=True)
@@ -272,7 +274,7 @@ def stage_update(root, release, progress, cancelled):
 
 
 def start_installer(root, staging, chinese):
-    _check_stage(root, staging)
+    staging = _check_stage(root, staging)
     if (staging / JOURNAL).exists() or (staging / 'installer-ready').exists():
         raise OSError('This staging directory already has an update transaction.')
     command = [str(staging / 'xjtu-ww/xjtu-ww.exe'), '--apply-update',
@@ -358,7 +360,7 @@ def _validate_install(root, staging):
         if _is_link(path):
             raise ValueError('Installation and staging directories must not be Windows links.')
     root, staging = root.resolve(), staging.resolve()
-    _check_stage(root, staging)
+    staging = _check_stage(root, staging)
     if root == root.parent:
         raise ValueError('Invalid installation or staging directory.')
     payload = staging / 'xjtu-ww'
@@ -513,7 +515,7 @@ def apply_update(root, staging, app_pid, *, health_check=_check_startup):
     import psutil
 
     root, staging = Path(root), Path(staging)
-    _check_stage(root, staging)
+    staging = _check_stage(root, staging)
     if (staging / JOURNAL).exists():
         raise ValueError('This update has a journal; recover it before installing again.')
     _wait_for_app(app_pid, lambda: (staging / 'installer-ready').write_text('ready', encoding='ascii'))
@@ -572,7 +574,7 @@ def recover_update(root, staging, app_pid):
     import psutil
 
     root, staging = Path(root).resolve(), Path(staging)
-    _check_stage(root, staging)
+    staging = _check_stage(root, staging)
     journal = json.loads((staging / JOURNAL).read_text(encoding='utf-8'))
     if Path(journal['root']) != root or journal['state'] not in ('applying', 'awaiting-health', 'recovery-needed'):
         raise ValueError('This transaction cannot be recovered.')
@@ -595,7 +597,7 @@ def _process_active(pid, created):
 
 def guard_pending_update(root, post_update=None):
     """Resume an interrupted transaction using the intact staged executable."""
-
+    root = root.resolve()
     for staging in _stage_parent(root).glob('.xjtu-ww-update-*'):
         if _is_link(staging) or not (staging / JOURNAL).is_file():
             continue
@@ -634,10 +636,11 @@ def guard_pending_update(root, post_update=None):
 def finish_startup(root, staging=None):
     from src.windows_runtime import repair_shortcuts
     from src.telemetry import write_update_receipt
+    root = root.resolve()
 
     if staging is not None:
         staging = Path(staging)
-        _check_stage(root, staging)
+        staging = _check_stage(root, staging)
         journal = json.loads((staging / JOURNAL).read_text(encoding='utf-8'))
         if (Path(journal['root']) != root or journal['state'] != 'awaiting-health'
                 or journal['version'] != installed_version(root)):
@@ -687,7 +690,8 @@ def installer_main():
     parser.add_argument('--chinese', action='store_true')
     parser.add_argument('--xjtu-admin-requested', action='store_true', help=argparse.SUPPRESS)
     args = parser.parse_args()
-    _check_stage(args.install_root, args.stage)
+    args.install_root = args.install_root.resolve()
+    args.stage = _check_stage(args.install_root, args.stage)
     try:
         with _update_lock(args.install_root):
             if args.recover_update:

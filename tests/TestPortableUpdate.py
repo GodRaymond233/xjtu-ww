@@ -26,8 +26,9 @@ class TestPortableUpdate(unittest.TestCase):
         self.addCleanup(temp.cleanup)
         self.root = Path(temp.name) / '我的 [XJTU-WW]'
         self.root.mkdir()
-        self.cache = Path(temp.name) / 'protected-cache'
+        self.cache = self.root / '..' / 'protected-cache'
         self.cache.mkdir()
+        self._real_cache_root = portable_update._cache_root
         self.enterContext(patch.object(portable_update, '_cache_root', return_value=self.cache))
         (self.root / 'xjtu-ww.exe').write_bytes(b'old executable')
         (self.root / 'version.txt').write_text('v1.3.0', encoding='ascii')
@@ -291,3 +292,15 @@ Path('ok_tasks/custom.py').write_bytes(b'local task saved on exit')
         for args in ([], ['--post-update'], ['--post-update', '--help']):
             self.assertIsNone(portable_update.parse_post_update_arg(args))
         self.assertEqual(portable_update.parse_post_update_arg(['app', '--post-update', str(self.root)]), self.root)
+
+    @unittest.skipUnless(os.name == 'nt', 'Checks Windows ACL inheritance')
+    def test_windows_update_cache_is_private_and_reopens(self):
+        import ctypes
+        from win32com.shell import shell
+
+        if not ctypes.windll.shell32.IsUserAnAdmin():
+            self.skipTest('Creating an Administrators-owned cache requires an elevated Windows runner.')
+        with patch.object(shell, 'SHGetFolderPath', return_value=str(self.root)):
+            base = self._real_cache_root(True)
+            self.assertEqual(base, self._real_cache_root(False))
+            self.assertTrue(base.is_dir())
