@@ -25,7 +25,7 @@ if (root / 'config.cp312-win_amd64.pyd').is_file():
     datas.append((str(root / 'config.cp312-win_amd64.pyd'), '.'))
 hiddenimports = collect_submodules('src')
 # Imports inside compiled runtime modules are invisible to PyInstaller's Python analysis.
-hiddenimports += ['pythoncom', 'win32event', 'win32file', 'win32security',
+hiddenimports += ['pythoncom', 'win32event', 'win32file', 'win32security', 'win32timezone',
                   'win32com.shell.shell', 'win32com.shell.shellcon']
 binaries = collect_dynamic_libs('openvino')
 for package in ('ok', 'onnxocr', 'opencc'):
