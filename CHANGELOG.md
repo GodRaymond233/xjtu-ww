@@ -2,6 +2,12 @@
 
 Release history starts at v3.0.0.
 
+## v1.5.1 (2026-11-28)
+
+- The portable app now requests administrator access when it starts. Shortcuts keep their custom arguments and administrator setting.
+- Starting with this version, in-app updates replace files in the original folder and reopen the app. If the new version fails to start, the updater attempts to restore the previous version.
+- Stable builds report anonymous startup and version-change statistics by default. You can turn this off under Basic Options → Anonymous Usage Statistics.
+
 ## v1.5.0 (2026-11-27)
 
 - Synced combat, domain retry and login fixes from ok-ww v3.8.15. Concerto recognition also supports lower capture resolutions, and Traditional Chinese OCR includes OpenCC.

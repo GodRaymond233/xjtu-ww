@@ -2,6 +2,12 @@
 
 El historial comienza en v3.0.0.
 
+## v1.5.1 (2026-11-28)
+
+- La versión portátil solicita permisos de administrador al iniciarse. Al reparar un acceso directo, conserva sus argumentos y su configuración de administrador.
+- A partir de esta versión, las actualizaciones desde la aplicación reemplazan los archivos en la carpeta original y vuelven a abrir el programa. Si la nueva versión no arranca, se intenta restaurar la anterior.
+- Las versiones estables envían estadísticas anónimas de inicio y cambios de versión de forma predeterminada. Puedes desactivarlas en las opciones básicas, en «Anonymous Usage Statistics».
+
 ## v1.5.0 (2026-11-27)
 
 - Se integraron las correcciones de combate, reintento de dominios e inicio de sesión de ok-ww v3.8.15. La lectura de Concierto admite resoluciones menores y el OCR en chino tradicional incluye OpenCC.
